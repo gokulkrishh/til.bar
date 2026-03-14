@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bunx prettier --write \"$CLAUDE_FILE_PATHS\" 2>/dev/null; bunx eslint --fix \"$CLAUDE_FILE_PATHS\" 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
