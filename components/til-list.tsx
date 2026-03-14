@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { TilItem } from "@/components/til-item";
+import { TilItemSkeleton } from "@/components/til-item-skeleton";
+import { EmptyState } from "@/components/empty-state";
+import { usePendingTils } from "@/context/capture-provider";
 import type { Til } from "@/lib/types";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,17 +53,31 @@ function groupByRelativeDay(tils: Til[]) {
   return groups;
 }
 
-function TilGroup({ label, tils }: { label: string; tils: Til[] }) {
+type PendingItem = { id: string; url: string };
+
+function TilGroup({
+  label,
+  tils,
+  pendingItems = [],
+}: {
+  label: string;
+  tils: Til[];
+  pendingItems?: PendingItem[];
+}) {
   const [showAll, setShowAll] = useState(false);
+  const totalCount = tils.length + pendingItems.length;
   const hasMore = tils.length > DEFAULT_VISIBLE;
   const visible = showAll ? tils : tils.slice(0, DEFAULT_VISIBLE);
 
   return (
     <section>
       <h2 className="text-sm font-medium text-muted-foreground py-2">
-        {label} <span className="text-xs">({tils.length})</span>
+        {label} <span className="text-xs">({totalCount})</span>
       </h2>
       <ul className="relative flex flex-col gap-1 divide-border/40 divide-y">
+        {pendingItems.map((til) => (
+          <TilItemSkeleton key={til.id} url={til.url} />
+        ))}
         {visible.map((til) => (
           <TilItem key={til.id} til={til} />
         ))}
@@ -86,12 +103,30 @@ function TilGroup({ label, tils }: { label: string; tils: Til[] }) {
 }
 
 export function TilList({ tils }: { tils: Til[] }) {
+  const pendingTils = usePendingTils();
+  const hasPending = pendingTils.length > 0;
+  const isEmpty = tils.length === 0 && !hasPending;
+
+  if (isEmpty) {
+    return <EmptyState />;
+  }
+
   const groups = groupByRelativeDay(tils);
+
+  // If there are pending items but no "Today" group yet, create one
+  if (hasPending && !groups.some((g) => g.label === "Today")) {
+    groups.unshift({ label: "Today", tils: [] });
+  }
 
   return (
     <div className="flex flex-col gap-6 py-4 pb-20">
       {groups.map((group) => (
-        <TilGroup key={group.label} label={group.label} tils={group.tils} />
+        <TilGroup
+          key={group.label}
+          label={group.label}
+          tils={group.tils}
+          pendingItems={group.label === "Today" ? pendingTils : []}
+        />
       ))}
     </div>
   );
