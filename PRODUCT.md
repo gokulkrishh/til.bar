@@ -22,7 +22,13 @@ Pasting anywhere on the page triggers capture. Only URLs are supported for now. 
 
 ## AI Categorisation
 
-After an entry is saved, the AI assigns up to 2 tags asynchronously — capture never waits on this. Prefers reusing existing tags over creating new ones. Duplicate URLs get a "duplicate" tag. Tags are not editable.
+🚧 **Planned.** After an entry is saved, the AI assigns up to 2 tags asynchronously — capture never waits on this. Prefers reusing existing tags over creating new ones. Duplicate URLs get a "duplicate" tag. Tags are not editable.
+
+---
+
+## Search
+
+🚧 **Planned.** Full-text search across saved links (title, description, URL). Will also be exposed as a `search_links` MCP tool.
 
 ---
 
@@ -38,21 +44,48 @@ Both views are filterable by tag.
 
 ### Settings Modal
 
-**Account** — Google account name, email, and sign-out button.
+**Account** — Google account name, email, and avatar.
 
-**Data** — Export all TILs as JSON or markdown. Delete account (with confirmation) removes all TILs, tags, and the account record.
+**Appearance** — Theme toggle (system, light, dark). Sound effects toggle (plays audio on actions like delete, copy, capture).
+
+**MCP** — Setup instructions, server URL with copy button, API key management (create/regenerate), and list of available tools.
+
+**Data control** — Export all TILs as JSON. Delete account (with confirmation) removes all TILs, tags, and the account record.
 
 ---
 
 ## TIL Item Context Menu
 
-Each TIL item has a context menu with: **Delete**, **Add to Chat**, and **Copy URL**.
+Each TIL item has a context menu with: **Delete**, **Add to Chat**, **Refresh metadata**, and **Copy URL**.
 
 ---
 
 ## AI Chat
 
 Chat with saved URLs as attachments (added via "Add to Chat" in the context menu). Useful for summarising, asking questions, or extracting key points. Uses AI SDK with OpenRouter for model access.
+
+---
+
+## MCP Server
+
+Remote HTTP MCP server at `https://til.bar/api/mcp` for connecting AI assistants like Claude or ChatGPT.
+
+**Authentication:** API key (`mcp_sk_` prefix, SHA-256 hashed) via `?api_key=` query param or `Authorization: Bearer` header. Falls back to Supabase session for browser users. One key per user, managed in Settings → MCP.
+
+**Tools:**
+
+- `save_link` — Save a URL with auto-fetched metadata
+- `list_links` — List all saved links
+- `get_link` — Get a saved link by ID
+- `update_link` — Update title or description
+- `delete_link` — Delete a saved link
+- `search_links` — 🚧 Planned. Search across saved links
+
+---
+
+## PWA
+
+Installable as a Progressive Web App. Service worker caches assets (cache-first) and navigation (network-first). Web manifest with standalone display mode.
 
 ---
 
