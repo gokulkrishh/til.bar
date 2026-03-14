@@ -17,6 +17,7 @@ function Toaster(props: React.ComponentProps<typeof Sonner>) {
           padding: "0.25rem 0.75rem",
           width: "fit-content",
           maxWidth: "20rem",
+          margin: "0 auto",
           borderRadius: "9999px",
         },
         className: "[&_[data-icon]>svg]:size-4",

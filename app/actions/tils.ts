@@ -84,13 +84,13 @@ export async function deleteTil(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Sign in to save links" };
+    return { error: "Not authenticated" };
   }
 
   const { error } = await supabase.from("tils").delete().eq("id", id);
 
   if (error) {
-    return { error: "Something went wrong" };
+    return { error: error.message };
   }
 
   return { success: true };
