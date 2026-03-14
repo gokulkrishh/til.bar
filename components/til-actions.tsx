@@ -34,7 +34,6 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
 
   const handleDelete = () => {
     playDrop();
-    toast.success("Deleted");
     optimisticDelete(tilId);
   };
 

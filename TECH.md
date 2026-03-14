@@ -9,7 +9,7 @@
 - **Linting**: ESLint with eslint-config-next
 - **Package manager**: bun
 - **AI**: AI SDK + OpenRouter (chat with URLs as attachments)
-- **MCP**: MCP server for external tool integrations
+- **MCP**: Remote HTTP MCP server (`@modelcontextprotocol/sdk`) with Supabase OAuth — tools: `get_link`, `save_link`, `update_link`, `delete_link`
 - **Animation**: Motion (framer-motion) for spring physics and fluid interactions
 - **Sound**: soundcn (Web Audio API, inline base64 sounds via shadcn registry)
 - **Path alias**: `@/*` maps to project root
