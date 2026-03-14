@@ -8,32 +8,82 @@ import {
   useState,
   useTransition,
 } from "react";
-import { createTil } from "@/app/actions/tils";
+import { createTil, deleteTil } from "@/app/actions/tils";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAppSound } from "@/hooks/use-app-sound";
+import { drop003Sound } from "@/sounds/drop-003/drop-003";
 
 type PendingTil = {
   id: string;
   url: string;
 };
 
-const CaptureContext = createContext<PendingTil[]>([]);
+type CaptureContextType = {
+  pendingTils: PendingTil[];
+  deletedIds: Set<string>;
+  optimisticDelete: (id: string) => void;
+};
+
+const CaptureContext = createContext<CaptureContextType>({
+  pendingTils: [],
+  deletedIds: new Set(),
+  optimisticDelete: () => {},
+});
+
+export function useCaptureContext() {
+  return useContext(CaptureContext);
+}
 
 export function usePendingTils() {
-  return useContext(CaptureContext);
+  return useContext(CaptureContext).pendingTils;
 }
 
 export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [pendingTils, setPendingTils] = useState<PendingTil[]>([]);
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  const [playDrop] = useAppSound(drop003Sound);
+
+  const optimisticDelete = useCallback(
+    (id: string) => {
+      setDeletedIds((prev) => new Set(prev).add(id));
+
+      startTransition(async () => {
+        const result = await deleteTil(id);
+        toast.success("Deleted");
+
+        if (result.error) {
+          setDeletedIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+          toast.error(result.error);
+        } else {
+          startTransition(() => {
+            router.refresh();
+            setDeletedIds((prev) => {
+              const next = new Set(prev);
+              next.delete(id);
+              return next;
+            });
+          });
+        }
+      });
+    },
+    [router, startTransition],
+  );
 
   const capture = useCallback(
     (text: string) => {
       if (!text.match(/^https?:\/\//)) return;
 
       const tempId = crypto.randomUUID();
+      playDrop();
       setPendingTils((prev) => [{ id: tempId, url: text }, ...prev]);
+      toast.success("Saved");
 
       startTransition(async () => {
         const result = await createTil(text);
@@ -42,8 +92,6 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
           setPendingTils((prev) => prev.filter((t) => t.id !== tempId));
           toast.error(result.error);
         } else {
-          toast.success("Saved");
-          // Refresh first, then remove pending item so there's no gap
           startTransition(() => {
             router.refresh();
             setPendingTils((prev) => prev.filter((t) => t.id !== tempId));
@@ -51,7 +99,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
         }
       });
     },
-    [router, startTransition],
+    [router, startTransition, playDrop],
   );
 
   const handlePaste = useCallback(
@@ -74,5 +122,9 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("paste", handlePaste);
   }, [handlePaste]);
 
-  return <CaptureContext value={pendingTils}>{children}</CaptureContext>;
+  return (
+    <CaptureContext value={{ pendingTils, deletedIds, optimisticDelete }}>
+      {children}
+    </CaptureContext>
+  );
 }

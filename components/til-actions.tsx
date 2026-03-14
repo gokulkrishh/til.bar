@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { deleteTil } from "@/app/actions/tils";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,23 +15,27 @@ import {
   Trash2,
 } from "lucide-react";
 import { buttonVariants } from "./ui/button";
+import { useAppSound } from "@/hooks/use-app-sound";
+import { clickSoftSound } from "@/sounds/click-soft/click-soft";
+import { drop003Sound } from "@/sounds/drop-003/drop-003";
+import { useCaptureContext } from "@/context/capture-provider";
 import { toast } from "sonner";
 
 export function TilActions({ tilId, url }: { tilId: string; url: string }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const [playClick] = useAppSound(clickSoftSound);
+  const [playDrop] = useAppSound(drop003Sound);
+  const { optimisticDelete } = useCaptureContext();
 
   const handleCopyLink = async () => {
+    playClick();
     await navigator.clipboard.writeText(url);
   };
 
   const handleDelete = () => {
-    startTransition(async () => {
-      await deleteTil(tilId);
-      toast.success("Deleted");
-      router.refresh();
-    });
+    playDrop();
+    toast.success("Deleted");
+    optimisticDelete(tilId);
   };
 
   return (
@@ -56,11 +58,7 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
           <MessageCircle />
           Ask about this
         </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={isPending}
-        >
+        <DropdownMenuItem variant="destructive" onClick={handleDelete}>
           <Trash2 />
           Delete
         </DropdownMenuItem>

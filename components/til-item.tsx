@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import type { Til } from "@/lib/types";
 import Link from "next/link";
 import { TilActions } from "@/components/til-actions";
+import { useCaptureContext } from "@/context/capture-provider";
 import { refreshMetadata } from "@/app/actions/tils";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -31,7 +32,10 @@ function formatDate(dateStr: string) {
 export function TilItem({ til }: { til: Til }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { deletedIds } = useCaptureContext();
   const faviconUrl = getFaviconUrl(til.url);
+
+  if (deletedIds.has(til.id)) return null;
 
   const handleRefresh = () => {
     startTransition(async () => {
@@ -87,7 +91,7 @@ export function TilItem({ til }: { til: Til }) {
           href={til.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-color w-full flex gap-1 text-sm items-center group font-medium text-muted-foreground group-hover/row:text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
+          className="transition-color w-full flex gap-1 text-sm items-center group font-medium group-hover/row:text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
         >
           <span className="truncate">{til.title ?? til.url}</span>
           <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground group-hover/row:text-foreground transition-colors" />

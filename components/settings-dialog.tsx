@@ -17,6 +17,7 @@ import { exportTils, deleteAccount } from "@/app/actions/account";
 import { toast } from "sonner";
 import { Download, Monitor, Moon, Sun, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSoundSettings } from "@/context/sound-provider";
 
 export function SettingsDialog({
   user,
@@ -29,6 +30,7 @@ export function SettingsDialog({
 }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { soundEnabled, setSoundEnabled } = useSoundSettings();
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -131,6 +133,31 @@ export function SettingsDialog({
                     {label}
                   </button>
                 ))}
+              </div>
+              <div className="flex items-center justify-between pt-4">
+                <div>
+                  <h3 className="text-sm font-medium">Sound</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Play sounds on actions
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSoundEnabled(!soundEnabled)}
+                  className={cn(
+                    "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors",
+                    { "bg-primary": soundEnabled, "bg-input": !soundEnabled },
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none block size-4 rounded-full bg-background shadow-sm ring-0 transition-transform translate-y-0.5",
+                      {
+                        "translate-x-4.5": soundEnabled,
+                        "translate-x-0.5": !soundEnabled,
+                      },
+                    )}
+                  />
+                </button>
               </div>
             </div>
           </TabsContent>

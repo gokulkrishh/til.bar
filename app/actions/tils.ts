@@ -14,7 +14,7 @@ async function fetchMetadata(
 ): Promise<{ title: string | null; description: string | null }> {
   try {
     const response = await fetch(url, {
-      headers: { "User-Agent": "til.bar/1.0" },
+      headers: { "User-Agent": "til.bar Bot" },
       signal: AbortSignal.timeout(5000),
     });
 

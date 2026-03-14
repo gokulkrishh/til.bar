@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { CaptureProvider } from "@/context/capture-provider";
+import { SoundProvider } from "@/context/sound-provider";
 import { Header } from "@/components/header";
 
 const geistSans = Geist({
@@ -42,14 +43,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider delay={2000}>
-            <CaptureProvider>
-              <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
-                <Header />
-                {children}
-              </div>
-            </CaptureProvider>
-          </TooltipProvider>
+          <SoundProvider>
+            <TooltipProvider delay={2000}>
+              <CaptureProvider>
+                <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
+                  <Header />
+                  {children}
+                </div>
+              </CaptureProvider>
+            </TooltipProvider>
+          </SoundProvider>
           <Toaster richColors position="top-right" />
           <SWRegister />
         </ThemeProvider>

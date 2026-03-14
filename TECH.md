@@ -10,4 +10,5 @@
 - **Package manager**: bun
 - **AI**: AI SDK + OpenRouter (chat with URLs as attachments)
 - **MCP**: MCP server for external tool integrations
+- **Sound**: soundcn (Web Audio API, inline base64 sounds via shadcn registry)
 - **Path alias**: `@/*` maps to project root
