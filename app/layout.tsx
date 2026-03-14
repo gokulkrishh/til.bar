@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/theme-provider";
 import { SWRegister } from "@/components/sw-register";
@@ -19,9 +19,64 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const title = "til.bar";
+const description = "Capture all your links in one place.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://til.bar"),
   title: "til.bar",
   description: "Capture all your links in one place.",
+  twitter: {
+    card: "summary_large_image",
+    title,
+    site: "@gokul_i",
+    description,
+    creator: "@gokul_i",
+    images: [
+      {
+        type: "image/svg+xml",
+        url: "/logo.svg",
+        width: 1920,
+        height: 1080,
+        alt: "til.bar",
+      },
+    ],
+  },
+  openGraph: {
+    type: "website",
+    siteName: "til.bar",
+    title,
+    description,
+    url: "https://til.bar",
+    images: [
+      {
+        type: "image/svg+xml",
+        url: "/logo.svg",
+        width: 1200,
+        height: 630,
+        alt: "til.bar",
+      },
+    ],
+  },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/apple-icon.png",
+  },
+  appleWebApp: {
+    title,
+    statusBarStyle: "default",
+    startupImage: ["/apple-icon.png"],
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#1a1917",
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
