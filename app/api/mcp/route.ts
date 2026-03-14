@@ -206,7 +206,9 @@ async function authenticateRequest(
   const url = new URL(req.url);
   const queryKey = url.searchParams.get("api_key");
 
-  const token = queryKey ?? (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
+  const token =
+    queryKey ??
+    (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
   if (!token) return null;
 
   const supabase = createClient(
