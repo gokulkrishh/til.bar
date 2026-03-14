@@ -30,7 +30,13 @@ function formatDate(dateStr: string) {
   return dateFormatter.format(new Date(dateStr));
 }
 
-export function TilItem({ til }: { til: Til }) {
+export function TilItem({
+  til,
+  showDate = true,
+}: {
+  til: Til;
+  showDate?: boolean;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { deletedIds } = useCaptureContext();
@@ -112,7 +118,7 @@ export function TilItem({ til }: { til: Til }) {
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity">
           {formatDate(til.created_at)}
         </span>
         <TilActions key={til.id} tilId={til.id} url={til.url} />
