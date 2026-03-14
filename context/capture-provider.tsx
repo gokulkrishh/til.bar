@@ -15,20 +15,20 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const handlePaste = useCallback(
     (e: ClipboardEvent) => {
       const text = e.clipboardData?.getData("text/plain")?.trim();
+
       if (!text) return;
 
       // Only capture if it looks like a URL
       if (!text.match(/^https?:\/\//)) return;
 
-      // Don't capture if user is typing in an input
+      // Don't capture if user is typing in a textarea or contenteditable
+      // (but allow from inputs since the chat input should still capture URLs)
       const target = e.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable
-      ) {
+      if (target.tagName === "TEXTAREA" || target.isContentEditable) {
         return;
       }
+
+      e.preventDefault();
 
       setStatus("capturing");
       setMessage("Capturing...");
@@ -58,6 +58,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+
       {status !== "idle" && (
         <div
           className={`fixed top-4 right-4 z-50 rounded-lg border px-4 py-2 text-sm font-medium shadow-md ${

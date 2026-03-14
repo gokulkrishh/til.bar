@@ -11,11 +11,20 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: tils } = user
+    ? await supabase
+        .from("tils")
+        .select()
+        .order("created_at", { ascending: false })
+    : { data: null };
+
+  const hasTils = tils && tils.length > 0;
+
   return (
     <CaptureProvider>
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
         <Header user={user} />
-        <TilList />
+        {hasTils ? <TilList tils={tils} /> : <EmptyState />}
         <ChatInput />
       </div>
     </CaptureProvider>

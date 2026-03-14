@@ -3,7 +3,10 @@
 export function ChatInput() {
   return (
     <div className="fixed inset-x-0 bottom-2 bg-background">
-      <div className="mx-auto flex h-14 max-w-2xl items-center px-6">
+      <div className="mx-auto flex flex-col gap-2 max-w-2xl px-6">
+        <p className="text-center text-xs text-muted-foreground">
+          Paste a URL anywhere to capture a link.
+        </p>
         <input
           type="text"
           placeholder="Ask me anything."

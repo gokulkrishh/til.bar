@@ -22,7 +22,7 @@ export function TilItem({ til }: { til: Til }) {
   const faviconUrl = getFaviconUrl(til.url);
 
   return (
-    <li className="flex items-center group/row gap-4 rounded-lg py-3">
+    <li className="flex items-center group/row gap-4 py-1">
       <div className="flex items-center gap-2 min-w-0 w-full">
         {faviconUrl ? (
           <img

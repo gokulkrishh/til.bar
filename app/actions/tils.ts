@@ -52,6 +52,7 @@ export async function createTil(input: string) {
   }
 
   const url = extractUrl(input);
+
   if (!url) {
     return { error: "No valid URL found" };
   }
