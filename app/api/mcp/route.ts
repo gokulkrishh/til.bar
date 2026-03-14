@@ -14,6 +14,13 @@ function createMcpServer(userId: string) {
   const server = new McpServer({
     name: "til-bar",
     version: "1.0.0",
+    icons: [
+      {
+        src: "https://til.bar/icon.svg",
+        mimeType: "image/svg+xml",
+        sizes: ["any"],
+      },
+    ],
   });
 
   server.registerTool(

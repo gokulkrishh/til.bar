@@ -12,13 +12,16 @@ export async function generateApiKey() {
 
   if (!user) return { error: "Sign in to generate an API key" };
 
-  const key = `mcp_sk_${crypto.randomBytes(32).toString("hex")}`;
-  const keyHash = crypto.createHash("sha256").update(key).digest("hex");
-
   const admin = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
+
+  // Delete any existing key — only one key per user
+  await admin.from("api_keys").delete().eq("user_id", user.id);
+
+  const key = `mcp_sk_${crypto.randomBytes(32).toString("hex")}`;
+  const keyHash = crypto.createHash("sha256").update(key).digest("hex");
 
   const { error } = await admin.from("api_keys").insert({
     user_id: user.id,
@@ -31,7 +34,7 @@ export async function generateApiKey() {
   return { key };
 }
 
-export async function deleteApiKey(keyId: string) {
+export async function deleteApiKey() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,7 +45,6 @@ export async function deleteApiKey(keyId: string) {
   const { error } = await supabase
     .from("api_keys")
     .delete()
-    .eq("id", keyId)
     .eq("user_id", user.id);
 
   if (error) return { error: "Failed to delete API key" };
@@ -50,7 +52,7 @@ export async function deleteApiKey(keyId: string) {
   return { success: true };
 }
 
-export async function listApiKeys() {
+export async function hasApiKey() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -58,15 +60,14 @@ export async function listApiKeys() {
 
   if (!user) return { error: "Not authenticated" };
 
-  const { data, error } = await supabase
+  const { count, error } = await supabase
     .from("api_keys")
-    .select("id, created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
 
-  if (error) return { error: "Failed to fetch API keys" };
+  if (error) return { error: "Failed to check API key" };
 
-  return { data };
+  return { exists: (count ?? 0) > 0 };
 }
 
 export async function exportTils() {

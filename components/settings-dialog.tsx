@@ -1,7 +1,7 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -13,7 +13,12 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { exportTils, deleteAccount } from "@/app/actions/account";
+import {
+  exportTils,
+  deleteAccount,
+  generateApiKey,
+  hasApiKey,
+} from "@/app/actions/account";
 import { toast } from "sonner";
 import {
   Check,
@@ -21,12 +26,14 @@ import {
   Download,
   Monitor,
   Moon,
+  RefreshCw,
   Sun,
   Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSoundSettings } from "@/context/sound-provider";
 import { Switch } from "@/components/ui/switch";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -52,8 +59,43 @@ export function SettingsDialog({
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [newKey, setNewKey] = useState<string | null>(null);
+  const [keyCopied, setKeyCopied] = useState(false);
+  const [keyExists, setKeyExists] = useState(false);
+  const [keyLoading, setKeyLoading] = useState(false);
 
   const mcpUrl = "https://til.bar/api/mcp";
+
+  const checkApiKey = useCallback(async () => {
+    setKeyLoading(true);
+    const result = await hasApiKey();
+    if (!result.error) {
+      setKeyExists(result.exists ?? false);
+    }
+    setKeyLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      checkApiKey();
+      setNewKey(null);
+    }
+  }, [open, checkApiKey]);
+
+  const handleGenerateKey = () => {
+    startTransition(async () => {
+      const result = await generateApiKey();
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      if (result.key) {
+        setNewKey(result.key);
+        setKeyExists(true);
+        toast.success(keyExists ? "API key regenerated" : "API key created");
+      }
+    });
+  };
 
   const handleCopyMcpUrl = async () => {
     await navigator.clipboard.writeText(mcpUrl);
@@ -110,11 +152,11 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl pb-4 overflow-auto">
+      <DialogContent className="sm:max-w-xl pb-4">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="account">
+        <Tabs defaultValue="account" className="min-h-0 flex flex-col">
           <TabsList variant="line">
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
@@ -202,6 +244,75 @@ export function SettingsDialog({
                     <Copy className="size-4" />
                   )}
                 </Button>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium">API Key</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Authenticate MCP requests
+                    </p>
+                  </div>
+                  {keyLoading ? (
+                    <Spinner className="size-4" />
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isPending}
+                      onClick={handleGenerateKey}
+                    >
+                      {keyExists ? (
+                        <>
+                          <RefreshCw className="size-4" />
+                          Regenerate
+                        </>
+                      ) : (
+                        "Create key"
+                      )}
+                    </Button>
+                  )}
+                </div>
+                <div className="flex flex-col gap-4">
+                  {keyExists && !newKey && (
+                    <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+                      <code className="text-xs font-mono text-muted-foreground">
+                        mcp_sk_••••••••
+                      </code>
+                      <Check className="size-3 text-green-500" />
+                    </div>
+                  )}
+                  {newKey && (
+                    <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 p-3">
+                      <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400 mb-2">
+                        Copy this URL now — it won&apos;t be shown again.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 rounded-md bg-muted px-3 py-2 text-xs font-mono truncate">
+                          {`${mcpUrl}?api_key=${newKey}`}
+                        </code>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(
+                              `${mcpUrl}?api_key=${newKey}`,
+                            );
+                            setKeyCopied(true);
+                            toast.success("MCP URL copied");
+                            setTimeout(() => setKeyCopied(false), 2000);
+                          }}
+                        >
+                          {keyCopied ? (
+                            <Check className="size-4" />
+                          ) : (
+                            <Copy className="size-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               <Table>
                 <TableHeader>
