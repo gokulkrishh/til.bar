@@ -2,6 +2,9 @@
 
 **til.bar** — a "Today I Learned" application. Capture all your links in one place.
 
+> Read `PRODUCT.md` for product context, features, and design decisions.
+> Read `TECH.md` for tech stack and tooling details.
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
@@ -64,3 +67,4 @@
 ## 9. Tooling
 
 - **Package manager**: Always use `bun` (never npm, yarn, or pnpm)
+- **Icons**: Use `@hugeicons-pro/core-stroke-rounded` for all icons (licensed)
