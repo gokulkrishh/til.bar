@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/theme-provider";
 import { SWRegister } from "@/components/sw-register";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { CaptureProvider } from "@/context/capture-provider";
 import { Header } from "@/components/header";
@@ -41,12 +42,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <CaptureProvider>
-            <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
-              <Header />
-              {children}
-            </div>
-          </CaptureProvider>
+          <TooltipProvider delay={2000}>
+            <CaptureProvider>
+              <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
+                <Header />
+                {children}
+              </div>
+            </CaptureProvider>
+          </TooltipProvider>
           <Toaster richColors position="top-right" />
           <SWRegister />
         </ThemeProvider>

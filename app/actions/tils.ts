@@ -1,5 +1,6 @@
 "use server";
 
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 function extractUrl(text: string): string | null {
@@ -57,15 +58,11 @@ export async function createTil(input: string) {
     return { error: "Not a valid URL" };
   }
 
-  const { title, description } = await fetchMetadata(url);
-
   const { data, error } = await supabase
     .from("tils")
     .insert({
       user_id: user.id,
       url,
-      title,
-      description,
     })
     .select()
     .single();
@@ -73,6 +70,18 @@ export async function createTil(input: string) {
   if (error) {
     return { error: "Something went wrong" };
   }
+
+  // Fetch metadata in the background after response is sent
+  after(async () => {
+    const { title, description } = await fetchMetadata(url);
+    if (title || description) {
+      const supabase = await createClient();
+      await supabase
+        .from("tils")
+        .update({ title, description })
+        .eq("id", data.id);
+    }
+  });
 
   return { data };
 }
@@ -88,6 +97,30 @@ export async function deleteTil(id: string) {
   }
 
   const { error } = await supabase.from("tils").delete().eq("id", id);
+
+  if (error) {
+    return { error: "Something went wrong" };
+  }
+
+  return { success: true };
+}
+
+export async function refreshMetadata(id: string, url: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Sign in to continue" };
+  }
+
+  const { title, description } = await fetchMetadata(url);
+
+  const { error } = await supabase
+    .from("tils")
+    .update({ title, description })
+    .eq("id", id);
 
   if (error) {
     return { error: "Something went wrong" };

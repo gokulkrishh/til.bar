@@ -156,6 +156,12 @@ create policy "Users can insert own tils"
   to authenticated
   with check (user_id = (select auth.uid()));
 
+create policy "Users can update own tils"
+  on public.tils for update
+  to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+
 create policy "Users can delete own tils"
   on public.tils for delete
   to authenticated

@@ -71,6 +71,7 @@
 - **Formatting**: Use `Intl.DateTimeFormat` / `Intl.NumberFormat` with `undefined` locale, not `toLocaleDateString`. Create formatter instances outside functions for reuse.
 - **Toasts**: Use Sonner (`toast.success` / `toast.error`), not custom toast UI.
 - **CSS units**: Prefer `rem` over `px` where possible.
+- **Base UI components**: shadcn uses `@base-ui/react`, NOT Radix. No `asChild` prop — use `render` prop or pass children directly. Triggers (Menu, Tooltip, Dialog) render their own element. Check `components/ui/*.tsx` for the actual API before using.
 
 ## 10. Tooling
 
