@@ -63,7 +63,7 @@ export function DataTab({
     <div className="flex flex-col gap-4 py-4 px-1">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium">Export links</h3>
+          <h3 className="text-sm font-semibold">Export links</h3>
           <p className="text-xs text-muted-foreground">
             Download all your links as JSON
           </p>
@@ -75,7 +75,7 @@ export function DataTab({
       </div>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium text-destructive">
+          <h3 className="text-sm font-semibold text-destructive">
             Delete account
           </h3>
           <p className="text-xs text-muted-foreground">

@@ -14,7 +14,7 @@ export function AppearanceTab() {
     <div className="flex flex-col gap-2 py-4 px-1">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium">Theme</h3>
+          <h3 className="text-sm font-semibold">Theme</h3>
           <p className="text-xs text-muted-foreground">
             Choose your preferred theme
           </p>
@@ -43,7 +43,7 @@ export function AppearanceTab() {
       </div>
       <div className="flex items-center justify-between pt-4">
         <div>
-          <h3 className="text-sm font-medium">Sound</h3>
+          <h3 className="text-sm font-semibold">Sound</h3>
           <p className="text-xs text-muted-foreground">
             Play sounds on actions
           </p>

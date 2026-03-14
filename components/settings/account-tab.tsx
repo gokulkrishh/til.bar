@@ -15,7 +15,7 @@ export function AccountTab({ user }: { user: User }) {
         <AvatarFallback>{fullName.charAt(0)}</AvatarFallback>
       </Avatar>
       <div className="flex flex-col">
-        <span className="text-sm font-medium">{fullName}</span>
+        <span className="text-sm font-semibold">{fullName}</span>
         <span className="text-xs text-muted-foreground">{email}</span>
       </div>
     </div>
