@@ -67,6 +67,10 @@
 ## 9. Code Conventions
 
 - **Conditional classes**: Always use `cn()` from `@/lib/utils` with object syntax: `cn("static-classes", { "conditional-class": condition })`. Never use template literal ternaries.
+- **Server actions**: Return `{ error: string }` for known errors, never throw. Use human-friendly messages, never expose raw DB errors.
+- **Formatting**: Use `Intl.DateTimeFormat` / `Intl.NumberFormat` with `undefined` locale, not `toLocaleDateString`. Create formatter instances outside functions for reuse.
+- **Toasts**: Use Sonner (`toast.success` / `toast.error`), not custom toast UI.
+- **CSS units**: Prefer `rem` over `px` where possible.
 
 ## 10. Tooling
 
