@@ -16,6 +16,43 @@ function createMcpServer(userId: string) {
   });
 
   server.registerTool(
+    "list_links",
+    {
+      description: "List all saved links, most recent first",
+      inputSchema: {
+        limit: z
+          .number()
+          .optional()
+          .describe("Max number of links to return (default 50)"),
+      },
+    },
+    async ({ limit }) => {
+      const { data, error } = await supabase
+        .from("tils")
+        .select()
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(limit ?? 50);
+
+      if (error) {
+        return {
+          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
+          isError: true,
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `${data.length} links:\n${JSON.stringify(data, null, 2)}`,
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerTool(
     "get_link",
     {
       description: "Get a saved link by its ID",
