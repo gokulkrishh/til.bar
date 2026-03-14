@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Logout01Icon } from "@hugeicons-pro/core-stroke-rounded";
+import { Logout01Icon, Logout05Icon } from "@hugeicons-pro/core-stroke-rounded";
 
 export function UserMenu({ user }: { user: User }) {
   const router = useRouter();
@@ -36,7 +36,7 @@ export function UserMenu({ user }: { user: User }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger>
         <Avatar className="size-8">
           <AvatarImage src={avatarUrl} alt={fullName} />
           <AvatarFallback className="text-xs">{initials}</AvatarFallback>
@@ -44,7 +44,7 @@ export function UserMenu({ user }: { user: User }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleSignOut}>
-          <HugeiconsIcon icon={Logout01Icon} className="size-4" />
+          <HugeiconsIcon icon={Logout05Icon} />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

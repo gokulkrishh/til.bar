@@ -64,7 +64,11 @@
 - **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
 - **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
 
-## 9. Tooling
+## 9. Code Conventions
+
+- **Conditional classes**: Always use `cn()` from `@/lib/utils` with object syntax: `cn("static-classes", { "conditional-class": condition })`. Never use template literal ternaries.
+
+## 10. Tooling
 
 - **Package manager**: Always use `bun` (never npm, yarn, or pnpm)
 - **Icons**: Use `@hugeicons-pro/core-stroke-rounded` for all icons (licensed)
