@@ -81,7 +81,7 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg pb-4">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
@@ -105,7 +105,12 @@ export function SettingsDialog({
           </TabsContent>
           <TabsContent value="appearance">
             <div className="flex flex-col gap-2 py-4 px-1">
-              <h3 className="text-sm font-medium">Theme</h3>
+              <div>
+                <h3 className="text-sm font-medium">Theme</h3>
+                <p className="text-xs text-muted-foreground">
+                  Choose your preferred theme
+                </p>
+              </div>
               <div className="flex gap-2">
                 {[
                   { value: "light", label: "Light", icon: Sun },
@@ -114,8 +119,10 @@ export function SettingsDialog({
                 ].map(({ value, label, icon: Icon }) => (
                   <button
                     className={cn(
-                      "flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-sm font-medium transition-colors hover:bg-muted",
-                      theme === value ? "bg-muted" : "bg-transparent",
+                      "flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-lg border px-2 py-3 text-sm transition-all active:scale-[0.97]",
+                      theme === value
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20",
                     )}
                     key={value}
                     onClick={() => setTheme(value)}
@@ -131,7 +138,7 @@ export function SettingsDialog({
             <div className="flex flex-col gap-4 py-4 px-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">Export links</p>
+                  <h3 className="text-sm font-medium">Export links</h3>
                   <p className="text-xs text-muted-foreground">
                     Download all your links as JSON
                   </p>
@@ -147,9 +154,9 @@ export function SettingsDialog({
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-destructive">
+                  <h3 className="text-sm font-medium text-destructive">
                     Delete account
-                  </p>
+                  </h3>
                   <p className="text-xs text-muted-foreground">
                     This removes all your links and account
                   </p>
