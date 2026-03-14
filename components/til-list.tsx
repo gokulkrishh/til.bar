@@ -58,7 +58,7 @@ function TilGroup({ label, tils }: { label: string; tils: Til[] }) {
   return (
     <section>
       <h2 className="text-sm font-medium text-muted-foreground py-2">
-        {label}
+        {label} <span className="text-xs">({tils.length})</span>
       </h2>
       <ul className="relative flex flex-col gap-1 divide-border/40 divide-y">
         {visible.map((til) => (

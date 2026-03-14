@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { buttonVariants } from "./ui/button";
+import { toast } from "sonner";
 
 export function TilActions({ tilId, url }: { tilId: string; url: string }) {
   const router = useRouter();
@@ -30,6 +31,7 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
   const handleDelete = () => {
     startTransition(async () => {
       await deleteTil(tilId);
+      toast.success("Deleted");
       router.refresh();
     });
   };
