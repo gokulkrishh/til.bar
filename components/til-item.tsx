@@ -1,7 +1,6 @@
 "use client";
 
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUpRight, Globe02Icon } from "@hugeicons-pro/core-stroke-rounded";
+import { ArrowUpRight, Globe } from "lucide-react";
 import type { Til } from "@/lib/types";
 import Link from "next/link";
 import { TilActions } from "@/components/til-actions";
@@ -23,7 +22,7 @@ export function TilItem({ til }: { til: Til }) {
   const faviconUrl = getFaviconUrl(til.url);
 
   return (
-    <li className="flex items-center justify-between gap-4 rounded-lg py-3">
+    <li className="flex items-center group/row gap-4 rounded-lg py-3">
       <div className="flex items-center gap-2 min-w-0 w-full">
         {faviconUrl ? (
           <img
@@ -35,23 +34,20 @@ export function TilItem({ til }: { til: Til }) {
             }}
           />
         ) : (
-          <HugeiconsIcon icon={Globe02Icon} className="size-4" />
+          <Globe className="size-4" />
         )}
         <Link
           href={til.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex gap-1 text-sm items-center group font-medium text-foreground hover:underline hover:underline-offset-2 truncate focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
+          className="flex gap-1 text-sm items-center group font-medium text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
         >
-          {til.title ?? til.url}
-          <HugeiconsIcon
-            icon={ArrowUpRight}
-            className="size-4 transition-colors opacity-0 group-hover:opacity-100"
-          />
+          <span className="truncate">{til.title ?? til.url}</span>
+          <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground transition-colors" />
         </Link>
       </div>
-      <div className="flex items-center gap-1 shrink-0">
-        <span className="text-xs text-muted-foreground mr-1">
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-xs text-muted-foreground">
           {formatDate(til.created_at)}
         </span>
         <TilActions tilId={til.id} url={til.url} />

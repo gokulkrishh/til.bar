@@ -9,14 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  AiChat02Icon,
-  ArrowUpRight01Icon,
-  CopyLinkIcon,
-  Delete02Icon,
-  MoreVerticalIcon,
-} from "@hugeicons-pro/core-stroke-rounded";
+  ExternalLink,
+  Link2,
+  MessageCircle,
+  MoreVertical,
+  Trash2,
+} from "lucide-react";
 import { buttonVariants } from "./ui/button";
 
 export function TilActions({ tilId, url }: { tilId: string; url: string }) {
@@ -40,19 +39,19 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
       <DropdownMenuTrigger
         className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
-        <HugeiconsIcon icon={MoreVerticalIcon} />
+        <MoreVertical />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
         <DropdownMenuItem onClick={() => {}}>
-          <HugeiconsIcon icon={ArrowUpRight01Icon} />
+          <ExternalLink />
           Open in new tab
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
-          <HugeiconsIcon icon={CopyLinkIcon} />
+          <Link2 />
           Copy link
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => {}}>
-          <HugeiconsIcon icon={AiChat02Icon} />
+          <MessageCircle />
           Add to chat
         </DropdownMenuItem>
         <DropdownMenuItem
@@ -60,7 +59,7 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
           onClick={handleDelete}
           disabled={isPending}
         >
-          <HugeiconsIcon icon={Delete02Icon} />
+          <Trash2 />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

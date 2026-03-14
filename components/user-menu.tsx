@@ -11,8 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Logout01Icon, Logout05Icon } from "@hugeicons-pro/core-stroke-rounded";
+import { LogOut } from "lucide-react";
 
 export function UserMenu({ user }: { user: User }) {
   const router = useRouter();
@@ -44,7 +43,7 @@ export function UserMenu({ user }: { user: User }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={handleSignOut}>
-          <HugeiconsIcon icon={Logout05Icon} />
+          <LogOut />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

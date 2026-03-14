@@ -71,4 +71,4 @@
 ## 10. Tooling
 
 - **Package manager**: Always use `bun` (never npm, yarn, or pnpm)
-- **Icons**: Use `@hugeicons-pro/core-stroke-rounded` for all icons (licensed)
+- **Icons**: Use `lucide-react` for all icons

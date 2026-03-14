@@ -3,7 +3,7 @@
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript (strict mode)
 - **UI**: React 19, Tailwind CSS 4, Base UI, CVA, tailwind-merge
-- **Icons**: HugeIcons Pro (stroke-rounded) + free icons
+- **Icons**: Lucide React
 - **Theming**: next-themes
 - **Formatting**: Prettier (pre-commit via Husky)
 - **Linting**: ESLint with eslint-config-next

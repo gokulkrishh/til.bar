@@ -1,2 +1,0 @@
-[install.scopes]
-"@hugeicons-pro" = { url = "https://npm.hugeicons.com/", token = "$HUGEICONS_AUTH_TOKEN" }
