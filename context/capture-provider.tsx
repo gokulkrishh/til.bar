@@ -1,53 +1,44 @@
 "use client";
 
-import { useEffect, useCallback, useState, useTransition } from "react";
+import { useEffect, useCallback, useTransition } from "react";
 import { createTil } from "@/app/actions/tils";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [status, setStatus] = useState<
-    "idle" | "capturing" | "success" | "error"
-  >("idle");
-  const [message, setMessage] = useState("");
+  const [, startTransition] = useTransition();
 
-  const handlePaste = useCallback(
-    (e: ClipboardEvent) => {
-      const text = e.clipboardData?.getData("text/plain")?.trim();
-
-      if (!text) return;
-
-      // Only capture if it looks like a URL
+  const capture = useCallback(
+    (text: string) => {
       if (!text.match(/^https?:\/\//)) return;
-
-      // Don't capture if user is typing in a textarea or contenteditable
-      // (but allow from inputs since the chat input should still capture URLs)
-      const target = e.target as HTMLElement;
-      if (target.tagName === "TEXTAREA" || target.isContentEditable) {
-        return;
-      }
-
-      e.preventDefault();
-
-      setStatus("capturing");
-      setMessage("Capturing...");
 
       startTransition(async () => {
         const result = await createTil(text);
         if (result.error) {
-          setStatus("error");
-          setMessage(result.error);
+          toast.error(result.error);
         } else {
-          setStatus("success");
-          setMessage("Captured!");
+          toast.success("Saved");
           router.refresh();
         }
-
-        setTimeout(() => setStatus("idle"), 2000);
       });
     },
     [router, startTransition],
+  );
+
+  const handlePaste = useCallback(
+    (e: ClipboardEvent) => {
+      const text = e.clipboardData?.getData("text/plain")?.trim();
+      if (!text) return;
+      if (!text.match(/^https?:\/\//)) return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === "TEXTAREA" || target.isContentEditable) return;
+
+      e.preventDefault();
+      capture(text);
+    },
+    [capture],
   );
 
   useEffect(() => {
@@ -55,23 +46,5 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("paste", handlePaste);
   }, [handlePaste]);
 
-  return (
-    <>
-      {children}
-
-      {status !== "idle" && (
-        <div
-          className={`fixed top-4 right-4 z-50 rounded-lg border px-4 py-2 text-sm font-medium shadow-md ${
-            status === "error"
-              ? "border-destructive/50 bg-destructive/10 text-destructive"
-              : status === "success"
-                ? "border-border bg-background text-foreground"
-                : "border-border bg-background text-muted-foreground"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-    </>
-  );
+  return <>{children}</>;
 }

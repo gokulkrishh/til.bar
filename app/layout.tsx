@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/theme-provider";
 import { SWRegister } from "@/components/sw-register";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { CaptureProvider } from "@/context/capture-provider";
 import { Header } from "@/components/header";
@@ -46,6 +47,7 @@ export default function RootLayout({
               {children}
             </div>
           </CaptureProvider>
+          <Toaster richColors position="top-right" />
           <SWRegister />
         </ThemeProvider>
       </body>

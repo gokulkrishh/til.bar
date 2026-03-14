@@ -48,13 +48,13 @@ export async function createTil(input: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated" };
+    return { error: "Sign in to save links" };
   }
 
   const url = extractUrl(input);
 
   if (!url) {
-    return { error: "No valid URL found" };
+    return { error: "Not a valid URL" };
   }
 
   const { title, description } = await fetchMetadata(url);
@@ -71,7 +71,7 @@ export async function createTil(input: string) {
     .single();
 
   if (error) {
-    return { error: error.message };
+    return { error: "Something went wrong" };
   }
 
   return { data };
@@ -84,13 +84,13 @@ export async function deleteTil(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated" };
+    return { error: "Sign in to save links" };
   }
 
   const { error } = await supabase.from("tils").delete().eq("id", id);
 
   if (error) {
-    return { error: error.message };
+    return { error: "Something went wrong" };
   }
 
   return { success: true };
