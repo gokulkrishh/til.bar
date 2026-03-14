@@ -13,9 +13,13 @@ function getFaviconUrl(url: string): string {
   }
 }
 
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+});
+
 function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return dateFormatter.format(new Date(dateStr));
 }
 
 export function TilItem({ til }: { til: Til }) {
