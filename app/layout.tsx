@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: [
       {
         type: "image/svg+xml",
-        url: "/logo.svg",
+        url: "/og.svg",
         width: 1920,
         height: 1080,
         alt: "til.bar",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     images: [
       {
         type: "image/svg+xml",
-        url: "/logo.svg",
+        url: "/og.svg",
         width: 1200,
         height: 630,
         alt: "til.bar",
