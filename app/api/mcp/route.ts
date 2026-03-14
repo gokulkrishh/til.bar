@@ -3,6 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { fetchMetadata } from "@/lib/metadata";
+import crypto from "crypto";
 
 function createMcpServer(userId: string) {
   const supabase = createClient(
@@ -201,15 +202,32 @@ async function authenticateRequest(
   req: Request,
 ): Promise<{ userId: string; token: string } | null> {
   const authHeader = req.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) return null;
+  // Support API key via query param for clients that can't set headers (e.g. Claude.ai connectors)
+  const url = new URL(req.url);
+  const queryKey = url.searchParams.get("api_key");
 
-  const token = authHeader.slice(7);
+  const token = queryKey ?? (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
+  if (!token) return null;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
+  // API key auth: tokens prefixed with mcp_sk_ are looked up by hash
+  if (token.startsWith("mcp_sk_")) {
+    const keyHash = crypto.createHash("sha256").update(token).digest("hex");
+    const { data, error } = await supabase
+      .from("api_keys")
+      .select("user_id")
+      .eq("key_hash", keyHash)
+      .single();
+
+    if (error || !data) return null;
+    return { userId: data.user_id, token };
+  }
+
+  // Fall back to Supabase session token (browser users)
   const {
     data: { user },
     error,
@@ -222,14 +240,17 @@ async function authenticateRequest(
 
 async function handleMcpRequest(req: Request): Promise<Response> {
   const auth = await authenticateRequest(req);
-  if (!auth) {
+
+  // Allow GET requests without auth so Claude can complete the MCP protocol
+  // handshake (capability discovery) before sending credentials.
+  if (!auth && req.method !== "GET") {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  const server = createMcpServer(auth.userId);
+  const server = createMcpServer(auth?.userId ?? "");
 
   const transport = new WebStandardStreamableHTTPServerTransport({
     enableJsonResponse: true,
@@ -238,11 +259,9 @@ async function handleMcpRequest(req: Request): Promise<Response> {
   await server.connect(transport);
 
   const response = await transport.handleRequest(req, {
-    authInfo: {
-      token: auth.token,
-      clientId: "til-bar",
-      scopes: [],
-    },
+    authInfo: auth
+      ? { token: auth.token, clientId: "til-bar", scopes: [] }
+      : undefined,
   });
 
   return response;
