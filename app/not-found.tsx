@@ -13,7 +13,9 @@ export default function NotFound() {
           Unable to find the requested page.
         </p>
         <Link href="/">
-          <Button className="w-fit self-center">Go to home</Button>
+          <Button size="lg" className="w-fit self-center">
+            Go to home
+          </Button>
         </Link>
       </div>
     </main>

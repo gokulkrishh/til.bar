@@ -22,7 +22,7 @@ export default function GlobalError({
                 {error.message || "An unexpected error occurred."}
               </p>
 
-              <Button className="w-fit" onClick={reset}>
+              <Button size="lg" className="w-fit" onClick={reset}>
                 Try again
               </Button>
             </div>

@@ -85,7 +85,7 @@ export function TilItem({ til }: { til: Til }) {
             )}
             <RefreshCw
               className={cn(
-                "absolute inset-0 size-4 text-muted-foreground opacity-0 transition-opacity group-hover/favicon:opacity-100",
+                "absolute inset-0 size-4 opacity-0 transition-opacity group-hover/favicon:opacity-100",
                 { "opacity-100 animate-spin": isPending },
               )}
             />
@@ -103,7 +103,7 @@ export function TilItem({ til }: { til: Til }) {
             className="shrink-0 text-muted-foreground group-hover/row:text-foreground"
             variants={{
               idle: { scale: 1 },
-              hover: { scale: 1.3 },
+              hover: { scale: 1.1 },
             }}
             transition={{ duration: 0.15, ease: "easeOut" }}
           >

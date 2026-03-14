@@ -53,7 +53,7 @@ export default function RootLayout({
               </CaptureProvider>
             </TooltipProvider>
           </SoundProvider>
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-center" />
           <SWRegister />
         </ThemeProvider>
       </body>

@@ -125,3 +125,17 @@
     @apply bg-background text-foreground font-sans;
   }
 }
+
+/* Hack to fix the width: fit-content for toater */
+@media (max-width: 600px) {
+  [data-sonner-toaster="true"][data-x-position="center"] {
+    left: 0 !important;
+    right: 0 !important;
+  }
+}
+
+@media (min-width: 601px) {
+  [data-sonner-toaster="true"][data-x-position="center"] {
+    transform: translateX(-15%) !important;
+  }
+}

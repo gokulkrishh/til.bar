@@ -16,10 +16,10 @@ function Toaster(props: React.ComponentProps<typeof Sonner>) {
           gap: "0.125rem",
           padding: "0.25rem 0.75rem",
           width: "fit-content",
-          maxWidth: "20rem",
+          maxWidth: "fit-content",
           margin: "0 auto",
           borderRadius: "9999px",
-        },
+        } as React.CSSProperties,
         className: "[&_[data-icon]>svg]:size-4",
       }}
       {...props}
