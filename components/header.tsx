@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { UserMenu } from "@/components/user-menu";
+import { Profile } from "@/components/profile";
 import SignIn from "./signin";
 
 export async function Header() {
@@ -16,7 +16,7 @@ export async function Header() {
           — today i learned
         </span>
       </h1>
-      {user ? <UserMenu user={user} /> : <SignIn />}
+      {user ? <Profile user={user} /> : <SignIn />}
     </header>
   );
 }

@@ -54,7 +54,7 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => {}}>
           <MessageCircle />
-          Add to chat
+          Ask about this
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
