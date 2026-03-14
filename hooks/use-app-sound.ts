@@ -6,5 +6,5 @@ import type { SoundAsset } from "@/lib/sound-types";
 
 export function useAppSound(sound: SoundAsset) {
   const { soundEnabled } = useSoundSettings();
-  return useSound(sound, { soundEnabled });
+  return useSound(sound, { soundEnabled, interrupt: true });
 }
