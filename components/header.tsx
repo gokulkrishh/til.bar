@@ -1,24 +1,12 @@
-"use client";
-
-import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { GoogleIcon } from "@/components/icons/google";
+import { createClient } from "@/lib/supabase/server";
 import { UserMenu } from "@/components/user-menu";
+import SignIn from "./signin";
 
-export function Header({ user }: { user: User | null }) {
-  const handleSignIn = async () => {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          prompt: "select_account",
-        },
-      },
-    });
-  };
+export async function Header() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <header className="flex items-center justify-between py-5">
@@ -28,14 +16,7 @@ export function Header({ user }: { user: User | null }) {
           — today i learned
         </span>
       </h1>
-      {user ? (
-        <UserMenu user={user} />
-      ) : (
-        <Button size="lg" variant="outline" onClick={handleSignIn}>
-          <GoogleIcon />
-          Sign in
-        </Button>
-      )}
+      {user ? <UserMenu user={user} /> : <SignIn />}
     </header>
   );
 }

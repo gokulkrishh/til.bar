@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# service worker (generated at build)
+public/sw.js
+
 # supabase
 supabase/.temp/
 

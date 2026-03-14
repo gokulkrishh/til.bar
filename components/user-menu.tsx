@@ -19,6 +19,11 @@ export function UserMenu({ user }: { user: User }) {
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+
+    // Clear service worker cache
+    const keys = await caches.keys();
+    await Promise.all(keys.map((key) => caches.delete(key)));
+
     router.refresh();
   };
 

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/theme-provider";
+import { SWRegister } from "@/components/sw-register";
 import "./globals.css";
+import { CaptureProvider } from "@/context/capture-provider";
+import { Header } from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +28,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -34,7 +40,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <CaptureProvider>
+            <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
+              <Header />
+              {children}
+            </div>
+          </CaptureProvider>
+          <SWRegister />
         </ThemeProvider>
       </body>
     </html>
