@@ -47,16 +47,12 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
         <DropdownMenuItem onClick={() => {}}>
-          <ExternalLink />
-          Open in new tab
+          <MessageCircle />
+          Ask about this
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
           <Link2 />
           Copy link
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => {}}>
-          <MessageCircle />
-          Ask about this
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onClick={handleDelete}>
           <Trash2 />

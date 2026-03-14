@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Globe, RefreshCw } from "lucide-react";
+import { ArrowUpRight, Globe, MoveUpRightIcon, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Til } from "@/lib/types";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import { useCaptureContext } from "@/context/capture-provider";
 import { refreshMetadata } from "@/app/actions/tils";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { motion } from "motion/react";
 
 function getFaviconUrl(url: string): string {
   try {
@@ -50,7 +51,11 @@ export function TilItem({ til }: { til: Til }) {
   };
 
   return (
-    <li className="flex items-center group/row gap-4 py-1">
+    <motion.li
+      className="flex items-center group/row gap-4 py-1"
+      initial="idle"
+      whileHover="hover"
+    >
       <div className="flex items-center gap-2 min-w-0 w-full">
         <Tooltip>
           <TooltipTrigger
@@ -94,7 +99,16 @@ export function TilItem({ til }: { til: Til }) {
           className="transition-color w-full flex gap-1 text-sm items-center group font-medium group-hover/row:text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
         >
           <span className="truncate">{til.title ?? til.url}</span>
-          <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground group-hover/row:text-foreground transition-colors" />
+          <motion.span
+            className="shrink-0 text-muted-foreground group-hover/row:text-foreground"
+            variants={{
+              idle: { scale: 1 },
+              hover: { scale: 1.3 },
+            }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <ArrowUpRight className="size-3.5" />
+          </motion.span>
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">
@@ -103,6 +117,6 @@ export function TilItem({ til }: { til: Til }) {
         </span>
         <TilActions key={til.id} tilId={til.id} url={til.url} />
       </div>
-    </li>
+    </motion.li>
   );
 }
