@@ -1,9 +1,13 @@
+import { Kbd } from "./ui/kbd";
+
 export function EmptyState() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center text-center">
-      <p className="text-lg font-medium text-foreground">No TILs yet</p>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Paste a URL anywhere to capture your first link.
+    <div className="flex h-[calc(100vh-8rem)] gap-2 flex-col items-center justify-center text-center">
+      <h2 className="text-foreground text-balance text-3xl font-semibold tracking-tight">
+        Capture your first learning.
+      </h2>
+      <p className="text-muted-foreground">
+        Paste a URL anywhere to get started.
       </p>
     </div>
   );

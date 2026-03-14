@@ -12,7 +12,7 @@ export function Header() {
           — today i learned
         </span>
       </h1>
-      <Button variant="outline" onClick={() => {}}>
+      <Button size="lg" variant="outline" onClick={() => {}}>
         <GoogleIcon />
         Sign in
       </Button>
