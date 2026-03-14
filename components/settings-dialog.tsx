@@ -15,10 +15,27 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { exportTils, deleteAccount } from "@/app/actions/account";
 import { toast } from "sonner";
-import { Download, Monitor, Moon, Sun, Trash2 } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Download,
+  Monitor,
+  Moon,
+  Sun,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSoundSettings } from "@/context/sound-provider";
 import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { MCP_TOOLS } from "@/lib/mcp-tools";
 
 export function SettingsDialog({
   user,
@@ -34,6 +51,15 @@ export function SettingsDialog({
   const { soundEnabled, setSoundEnabled } = useSoundSettings();
   const [isPending, startTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const mcpUrl = "https://til.bar/api/mcp";
+
+  const handleCopyMcpUrl = async () => {
+    await navigator.clipboard.writeText(mcpUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const avatarUrl = user.user_metadata?.avatar_url;
   const fullName = user.user_metadata?.full_name ?? "";
@@ -92,6 +118,7 @@ export function SettingsDialog({
           <TabsList>
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            <TabsTrigger value="mcp">MCP</TabsTrigger>
             <TabsTrigger value="data">Data control</TabsTrigger>
           </TabsList>
           <TabsContent value="account">
@@ -150,6 +177,52 @@ export function SettingsDialog({
                   onCheckedChange={() => setSoundEnabled(!soundEnabled)}
                 />
               </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="mcp">
+            <div className="flex flex-col gap-4 py-4 px-1">
+              <div>
+                <h3 className="text-sm font-medium">MCP Server</h3>
+                <p className="text-xs text-muted-foreground">
+                  Connect AI tools like Claude or ChatGPT.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded-md bg-muted px-3 py-2 text-xs font-mono truncate">
+                  {mcpUrl}
+                </code>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyMcpUrl}
+                >
+                  {copied ? (
+                    <Check className="size-4" />
+                  ) : (
+                    <Copy className="size-4" />
+                  )}
+                </Button>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-30">Tool</TableHead>
+                    <TableHead>Description</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {MCP_TOOLS.map((tool) => (
+                    <TableRow key={tool.name}>
+                      <TableCell className="font-mono text-xs">
+                        {tool.name}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {tool.description}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </TabsContent>
           <TabsContent value="data">
