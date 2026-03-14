@@ -44,7 +44,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SoundProvider>
-            <TooltipProvider delay={2000}>
+            <TooltipProvider delay={1000}>
               <CaptureProvider>
                 <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
                   <Header />

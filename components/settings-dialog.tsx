@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Download, Monitor, Moon, Sun, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSoundSettings } from "@/context/sound-provider";
+import { Switch } from "@/components/ui/switch";
 
 export function SettingsDialog({
   user,
@@ -107,32 +108,35 @@ export function SettingsDialog({
           </TabsContent>
           <TabsContent value="appearance">
             <div className="flex flex-col gap-2 py-4 px-1">
-              <div>
-                <h3 className="text-sm font-medium">Theme</h3>
-                <p className="text-xs text-muted-foreground">
-                  Choose your preferred theme
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {[
-                  { value: "light", label: "Light", icon: Sun },
-                  { value: "dark", label: "Dark", icon: Moon },
-                  { value: "system", label: "System", icon: Monitor },
-                ].map(({ value, label, icon: Icon }) => (
-                  <button
-                    className={cn(
-                      "flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-lg border px-2 py-3 text-sm transition-all active:scale-[0.97]",
-                      theme === value
-                        ? "border-primary bg-primary/5 text-foreground"
-                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20",
-                    )}
-                    key={value}
-                    onClick={() => setTheme(value)}
-                  >
-                    <Icon />
-                    {label}
-                  </button>
-                ))}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium">Theme</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Choose your preferred theme
+                  </p>
+                </div>
+                <div className="flex border border-muted rounded-full p-0.75 w-fit">
+                  {[
+                    { value: "system", label: "System", icon: Monitor },
+                    { value: "light", label: "Light", icon: Sun },
+                    { value: "dark", label: "Dark", icon: Moon },
+                  ].map(({ value, label, icon: Icon }) => (
+                    <button
+                      className={cn(
+                        "rounded-full cursor-pointer p-1.25 hover:bg-muted",
+                        {
+                          "bg-primary text-white hover:bg-primary":
+                            theme === value,
+                        },
+                      )}
+                      key={value}
+                      onClick={() => setTheme(value)}
+                      aria-label={label}
+                    >
+                      <Icon className="size-3" />
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="flex items-center justify-between pt-4">
                 <div>
@@ -141,23 +145,10 @@ export function SettingsDialog({
                     Play sounds on actions
                   </p>
                 </div>
-                <button
-                  onClick={() => setSoundEnabled(!soundEnabled)}
-                  className={cn(
-                    "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors",
-                    { "bg-primary": soundEnabled, "bg-input": !soundEnabled },
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "pointer-events-none block size-4 rounded-full bg-background shadow-sm ring-0 transition-transform translate-y-0.5",
-                      {
-                        "translate-x-4.5": soundEnabled,
-                        "translate-x-0.5": !soundEnabled,
-                      },
-                    )}
-                  />
-                </button>
+                <Switch
+                  checked={soundEnabled}
+                  onCheckedChange={() => setSoundEnabled(!soundEnabled)}
+                />
               </div>
             </div>
           </TabsContent>

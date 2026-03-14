@@ -10,5 +10,6 @@
 - **Package manager**: bun
 - **AI**: AI SDK + OpenRouter (chat with URLs as attachments)
 - **MCP**: MCP server for external tool integrations
+- **Animation**: Motion (framer-motion) for spring physics and fluid interactions
 - **Sound**: soundcn (Web Audio API, inline base64 sounds via shadcn registry)
 - **Path alias**: `@/*` maps to project root
