@@ -61,6 +61,60 @@ function createMcpServer(userId: string) {
   );
 
   server.registerTool(
+    "search_links",
+    {
+      description:
+        "Search saved links by keyword. Matches against title, description, and URL.",
+      inputSchema: {
+        query: z.string().describe("Search keyword"),
+        limit: z
+          .number()
+          .optional()
+          .describe("Max number of results to return (default 20)"),
+      },
+    },
+    async ({ query, limit }) => {
+      const pattern = `%${query}%`;
+      const { data, error } = await supabase
+        .from("tils")
+        .select()
+        .eq("user_id", userId)
+        .or(
+          `title.ilike.${pattern},description.ilike.${pattern},url.ilike.${pattern}`,
+        )
+        .order("created_at", { ascending: false })
+        .limit(limit ?? 20);
+
+      if (error) {
+        return {
+          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
+          isError: true,
+        };
+      }
+
+      if (data.length === 0) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `No links found matching "${query}"`,
+            },
+          ],
+        };
+      }
+
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `${data.length} links matching "${query}":\n${JSON.stringify(data, null, 2)}`,
+          },
+        ],
+      };
+    },
+  );
+
+  server.registerTool(
     "get_link",
     {
       description: "Get a saved link by its ID",
