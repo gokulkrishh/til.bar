@@ -24,12 +24,14 @@ type CaptureContextType = {
   pendingTils: PendingTil[];
   deletedIds: Set<string>;
   optimisticDelete: (id: string) => void;
+  capture: (text: string) => void;
 };
 
 const CaptureContext = createContext<CaptureContextType>({
   pendingTils: [],
   deletedIds: new Set(),
   optimisticDelete: () => {},
+  capture: () => {},
 });
 
 export function useCaptureContext() {
@@ -112,7 +114,12 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
       if (!text.match(/^https?:\/\//)) return;
 
       const target = e.target as HTMLElement;
-      if (target.tagName === "TEXTAREA" || target.isContentEditable) return;
+      if (
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "INPUT" ||
+        target.isContentEditable
+      )
+        return;
 
       e.preventDefault();
       capture(text);
@@ -126,7 +133,9 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   }, [handlePaste]);
 
   return (
-    <CaptureContext value={{ pendingTils, deletedIds, optimisticDelete }}>
+    <CaptureContext
+      value={{ pendingTils, deletedIds, optimisticDelete, capture }}
+    >
       {children}
     </CaptureContext>
   );

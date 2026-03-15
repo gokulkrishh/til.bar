@@ -13,7 +13,7 @@ export default function GlobalError({
     <html lang="en">
       <body>
         <div className="relative mx-auto flex h-[calc(100vh-4rem)] max-w-2xl w-full flex-col">
-          <main className="mx-auto flex h-full w-full flex-col justify-center gap-4 px-6">
+          <main className="flex flex-1 px-2 flex-col items-center justify-center text-center">
             <div className="flex w-full flex-col gap-3">
               <h2 className="text-foreground text-balance text-2xl font-semibold tracking-tight">
                 Something went wrong
