@@ -48,7 +48,7 @@ export function TilActions({
       <DropdownMenuTrigger
         className={cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "rounded-full",
+          "rounded-full hit-area-2",
         )}
       >
         <MoreVertical />

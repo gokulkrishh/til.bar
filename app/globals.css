@@ -161,6 +161,78 @@
   }
 }
 
+/* Hit area utilities — expand touch targets via pseudo-elements
+ * From: https://bazza.dev/craft/2026/hit-area */
+@utility hit-area-* {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: calc(--value(--spacing) * -1);
+  }
+}
+
+@utility hit-area-x-* {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 calc(--value(--spacing) * -1);
+  }
+}
+
+@utility hit-area-y-* {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: calc(--value(--spacing) * -1) 0;
+  }
+}
+
+@utility hit-area-t-* {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: calc(--value(--spacing) * -1) 0 0 0;
+  }
+}
+
+@utility hit-area-r-* {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 calc(--value(--spacing) * -1) 0 0;
+  }
+}
+
+@utility hit-area-b-* {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 calc(--value(--spacing) * -1) 0;
+  }
+}
+
+@utility hit-area-l-* {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 0 calc(--value(--spacing) * -1);
+  }
+}
+
 /* Hack to fix the width: fit-content for toater */
 @media (max-width: 600px) {
   [data-sonner-toaster="true"][data-x-position="center"] {
