@@ -1,6 +1,7 @@
 "use server";
 
 import { after } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { fetchMetadata } from "@/lib/metadata";
 import { generateTags } from "@/lib/ai-tags";
@@ -50,8 +51,8 @@ export async function createTil(input: string) {
         .update({ title, description })
         .eq("id", data.id);
     }
-
     await generateTags(data.id, url, title, description, user.id);
+    revalidatePath("/");
   });
 
   return { data };

@@ -14,7 +14,6 @@ import { clickSoftSound } from "@/sounds/click-soft";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
-import { error007Sound } from "@/sounds/error-007";
 
 export function TilActions({
   tilId,
@@ -27,7 +26,6 @@ export function TilActions({
 }) {
   const [open, setOpen] = useState(false);
   const [playClick] = useAppSound(clickSoftSound);
-  const [playTrash] = useAppSound(error007Sound);
   const { optimisticDelete } = useCaptureContext();
   const { attachTil } = useChatContext();
   const trigger = useAppHaptics();
@@ -39,7 +37,7 @@ export function TilActions({
   };
 
   const handleDelete = () => {
-    playTrash();
+    playClick();
     trigger("heavy");
     optimisticDelete(tilId);
   };
