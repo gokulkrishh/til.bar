@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "til.bar",
+  "description": "Save links to til.bar with one click",
+  "version": "1.0.0",
+  "permissions": ["activeTab", "contextMenus", "storage", "identity"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png"
+    },
+    "default_title": "Save to til.bar"
+  }
+}
