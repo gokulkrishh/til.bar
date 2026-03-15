@@ -54,9 +54,10 @@ export async function createTil(input: string) {
           .eq("id", data.id);
       }
       await generateTags({ ...data, title, description });
-      revalidatePath("/");
     } catch (err) {
       console.error("[after] Background work failed:", err);
+    } finally {
+      revalidatePath("/");
     }
   });
 
@@ -112,7 +113,10 @@ export async function refreshMetadata(id: string, url: string) {
     .eq("til_id", id);
 
   if (!count) {
-    after(() => generateTags(til));
+    after(() => {
+      generateTags(til);
+      revalidatePath("/");
+    });
   }
 
   return { success: true };

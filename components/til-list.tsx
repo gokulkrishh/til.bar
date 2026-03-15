@@ -5,6 +5,7 @@ import { TilItem } from "@/components/til-item";
 import { TilItemSkeleton } from "@/components/til-item-skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { usePendingTils } from "@/context/capture-provider";
+import { useSearch } from "@/context/search-provider";
 import type { TilWithTags } from "@/lib/types";
 import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -148,8 +149,8 @@ function TagFilter({
         <Button
           size="xs"
           onClick={onClear}
-          variant="ghost"
-          className="rounded-full"
+          variant="secondary"
+          className="rounded-full h-6.5"
         >
           <X className="size-3" aria-hidden="true" />
           Clear
@@ -161,6 +162,7 @@ function TagFilter({
 
 export function TilList({ tils }: { tils: TilWithTags[] }) {
   const pendingTils = usePendingTils();
+  const { query } = useSearch();
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
   const hasPending = pendingTils.length > 0;
   const isEmpty = tils.length === 0 && !hasPending;
@@ -182,16 +184,29 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
     return <EmptyState />;
   }
 
-  const hasFilter = activeTags.size > 0;
+  const hasTagFilter = activeTags.size > 0;
+  const searchLower = query.toLowerCase();
+  const hasAnyFilter = hasTagFilter || !!query;
 
-  const filtered = hasFilter
-    ? tils.filter((til) => til.tags?.some((t) => activeTags.has(t.name)))
-    : tils;
+  let filtered = tils;
+  if (hasTagFilter) {
+    filtered = filtered.filter((til) =>
+      til.tags?.some((t) => activeTags.has(t.name)),
+    );
+  }
+  if (query) {
+    filtered = filtered.filter(
+      (til) =>
+        til.title?.toLowerCase().includes(searchLower) ||
+        til.url.toLowerCase().includes(searchLower) ||
+        til.description?.toLowerCase().includes(searchLower),
+    );
+  }
 
   const groups = groupByRelativeDay(filtered);
 
   // If there are pending items but no "Today" group yet, create one
-  if (hasPending && !hasFilter && !groups.some((g) => g.label === "Today")) {
+  if (hasPending && !hasAnyFilter && !groups.some((g) => g.label === "Today")) {
     groups.unshift({ label: "Today", tils: [] });
   }
 
@@ -221,10 +236,18 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
           label={group.label}
           tils={group.tils}
           pendingItems={
-            group.label === "Today" && !hasFilter ? pendingTils : []
+            group.label === "Today" && !hasAnyFilter ? pendingTils : []
           }
         />
       ))}
+
+      {groups.length === 0 && hasAnyFilter && (
+        <div className="flex flex-col h-52 items-center justify-center">
+          <p className="text-muted-foreground text-sm text-center">
+            No results found.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

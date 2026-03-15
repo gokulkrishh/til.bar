@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { Profile } from "@/components/profile";
+import { SearchButton } from "@/components/search";
 import SignIn from "./signin";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,7 +16,10 @@ export async function Header() {
       <Link className="active:scale-98 inline-flex items-center" href="/">
         <Image priority src="/logo.svg" alt="TIL Logo" width={28} height={28} />
       </Link>
-      {user ? <Profile user={user} /> : <SignIn />}
+      <div className="flex items-center gap-2">
+        {user && <SearchButton />}
+        {user ? <Profile user={user} /> : <SignIn />}
+      </div>
     </header>
   );
 }
