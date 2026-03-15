@@ -57,7 +57,12 @@ export function ChatMessage({
           return isUser ? (
             <span key={i}>{part.text}</span>
           ) : (
-            <Streamdown key={i} isAnimating={isStreaming} plugins={{ code }}>
+            <Streamdown
+              linkSafety={{ enabled: false }}
+              key={i}
+              isAnimating={isStreaming}
+              plugins={{ code }}
+            >
               {part.text}
             </Streamdown>
           );
