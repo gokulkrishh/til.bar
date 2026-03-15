@@ -25,7 +25,7 @@ export async function generateApiKey() {
     key_hash: keyHash,
   });
 
-  if (error) return { error: "Failed to generate API key" };
+  if (error) return { error: "Couldn't generate API key" };
 
   // Return the plain key once — it cannot be recovered after this point
   return { key };
@@ -37,14 +37,14 @@ export async function deleteApiKey() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { error: "Not authenticated" };
+  if (!user) return { error: "Sign in to manage API keys" };
 
   const { error } = await supabase
     .from("api_keys")
     .delete()
     .eq("user_id", user.id);
 
-  if (error) return { error: "Failed to delete API key" };
+  if (error) return { error: "Couldn't delete API key" };
 
   return { success: true };
 }
@@ -55,14 +55,14 @@ export async function hasApiKey() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { error: "Not authenticated" };
+  if (!user) return { error: "Sign in to manage API keys" };
 
   const { count, error } = await supabase
     .from("api_keys")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id);
 
-  if (error) return { error: "Failed to check API key" };
+  if (error) return { error: "Couldn't check API key status" };
 
   return { exists: (count ?? 0) > 0 };
 }
@@ -83,7 +83,7 @@ export async function exportTils() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return { error: "Something went wrong" };
+    return { error: "Couldn't export your links" };
   }
 
   return { data: tils };
@@ -96,7 +96,7 @@ export async function deleteAccount() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated" };
+    return { error: "Sign in to continue" };
   }
 
   const admin = createAdminClient();
@@ -104,7 +104,7 @@ export async function deleteAccount() {
   const { error } = await admin.auth.admin.deleteUser(user.id);
 
   if (error) {
-    return { error: "Something went wrong" };
+    return { error: "Couldn't delete your account" };
   }
 
   await supabase.auth.signOut();

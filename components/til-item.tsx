@@ -48,7 +48,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Refreshed");
+        toast.success("Metadata refreshed");
         router.refresh();
       }
     });

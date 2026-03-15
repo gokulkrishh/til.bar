@@ -80,7 +80,7 @@ export function DataTab({
             Delete account
           </h3>
           <p className="text-xs text-muted-foreground">
-            This removes all your links and account
+            Permanently deletes all your links and account data
           </p>
         </div>
         <Button
@@ -89,7 +89,7 @@ export function DataTab({
           disabled={isPending}
         >
           <Trash2 />
-          {confirmDelete ? "Are you sure?" : "Delete"}
+          {confirmDelete ? "Delete? Can't be undone" : "Delete"}
         </Button>
       </div>
     </div>

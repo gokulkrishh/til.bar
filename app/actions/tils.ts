@@ -40,7 +40,7 @@ export async function createTil(input: string) {
     .single();
 
   if (error) {
-    return { error: "Something went wrong" };
+    return { error: "Couldn't save this link" };
   }
 
   // Fetch metadata and generate tags in the background after response is sent
@@ -89,13 +89,13 @@ export async function deleteTil(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Sign in to continue" };
+    return { error: "Sign in to delete links" };
   }
 
   const { error } = await supabase.from("tils").delete().eq("id", id);
 
   if (error) {
-    return { error: "Something went wrong" };
+    return { error: "Couldn't delete this link" };
   }
 
   return { success: true };
@@ -108,7 +108,7 @@ export async function refreshMetadata(id: string, url: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Sign in to continue" };
+    return { error: "Sign in to refresh metadata" };
   }
 
   let { title, description } = await fetchMetadata(url);
@@ -129,7 +129,7 @@ export async function refreshMetadata(id: string, url: string) {
     .single();
 
   if (error || !til) {
-    return { error: "Something went wrong" };
+    return { error: "Couldn't refresh metadata" };
   }
 
   // Generate tags if this TIL has none
