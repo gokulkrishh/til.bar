@@ -1,6 +1,8 @@
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import { createClient } from "@/lib/supabase/server";
+import { buildChatSystemPrompt } from "@/lib/prompts";
+import type { Til } from "@/lib/types";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -17,24 +19,24 @@ export async function POST(request: Request) {
     tils,
   }: {
     messages: UIMessage[];
-    tils?: { url: string; title: string | null; description?: string | null }[];
+    tils?: Til[];
   } = await request.json();
 
-  const context = (tils ?? [])
+  const links = (tils ?? [])
     .map((til) =>
       [
-        `URL: ${til.url}`,
-        til.title && `Title: ${til.title}`,
-        til.description && `Description: ${til.description}`,
+        `- ${til.url}`,
+        til.title && `  Title: ${til.title}`,
+        til.description && `  Description: ${til.description}`,
       ]
         .filter(Boolean)
         .join("\n"),
     )
-    .join("\n\n");
+    .join("\n");
 
   const result = streamText({
     model: openrouter("google/gemini-2.5-flash-lite"),
-    system: `You are a helpful assistant. The user is asking about the following link(s):\n\n${context}\n\nAnswer concisely based on what you know about these links. If you don't have enough context, say so.`,
+    system: buildChatSystemPrompt(links),
     messages: await convertToModelMessages(messages),
   });
 
