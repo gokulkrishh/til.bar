@@ -8,7 +8,7 @@ import {
   type ClipboardEvent,
   useMemo,
 } from "react";
-import { ArrowUp, X } from "lucide-react";
+import { ArrowUp, Link, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCaptureContext } from "@/context/capture-provider";
@@ -200,6 +200,7 @@ export function ChatInput({ user }: { user: User }) {
                 variant="secondary"
                 className="gap-1 max-w-full"
               >
+                <Link className="size-3 mr-1" />
                 <span className="truncate">{til.title ?? til.url}</span>
                 <button
                   onClick={() => {
