@@ -12,6 +12,8 @@ import { refreshMetadata } from "@/app/actions/tils";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { motion } from "motion/react";
+import { useSound } from "@/hooks/use-sound";
+import { iUiInterfaceButtonASound } from "@/sounds/i-ui-interface-button-a";
 
 function getFaviconUrl(url: string): string {
   try {
@@ -35,11 +37,13 @@ export function TilItem({ til }: { til: TilWithTags }) {
   const [isPending, startTransition] = useTransition();
   const { deletedIds } = useCaptureContext();
   const faviconUrl = getFaviconUrl(til.url);
+  const [play] = useSound(iUiInterfaceButtonASound);
 
   if (deletedIds.has(til.id)) return null;
 
   const handleRefresh = () => {
     startTransition(async () => {
+      play();
       const result = await refreshMetadata(til.id, til.url);
       if (result.error) {
         toast.error(result.error);
@@ -61,6 +65,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
           <TooltipTrigger
             onClick={handleRefresh}
             disabled={isPending}
+            aria-label="Refresh metadata"
             className="relative size-4 shrink-0 group/favicon cursor-pointer"
           >
             {faviconUrl ? (
@@ -68,6 +73,8 @@ export function TilItem({ til }: { til: TilWithTags }) {
               <img
                 src={faviconUrl}
                 alt={`${til.title ?? til.url} icon`}
+                width={16}
+                height={16}
                 className={cn(
                   "size-4 rounded-sm transition-opacity group-hover/favicon:opacity-0",
                   { "opacity-0": isPending },
@@ -78,6 +85,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
               />
             ) : (
               <Globe
+                aria-hidden="true"
                 className={cn(
                   "size-4 transition-opacity group-hover/favicon:opacity-0",
                   { "opacity-0": isPending },
@@ -85,6 +93,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
               />
             )}
             <RefreshCw
+              aria-hidden="true"
               className={cn(
                 "absolute inset-0 size-4 opacity-0 transition-opacity group-hover/favicon:opacity-100",
                 { "opacity-100 animate-spin": isPending },
@@ -108,7 +117,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
             }}
             transition={{ duration: 0.15, ease: "easeOut" }}
           >
-            <ArrowUpRight className="size-3.5" />
+            <ArrowUpRight className="size-3.5" aria-hidden="true" />
           </motion.span>
         </Link>
       </div>
