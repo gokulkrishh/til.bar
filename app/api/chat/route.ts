@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     .join("\n");
 
   const result = streamText({
-    model: openrouter("google/gemini-2.5-flash-lite"),
+    model: openrouter("google/gemini-3.1-flash-lite-preview"),
     system: buildChatSystemPrompt(links),
     messages: await convertToModelMessages(messages),
   });

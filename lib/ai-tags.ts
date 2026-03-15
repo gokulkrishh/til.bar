@@ -33,7 +33,7 @@ export async function generateTags(til: Til) {
 
   try {
     const { output } = await generateText({
-      model: openrouter("google/gemini-2.5-flash-lite"),
+      model: openrouter("google/gemini-3.1-flash-lite-preview"),
       output: Output.object({ schema: tagSchema }),
       system: `You categorise web links with 1-2 short, lowercase tags.
 Rules:

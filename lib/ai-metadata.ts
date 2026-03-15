@@ -25,7 +25,7 @@ export async function generateMetadata(
     if (description) parts.push(`Description: ${description}`);
 
     const { output } = await generateText({
-      model: openrouter("google/gemini-2.5-flash-lite"),
+      model: openrouter("google/gemini-3.1-flash-lite-preview"),
       output: Output.object({ schema: metadataSchema }),
       system: `You evaluate web link metadata and improve it if needed.
 
