@@ -10,15 +10,15 @@ import {
 import { Link2, MessageCircle, MoreVertical, Trash2 } from "lucide-react";
 import { buttonVariants } from "./ui/button";
 import { useAppSound } from "@/hooks/use-app-sound";
-import { clickSoftSound } from "@/sounds/click-soft/click-soft";
-import { drop003Sound } from "@/sounds/drop-003/drop-003";
+import { clickSoftSound } from "@/sounds/click-soft";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
+import { error007Sound } from "@/sounds/error-007";
 
 export function TilActions({ tilId, url }: { tilId: string; url: string }) {
   const [open, setOpen] = useState(false);
   const [playClick] = useAppSound(clickSoftSound);
-  const [playDrop] = useAppSound(drop003Sound);
+  const [playTrash] = useAppSound(error007Sound);
   const { optimisticDelete } = useCaptureContext();
   const trigger = useAppHaptics();
 
@@ -29,7 +29,7 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
   };
 
   const handleDelete = () => {
-    playDrop();
+    playTrash();
     trigger("heavy");
     optimisticDelete(tilId);
   };

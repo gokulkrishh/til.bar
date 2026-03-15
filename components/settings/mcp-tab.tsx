@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Check, Copy, RefreshCw } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { MCP_TOOLS } from "@/lib/mcp-tools";
-import { clickSoftSound } from "@/sounds/click-soft/click-soft";
+import { clickSoftSound } from "@/sounds/click-soft";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { useAppHaptics } from "@/context/haptics-provider";
 

@@ -12,7 +12,7 @@ import { createTil, deleteTil } from "@/app/actions/tils";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppSound } from "@/hooks/use-app-sound";
-import { drop003Sound } from "@/sounds/drop-003/drop-003";
+import { drop003Sound } from "@/sounds/drop-003";
 import { useAppHaptics } from "@/context/haptics-provider";
 
 type PendingTil = {
