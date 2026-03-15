@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { motion } from "motion/react";
 import { useSound } from "@/hooks/use-sound";
-import { iUiInterfaceButtonASound } from "@/sounds/i-ui-interface-button-a";
+import { clickSoftSound } from "@/sounds/click-soft";
 
 function getFaviconUrl(url: string): string {
   try {
@@ -37,7 +37,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
   const [isPending, startTransition] = useTransition();
   const { deletedIds } = useCaptureContext();
   const faviconUrl = getFaviconUrl(til.url);
-  const [play] = useSound(iUiInterfaceButtonASound);
+  const [play] = useSound(clickSoftSound);
 
   if (deletedIds.has(til.id)) return null;
 
