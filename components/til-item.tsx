@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Globe, MoveUpRightIcon, RefreshCw } from "lucide-react";
+import { ArrowUpRight, Globe, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Til } from "@/lib/types";
 import Link from "next/link";
@@ -30,13 +30,7 @@ function formatDate(dateStr: string) {
   return dateFormatter.format(new Date(dateStr));
 }
 
-export function TilItem({
-  til,
-  showDate = true,
-}: {
-  til: Til;
-  showDate?: boolean;
-}) {
+export function TilItem({ til }: { til: Til }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { deletedIds } = useCaptureContext();
@@ -70,6 +64,7 @@ export function TilItem({
             className="relative size-4 shrink-0 group/favicon cursor-pointer"
           >
             {faviconUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={faviconUrl}
                 alt={`${til.title ?? til.url} icon`}

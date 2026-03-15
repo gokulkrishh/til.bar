@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 type SoundContextType = {
   soundEnabled: boolean;
@@ -19,14 +19,11 @@ export function useSoundSettings() {
 const STORAGE_KEY = "til-bar-sound";
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
-
-  useEffect(() => {
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored !== null) {
-      setSoundEnabled(stored === "true");
-    }
-  }, []);
+    return stored !== null ? stored === "true" : true;
+  });
 
   const handleSetSoundEnabled = (enabled: boolean) => {
     setSoundEnabled(enabled);

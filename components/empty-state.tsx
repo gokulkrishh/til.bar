@@ -1,5 +1,3 @@
-import { Kbd } from "./ui/kbd";
-
 export function EmptyState() {
   return (
     <div className="flex h-[calc(100vh-8rem)] gap-2 flex-col items-center justify-center text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300">
