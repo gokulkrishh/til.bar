@@ -89,9 +89,10 @@ function TilGroup({
       {hasMore && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer items-center justify-center gap-1 py-2 text-xs transition-colors"
+          className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer items-center justify-center gap-1 py-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
         >
           <ChevronDown
+            aria-hidden="true"
             className={cn("transition-transform size-4", {
               "rotate-180": showAll,
             })}
@@ -119,7 +120,11 @@ function TagFilter({
   if (tags.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div
+      role="group"
+      aria-label="Filter by tag"
+      className="flex items-center gap-2 flex-wrap"
+    >
       {tags.map((tag) => (
         <Button
           className="border-0"
@@ -135,7 +140,7 @@ function TagFilter({
 
       {activeTags.size > 0 && (
         <Button size="xs" onClick={onClear} variant="ghost">
-          <X />
+          <X aria-hidden="true" />
           Clear
         </Button>
       )}
