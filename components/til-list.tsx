@@ -231,7 +231,10 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
         tags={allTags}
         activeTags={activeTags}
         onTagClick={toggleTag}
-        onClear={() => setActiveTags(new Set())}
+        onClear={() => {
+          trigger("light");
+          setActiveTags(new Set());
+        }}
       />
       {groups.map((group) => (
         <TilGroup
