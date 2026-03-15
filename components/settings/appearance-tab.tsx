@@ -30,7 +30,7 @@ export function AppearanceTab() {
           ].map(({ value, label, icon: Icon }) => (
             <button
               className={cn(
-                "rounded-full cursor-pointer p-1.25 hover:bg-muted",
+                "rounded-full cursor-pointer p-1.25 hover:bg-muted hit-area-1",
                 {
                   "bg-primary text-white hover:bg-primary": theme === value,
                 },

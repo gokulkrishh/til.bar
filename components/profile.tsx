@@ -44,7 +44,7 @@ export function Profile({ user }: { user: User }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Avatar className="size-8">
+          <Avatar className="size-8 hit-area-2">
             <AvatarImage src={avatarUrl} alt={fullName} />
             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
