@@ -13,6 +13,9 @@ import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { useAppHaptics } from "@/context/haptics-provider";
+import { useSound } from "@/hooks/use-sound";
+import { useAppSound } from "@/hooks/use-app-sound";
+import { drop003Sound } from "@/sounds/drop-003";
 
 const DEFAULT_VISIBLE = 5;
 
@@ -134,6 +137,9 @@ function TagFilter({
   onTagClick: (tagName: string) => void;
   onClear: () => void;
 }) {
+  const [play] = useAppSound(drop003Sound);
+  const trigger = useAppHaptics();
+
   if (tags.length === 0) return null;
 
   return (
@@ -146,7 +152,10 @@ function TagFilter({
         <Badge
           key={tag.id}
           variant={activeTags.has(tag.name) ? "default" : "outline"}
-          onClick={() => onTagClick(tag.name)}
+          onClick={() => {
+            trigger("light");
+            onTagClick(tag.name);
+          }}
           className="cursor-pointer"
         >
           {tag.name}
@@ -163,7 +172,11 @@ function TagFilter({
       {activeTags.size > 0 && (
         <Button
           size="xs"
-          onClick={onClear}
+          onClick={() => {
+            play();
+            trigger("light");
+            onClear();
+          }}
           variant="secondary"
           className="rounded-full h-6.5"
         >
