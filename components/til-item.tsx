@@ -125,7 +125,12 @@ export function TilItem({ til }: { til: TilWithTags }) {
         <span className="text-xs text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity">
           {formatDate(til.created_at)}
         </span>
-        <TilActions key={til.id} tilId={til.id} url={til.url} />
+        <TilActions
+          key={til.id}
+          tilId={til.id}
+          url={til.url}
+          title={til.title}
+        />
       </div>
     </motion.li>
   );

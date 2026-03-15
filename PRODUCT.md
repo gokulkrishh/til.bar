@@ -22,7 +22,7 @@ Pasting anywhere on the page triggers capture in desktop. On mobile, a fixed inp
 
 ## AI Categorisation
 
-After an entry is saved, the AI assigns up to 2 tags asynchronously via OpenRouter (Gemini 2.0 Flash) — capture never waits on this. Prefers reusing existing tags over creating new ones. Tags are lowercase, displayed as pills on each item. Tags are not editable.
+After an entry is saved, the AI assigns up to 2 tags asynchronously via OpenRouter (Gemini 2.5 Flash Lite) — capture never waits on this. Prefers reusing existing tags over creating new ones. Tags are lowercase, displayed as pills on each item. Tags are not editable.
 
 ---
 
@@ -56,13 +56,13 @@ Both views are filterable by tag.
 
 ## TIL Item Context Menu
 
-Each TIL item has a context menu with: **Ask about this** (🚧 not yet wired up), **Copy link**, and **Delete**.
+Each TIL item has a context menu with: **Ask about this**, **Copy link**, and **Delete**.
 
 ---
 
 ## AI Chat
 
-🚧 **Planned.** Chat with saved URLs as context. Useful for summarising, asking questions, or extracting key points. Currently only a placeholder input is rendered.
+Chat with saved URLs as context. Click "Ask about this" on any TIL to attach it, then ask questions. Uses OpenRouter (Gemini 2.5 Flash Lite) for streaming responses. Session-only — no conversation history stored.
 
 ---
 

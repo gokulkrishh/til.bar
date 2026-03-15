@@ -12,7 +12,7 @@ export async function Header() {
 
   return (
     <header className="flex items-center justify-between py-5">
-      <Link className="active:scale-99 inline-flex items-center" href="/">
+      <Link className="active:scale-98 inline-flex items-center" href="/">
         <Image priority src="/logo.svg" alt="TIL Logo" width={28} height={28} />
       </Link>
       {user ? <Profile user={user} /> : <SignIn />}

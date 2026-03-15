@@ -10,8 +10,8 @@ import { CaptureProvider } from "@/context/capture-provider";
 import { SoundProvider } from "@/context/sound-provider";
 import { HapticsProvider } from "@/context/haptics-provider";
 import { Header } from "@/components/header";
-import { ChatInput } from "@/components/chat-input";
 import { ShareTargetHandler } from "@/components/share-target-handler";
+import { ChatProvider } from "@/context/chat-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -111,13 +111,15 @@ export default function RootLayout({
             <HapticsProvider>
               <TooltipProvider delay={1000}>
                 <CaptureProvider>
-                  <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
-                    <Header />
-                    {children}
-                  </div>
-                  <Suspense>
-                    <ShareTargetHandler />
-                  </Suspense>
+                  <ChatProvider>
+                    <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
+                      <Header />
+                      {children}
+                    </div>
+                    <Suspense>
+                      <ShareTargetHandler />
+                    </Suspense>
+                  </ChatProvider>
                 </CaptureProvider>
               </TooltipProvider>
             </HapticsProvider>
