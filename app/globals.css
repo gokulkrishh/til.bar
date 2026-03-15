@@ -125,6 +125,15 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+
+  .prose {
+    --tw-prose-font: var(--font-geist-sans);
+    font-family: var(--font-geist-sans);
+  }
+
+  .prose :where(code, pre, kbd, samp) {
+    font-family: var(--font-geist-mono);
+  }
 }
 
 @keyframes pixel-shift {
