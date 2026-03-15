@@ -3,7 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { fetchMetadata } from "@/lib/metadata";
-import crypto from "crypto";
+import { authenticateApiKey } from "@/lib/auth";
 
 function createMcpServer(userId: string) {
   const supabase = createClient(
@@ -279,15 +279,9 @@ async function authenticateRequest(
 
   // API key auth: tokens prefixed with mcp_sk_ are looked up by hash
   if (token.startsWith("mcp_sk_")) {
-    const keyHash = crypto.createHash("sha256").update(token).digest("hex");
-    const { data, error } = await supabase
-      .from("api_keys")
-      .select("user_id")
-      .eq("key_hash", keyHash)
-      .single();
-
-    if (error || !data) return null;
-    return { userId: data.user_id, token };
+    const userId = await authenticateApiKey(token);
+    if (!userId) return null;
+    return { userId, token };
   }
 
   // Fall back to Supabase session token (browser users)
