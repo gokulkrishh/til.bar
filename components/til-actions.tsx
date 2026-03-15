@@ -12,14 +12,24 @@ import { buttonVariants } from "./ui/button";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { clickSoftSound } from "@/sounds/click-soft";
 import { useCaptureContext } from "@/context/capture-provider";
+import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
 import { error007Sound } from "@/sounds/error-007";
 
-export function TilActions({ tilId, url }: { tilId: string; url: string }) {
+export function TilActions({
+  tilId,
+  url,
+  title,
+}: {
+  tilId: string;
+  url: string;
+  title: string | null;
+}) {
   const [open, setOpen] = useState(false);
   const [playClick] = useAppSound(clickSoftSound);
   const [playTrash] = useAppSound(error007Sound);
   const { optimisticDelete } = useCaptureContext();
+  const { attachTil } = useChatContext();
   const trigger = useAppHaptics();
 
   const handleCopyLink = async () => {
@@ -42,7 +52,12 @@ export function TilActions({ tilId, url }: { tilId: string; url: string }) {
         <MoreVertical />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
-        <DropdownMenuItem onClick={() => {}}>
+        <DropdownMenuItem
+          onClick={() => {
+            attachTil({ id: tilId, url, title });
+            setOpen(false);
+          }}
+        >
           <MessageCircle />
           Ask about this
         </DropdownMenuItem>

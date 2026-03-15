@@ -60,6 +60,8 @@
 
 ## 8. Core Principles
 
+- **Read docs first**: Before implementing with any external library, read the official docs (via WebFetch). Never guess at APIs, type names, or method signatures — especially for AI SDK, Base UI, or any library with major version changes.
+
 - **Simplicity First**: Make every change as simple as possible. Impact minimal code.
 - **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
 - **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.

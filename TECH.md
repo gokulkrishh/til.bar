@@ -8,7 +8,7 @@
 - **Formatting**: Prettier (pre-commit via Husky)
 - **Linting**: ESLint with eslint-config-next
 - **Package manager**: bun
-- **AI**: AI SDK + OpenRouter (chat with URLs as attachments)
+- **AI**: AI SDK + OpenRouter (Gemini 2.5 Flash Lite) for tag generation and chat
 - **MCP**: Remote HTTP MCP server (`@modelcontextprotocol/sdk`) with Supabase OAuth — tools: `get_link`, `save_link`, `update_link`, `delete_link`
 - **Animation**: Motion (framer-motion) for spring physics and fluid interactions
 - **Sound**: soundcn (Web Audio API, inline base64 sounds via shadcn registry)

@@ -5,6 +5,9 @@ import type { TilWithTags } from "@/lib/types";
 
 export default async function Home() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: rawTils } = await supabase
     .from("tils")
@@ -21,7 +24,7 @@ export default async function Home() {
   return (
     <>
       <TilList tils={tils} />
-      <ChatInput />
+      {user && <ChatInput user={user} />}
     </>
   );
 }

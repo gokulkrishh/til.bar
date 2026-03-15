@@ -52,7 +52,6 @@ export function McpTab() {
         toast.error(result.error);
         return;
       }
-      console.log(result);
       if (result.key) {
         setNewKey(result.key);
         setKeyExists(true);
