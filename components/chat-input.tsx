@@ -8,7 +8,7 @@ import {
   type ClipboardEvent,
   useMemo,
 } from "react";
-import { ArrowUp, Link, X } from "lucide-react";
+import { ArrowUp, LinkIcon, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCaptureContext } from "@/context/capture-provider";
@@ -20,8 +20,15 @@ import { Input } from "./ui/input";
 import { z } from "zod";
 import { ChatMessage, ChatMessageLoading } from "./chat-message";
 import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
 
 const urlSchema = z.url().check(z.startsWith("http"));
+
+const suggestionPrompts = [
+  "Summarize this link",
+  "What are the key takeaways?",
+  "Explain like I'm new to this",
+];
 
 export function ChatInput({ user }: { user: User }) {
   const [input, setInput] = useState("");
@@ -117,7 +124,7 @@ export function ChatInput({ user }: { user: User }) {
         {/* Chat messages */}
         {isChatMode && messages.length > 0 && (
           <div className="relative">
-            <div className="relative max-h-[60vh] border shadow overflow-y-auto mb-3 flex flex-col gap-3 p-4 rounded-md">
+            <div className="relative max-h-[60vh] border shadow overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-lg">
               {messages.map((message) => (
                 <ChatMessage
                   key={message.id}
@@ -143,7 +150,7 @@ export function ChatInput({ user }: { user: User }) {
                 setInput("");
               }}
               size="xs"
-              className="rounded-full absolute -bottom-6 right-1.5 flex items-center justify-center"
+              className="rounded-full absolute -bottom-6.5 right-1.5 flex items-center justify-center"
               variant="secondary"
             >
               <X className="size-3" aria-hidden="true" />
@@ -152,17 +159,52 @@ export function ChatInput({ user }: { user: User }) {
           </div>
         )}
 
+        {/* Suggestion prompts — show before first message */}
+        {isChatMode && messages.length === 0 && (
+          <div className="flex flex-col items-start gap-2 mb-2 flex-wrap">
+            {suggestionPrompts.map((prompt) => (
+              <Badge
+                key={prompt}
+                variant="outline"
+                onClick={() => {
+                  send(
+                    { text: prompt },
+                    {
+                      body: {
+                        tils: attachedTils.map((t) => ({
+                          url: t.url,
+                          title: t.title,
+                          description: t.description,
+                        })),
+                      },
+                    },
+                  );
+                }}
+                className="cursor-pointer"
+              >
+                {prompt}
+              </Badge>
+            ))}
+          </div>
+        )}
+
         {/* Attached TIL chips */}
         {isChatMode && (
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <div className="flex pl-1.5 items-center gap-2 mb-2.5 flex-wrap">
             {attachedTils.map((til) => (
               <Badge
                 key={til.id}
                 variant="secondary"
-                className="gap-1 max-w-full"
+                className="gap-1 flex flex-row"
               >
-                <Link className="size-3 mr-1" />
-                <span className="truncate">{til.title ?? til.url}</span>
+                <LinkIcon className="size-2.75 mr-0.75" />
+                <Link
+                  className="hover:underline underline-offset-2"
+                  href={til.url}
+                  target="_blank"
+                >
+                  <span className="truncate">{til.title ?? til.url}</span>
+                </Link>
                 <button
                   onClick={() => {
                     removeTil(til.id);

@@ -48,9 +48,8 @@ export function ChatMessage({
         </Avatar>
       )}
       <div
-        className={cn("rounded-2xl px-3 w-full", {
-          "bg-primary text-primary-foreground py-2": isUser,
-          "bg-muted prose prose-sm dark:prose-invert": !isUser,
+        className={cn("rounded-2xl bg-muted py-2 px-3 w-full", {
+          "bg-primary text-primary-foreground": isUser,
         })}
       >
         {message.parts.map((part, i) => {
@@ -71,7 +70,7 @@ export function ChatMessage({
 export function ChatMessageLoading() {
   return (
     <div className="text-sm text-foreground flex gap-2 self-start max-w-[85%]">
-      <Avatar className="size-6 shrink-0 bg-black">
+      <Avatar className="size-6 shrink-0 bg-black animate-spin">
         <AvatarImage src="/logo.svg" alt="AI logo" />
         <AvatarFallback className="font-bold text-xs text-white">
           AI
