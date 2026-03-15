@@ -1,23 +1,20 @@
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const redirectUri = searchParams.get("redirect_uri");
-  const state = searchParams.get("state");
 
-  if (!redirectUri || !state) {
+  if (!redirectUri) {
     return NextResponse.json(
-      { error: "Missing redirect_uri or state" },
+      { error: "Missing redirect_uri" },
       { status: 400 },
     );
   }
 
-  // Build Supabase OAuth URL directly
-  // redirectTo tells Supabase where to send the code after Google auth
-  const callbackUrl = `${origin}/auth/extension/callback?redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`;
-
+  // Supabase implicit flow: redirect_to is the extension's chromiumapp.org URL
+  // After Google sign-in, Supabase redirects directly to this URL with tokens in the hash
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const oauthUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(callbackUrl)}`;
+  const oauthUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUri)}`;
 
   return NextResponse.redirect(oauthUrl);
 }

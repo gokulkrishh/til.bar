@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { authenticateApiKey } from "@/lib/auth";
 import { fetchMetadata } from "@/lib/metadata";
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
   }
 
   // Background: fetch metadata, enhance with AI, generate tags
-  (async () => {
+  after(async () => {
     try {
       let { title, description } = await fetchMetadata(url);
 
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
     } catch (err) {
       console.error("[api/save] Background work failed:", err);
     }
-  })();
+  });
 
   return Response.json(
     { id: data.id, url: data.url },
