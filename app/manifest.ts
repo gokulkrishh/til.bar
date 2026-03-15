@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default function manifest(): MetadataRoute.Manifest & {
+  share_target: Record<string, unknown>;
+} {
   return {
     name: "til.bar",
     short_name: "til.bar",
@@ -21,5 +23,14 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
       },
     ],
+    share_target: {
+      action: "/",
+      method: "GET",
+      params: {
+        url: "shared_url",
+        text: "shared_text",
+        title: "shared_title",
+      },
+    },
   };
 }

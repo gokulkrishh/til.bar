@@ -16,7 +16,7 @@ Paste a URL → it's saved with a timestamp → AI tags it → appears in this w
 
 ## Capture
 
-Pasting anywhere on the page triggers capture. Only URLs are supported for now. The page title and description are auto-fetched and saved alongside the URL. If the fetch fails, the URL is saved as-is. Every paste creates a new entry. No edit mode after capture.
+Pasting anywhere on the page triggers capture in desktop. On mobile, a fixed input at the bottom provides a tap target for pasting or typing URLs. Only URLs are supported for now. The page title and description are auto-fetched in the background after the response is sent. If the fetch fails, the URL is saved as-is. Every paste creates a new entry. No edit mode after capture. Capture is optimistic — a pending item appears immediately while the server action runs. A drop sound and success haptic fire on capture.
 
 ---
 
@@ -28,7 +28,7 @@ Pasting anywhere on the page triggers capture. Only URLs are supported for now. 
 
 ## Search
 
-🚧 **Planned.** Full-text search across saved links (title, description, URL). Will also be exposed as a `search_links` MCP tool.
+🚧 **Planned (in-app UI).** Full-text search across saved links (title, description, URL). Already available as the `search_links` MCP tool.
 
 ---
 
@@ -46,7 +46,7 @@ Both views are filterable by tag.
 
 **Account** — Google account name, email, and avatar.
 
-**Appearance** — Theme toggle (system, light, dark). Sound effects toggle (plays audio on actions like delete, copy, capture).
+**Appearance** — Theme toggle (system, light, dark). Sound effects toggle (drop on capture, click on copy, error on delete). Haptic feedback toggle (success on capture, light on copy/theme change, heavy on delete). Both default to on.
 
 **MCP** — Setup instructions, server URL with copy button, API key management (create/regenerate), and list of available tools.
 
@@ -56,13 +56,13 @@ Both views are filterable by tag.
 
 ## TIL Item Context Menu
 
-Each TIL item has a context menu with: **Delete**, **Add to Chat**, **Refresh metadata**, and **Copy URL**.
+Each TIL item has a context menu with: **Ask about this** (🚧 not yet wired up), **Copy link**, and **Delete**.
 
 ---
 
 ## AI Chat
 
-Chat with saved URLs as attachments (added via "Add to Chat" in the context menu). Useful for summarising, asking questions, or extracting key points. Uses AI SDK with OpenRouter for model access.
+🚧 **Planned.** Chat with saved URLs as context. Useful for summarising, asking questions, or extracting key points. Currently only a placeholder input is rendered.
 
 ---
 
@@ -76,16 +76,16 @@ Remote HTTP MCP server at `https://til.bar/api/mcp` for connecting AI assistants
 
 - `save_link` — Save a URL with auto-fetched metadata
 - `list_links` — List all saved links
+- `search_links` — Search links by keyword
 - `get_link` — Get a saved link by ID
 - `update_link` — Update title or description
 - `delete_link` — Delete a saved link
-- `search_links` — 🚧 Planned. Search across saved links
 
 ---
 
 ## PWA
 
-Installable as a Progressive Web App. Service worker caches assets (cache-first) and navigation (network-first). Web manifest with standalone display mode.
+Installable as a Progressive Web App. Service worker caches assets (cache-first) and navigation (network-first). Web manifest with standalone display mode. Supports the Web Share Target API — when installed, users can share URLs from other apps directly into til.bar.
 
 ---
 

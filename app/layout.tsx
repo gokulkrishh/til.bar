@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/theme-provider";
 import { SWRegister } from "@/components/sw-register";
@@ -9,6 +10,8 @@ import { CaptureProvider } from "@/context/capture-provider";
 import { SoundProvider } from "@/context/sound-provider";
 import { HapticsProvider } from "@/context/haptics-provider";
 import { Header } from "@/components/header";
+import { ChatInput } from "@/components/chat-input";
+import { ShareTargetHandler } from "@/components/share-target-handler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -112,6 +115,9 @@ export default function RootLayout({
                     <Header />
                     {children}
                   </div>
+                  <Suspense>
+                    <ShareTargetHandler />
+                  </Suspense>
                 </CaptureProvider>
               </TooltipProvider>
             </HapticsProvider>
