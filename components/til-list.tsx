@@ -5,7 +5,7 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { TilItem } from "@/components/til-item";
 import { TilItemSkeleton } from "@/components/til-item-skeleton";
 import { EmptyState } from "@/components/empty-state";
-import { usePendingTils } from "@/context/capture-provider";
+import { usePendingTils, useCaptureContext } from "@/context/capture-provider";
 import { useSearch } from "@/context/search-provider";
 import type { TilWithTags } from "@/lib/types";
 import { ChevronDown, X } from "lucide-react";
@@ -73,9 +73,11 @@ function TilGroup({
   pendingItems?: PendingItem[];
 }) {
   const [showAll, setShowAll] = useState(false);
-  const totalCount = tils.length + pendingItems.length;
-  const hasMore = tils.length > DEFAULT_VISIBLE;
-  const visible = showAll ? tils : tils.slice(0, DEFAULT_VISIBLE);
+  const { deletedIds } = useCaptureContext();
+  const activeTils = tils.filter((til) => !deletedIds.has(til.id));
+  const totalCount = activeTils.length + pendingItems.length;
+  const hasMore = activeTils.length > DEFAULT_VISIBLE;
+  const visible = showAll ? activeTils : activeTils.slice(0, DEFAULT_VISIBLE);
 
   return (
     <motion.section layout="position" transition={{ duration: 0.2 }}>

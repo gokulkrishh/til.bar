@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import type { TilWithTags } from "@/lib/types";
 import Link from "next/link";
 import { TilActions } from "@/components/til-actions";
-import { useCaptureContext } from "@/context/capture-provider";
 import { refreshMetadata } from "@/app/actions/tils";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -35,13 +34,8 @@ function formatDate(dateStr: string) {
 export function TilItem({ til }: { til: TilWithTags }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const { deletedIds } = useCaptureContext();
   const [play] = useSound(clickSoftSound);
   const faviconUrl = getFaviconUrl(til.url);
-
-  if (deletedIds.has(til.id)) {
-    return null;
-  }
 
   const handleRefresh = () => {
     startTransition(async () => {
