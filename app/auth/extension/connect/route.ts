@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -13,21 +12,12 @@ export async function GET(request: Request) {
     );
   }
 
-  const supabase = await createClient();
+  // Build Supabase OAuth URL directly
+  // redirectTo tells Supabase where to send the code after Google auth
+  const callbackUrl = `${origin}/auth/extension/callback?redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`;
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${origin}/auth/extension/callback?redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}`,
-    },
-  });
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const oauthUrl = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(callbackUrl)}`;
 
-  if (error || !data.url) {
-    return NextResponse.json(
-      { error: "Failed to initiate sign-in" },
-      { status: 500 },
-    );
-  }
-
-  return NextResponse.redirect(data.url);
+  return NextResponse.redirect(oauthUrl);
 }

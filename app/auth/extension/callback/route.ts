@@ -8,9 +8,9 @@ export async function GET(request: Request) {
   const state = searchParams.get("state");
 
   if (!code || !redirectUri || !state) {
-    return NextResponse.json(
-      { error: "Missing code, redirect_uri, or state" },
-      { status: 400 },
+    const errorRedirect = redirectUri || "https://til.bar";
+    return NextResponse.redirect(
+      `${errorRedirect}?error=missing_params&state=${encodeURIComponent(state || "")}`,
     );
   }
 
