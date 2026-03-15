@@ -36,19 +36,26 @@ export function TilItem({ til }: { til: TilWithTags }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { deletedIds } = useCaptureContext();
-  const faviconUrl = getFaviconUrl(til.url);
   const [play] = useSound(clickSoftSound);
+  const faviconUrl = getFaviconUrl(til.url);
 
-  if (deletedIds.has(til.id)) return null;
+  if (deletedIds.has(til.id)) {
+    return null;
+  }
 
   const handleRefresh = () => {
     startTransition(async () => {
       play();
-      const result = await refreshMetadata(til.id, til.url);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Metadata refreshed");
+      try {
+        const { error } = await refreshMetadata(til.id, til.url);
+        if (error) {
+          toast.error(error);
+        } else {
+          toast.success("Metadata refreshed");
+        }
+      } catch {
+        toast.error("An error occurred.");
+      } finally {
         router.refresh();
       }
     });

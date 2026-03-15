@@ -56,6 +56,7 @@ export function TilActions({
       <DropdownMenuContent className="w-40" align="end">
         <DropdownMenuItem
           onClick={() => {
+            playClick();
             attachTil({ id: tilId, url, title });
             setOpen(false);
           }}
