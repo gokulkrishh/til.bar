@@ -8,6 +8,7 @@ import {
   type ClipboardEvent,
   useMemo,
 } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { ArrowUp, LinkIcon, Maximize2, Minus, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -215,35 +216,66 @@ export function ChatInput({ user }: { user: User }) {
         )}
 
         {/* Suggestion prompts — show before first message */}
-        {isChatMode && !minimized && messages.length === 0 && (
-          <div className="flex flex-col items-end gap-2 mb-2 flex-wrap">
-            {suggestionPrompts.map((prompt) => (
-              <Badge
-                size="lg"
-                key={prompt}
-                variant="outline"
-                onClick={() => {
-                  send(
-                    { text: prompt },
-                    {
-                      body: {
-                        tils: attachedTils.map((t) => ({
-                          url: t.url,
-                          title: t.title,
-                          description: t.description,
-                        })),
-                      },
+        <AnimatePresence>
+          {isChatMode && !minimized && messages.length === 0 && (
+            <motion.div
+              key="suggestions"
+              className="flex flex-col items-end gap-2 mb-2 flex-wrap mx-2"
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={{
+                visible: { transition: { staggerChildren: 0.06 } },
+                hidden: {
+                  transition: { staggerChildren: 0, staggerDirection: 0 },
+                },
+              }}
+            >
+              {suggestionPrompts.map((prompt) => (
+                <motion.div
+                  key={prompt}
+                  variants={{
+                    hidden: {
+                      opacity: 0,
+                      y: 0,
+                      filter: "blur(4px)",
+                      transition: { duration: 0, ease: "easeIn" },
                     },
-                  );
-                }}
-                className="cursor-pointer hover:bg-muted"
-              >
-                <SuggestedIcon className="size-2.75 mr-1" />
-                {prompt}
-              </Badge>
-            ))}
-          </div>
-        )}
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      filter: "blur(0px)",
+                      transition: { duration: 0.25, ease: "easeOut" },
+                    },
+                  }}
+                >
+                  <Badge
+                    size="lg"
+                    variant="outline"
+                    onClick={() => {
+                      send(
+                        { text: prompt },
+                        {
+                          body: {
+                            tils: attachedTils.map((t) => ({
+                              url: t.url,
+                              title: t.title,
+                              description: t.description,
+                            })),
+                          },
+                        },
+                      );
+                    }}
+                    className="cursor-pointer hover:bg-muted"
+                  >
+                    <SuggestedIcon className="size-2.75 mr-1" />
+                    {prompt}
+                  </Badge>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Attached TIL chips */}
         {isChatMode && !minimized && (
