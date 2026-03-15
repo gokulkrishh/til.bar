@@ -56,13 +56,13 @@ Both views are filterable by tag.
 
 ## TIL Item Context Menu
 
-Each TIL item has a context menu with: **Ask about this**, **Copy link**, and **Delete**.
+Each TIL item has a context menu with: **Ask AI**, **Copy link**, and **Delete**.
 
 ---
 
 ## AI Chat
 
-Chat with saved URLs as context. Click "Ask about this" on any TIL to attach it, then ask questions. Uses OpenRouter (Gemini 2.5 Flash Lite) for streaming responses. Session-only — no conversation history stored.
+Chat with saved URLs as context. Click "Ask AI" on any TIL to attach it, then ask questions. Uses OpenRouter (Gemini 2.5 Flash Lite) for streaming responses. Session-only — no conversation history stored.
 
 ---
 
