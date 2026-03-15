@@ -59,7 +59,7 @@ export function TilActions({
           }}
         >
           <MessageCircle />
-          Ask about this
+          Ask AI
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
           <Link2 />

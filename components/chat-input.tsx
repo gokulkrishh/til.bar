@@ -8,7 +8,7 @@ import {
   type ClipboardEvent,
   useMemo,
 } from "react";
-import { ArrowUp, LinkIcon, X } from "lucide-react";
+import { ArrowUp, LinkIcon, Maximize2, Minus, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCaptureContext } from "@/context/capture-provider";
@@ -21,6 +21,7 @@ import { z } from "zod";
 import { ChatMessage, ChatMessageLoading } from "./chat-message";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
+import { SuggestedIcon } from "./icons/suggested";
 
 const urlSchema = z.url().check(z.startsWith("http"));
 
@@ -32,6 +33,7 @@ const suggestionPrompts = [
 
 export function ChatInput({ user }: { user: User }) {
   const [input, setInput] = useState("");
+  const [minimized, setMinimized] = useState(false);
   const { capture } = useCaptureContext();
   const { attachedTils, removeTil, clearAttachment } = useChatContext();
 
@@ -121,10 +123,70 @@ export function ChatInput({ user }: { user: User }) {
   return (
     <div className="fixed inset-x-0 bottom-0 bg-background pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex flex-col max-w-2xl px-6 py-2">
+        {/* Minimized bar */}
+        {isChatMode && minimized && (
+          <div className="flex items-center dark:bg-input/30 border-input bg-transparent justify-between rounded-full border px-4 py-1.25 mb-2">
+            <span className="text-sm text-muted-foreground">
+              Chat with {attachedTils.length} link
+              {attachedTils.length > 1 ? "s" : ""}
+              {messages.length > 0 ? ` · ${messages.length} messages` : ""}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full"
+                onClick={() => setMinimized(false)}
+                aria-label="Expand chat"
+              >
+                <Maximize2 className="size-3.5" aria-hidden="true" />
+              </Button>
+              <Button
+                size="icon"
+                className="rounded-full"
+                variant="ghost"
+                onClick={() => {
+                  clearAttachment();
+                  setMessages([]);
+                  setInput("");
+                  setMinimized(false);
+                }}
+                aria-label="Close chat"
+              >
+                <X className="size-3.5" aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Chat messages */}
-        {isChatMode && messages.length > 0 && (
-          <div className="relative">
-            <div className="relative max-h-[60vh] border shadow overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-lg">
+        {isChatMode && !minimized && messages.length > 0 && (
+          <div>
+            <div className="flex items-center justify-end gap-1 mb-2">
+              <Button
+                onClick={() => setMinimized(true)}
+                size="xs"
+                className="rounded-full"
+                variant="secondary"
+              >
+                <Minus className="size-3" aria-hidden="true" />
+                Minimize
+              </Button>
+              <Button
+                onClick={() => {
+                  clearAttachment();
+                  setMessages([]);
+                  setInput("");
+                }}
+                size="xs"
+                className="rounded-full"
+                variant="secondary"
+              >
+                <X className="size-3" aria-hidden="true" />
+                Close
+              </Button>
+            </div>
+            <div className="max-h-[60vh] border shadow overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-lg">
               {messages.map((message) => (
                 <ChatMessage
                   key={message.id}
@@ -143,27 +205,15 @@ export function ChatInput({ user }: { user: User }) {
               )}
               <div ref={messagesEndRef} />
             </div>
-            <Button
-              onClick={() => {
-                clearAttachment();
-                setMessages([]);
-                setInput("");
-              }}
-              size="xs"
-              className="rounded-full absolute -bottom-6.5 right-1.5 flex items-center justify-center"
-              variant="secondary"
-            >
-              <X className="size-3" aria-hidden="true" />
-              Close chat
-            </Button>
           </div>
         )}
 
         {/* Suggestion prompts — show before first message */}
-        {isChatMode && messages.length === 0 && (
+        {isChatMode && !minimized && messages.length === 0 && (
           <div className="flex flex-col items-start gap-2 mb-2 flex-wrap">
             {suggestionPrompts.map((prompt) => (
               <Badge
+                size="lg"
                 key={prompt}
                 variant="outline"
                 onClick={() => {
@@ -180,8 +230,9 @@ export function ChatInput({ user }: { user: User }) {
                     },
                   );
                 }}
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-muted"
               >
+                <SuggestedIcon className="size-2.75 mr-1" />
                 {prompt}
               </Badge>
             ))}
@@ -189,7 +240,7 @@ export function ChatInput({ user }: { user: User }) {
         )}
 
         {/* Attached TIL chips */}
-        {isChatMode && (
+        {isChatMode && !minimized && (
           <div className="flex pl-1.5 items-center gap-2 mb-2.5 flex-wrap">
             {attachedTils.map((til) => (
               <Badge
@@ -222,40 +273,44 @@ export function ChatInput({ user }: { user: User }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="relative">
-          <Input
-            ref={inputRef}
-            type="text"
-            name={isChatMode ? "message" : "url"}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onPaste={handlePaste}
-            placeholder={
-              isChatMode
-                ? "Ask a question about these links\u2026"
-                : "Paste a link"
-            }
-            aria-label={isChatMode ? "Chat message" : "URL to save"}
-            autoComplete="off"
-            spellCheck={false}
-            className="h-12 w-full rounded-full border bg-transparent px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-          <Button
-            type="submit"
-            disabled={isLoading}
-            aria-label={isChatMode ? "Send message" : "Save link"}
-            className={cn(
-              "absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full",
-            )}
-          >
-            <ArrowUp aria-hidden="true" />
-          </Button>
-        </form>
-        <p className="text-center text-xs text-muted-foreground mt-2">
-          {isChatMode
-            ? "AI can make mistakes. Please verify the output."
-            : "Paste a URL to save it."}
-        </p>
+        {!(isChatMode && minimized) && (
+          <>
+            <form onSubmit={handleSubmit} className="relative">
+              <Input
+                ref={inputRef}
+                type="text"
+                name={isChatMode ? "message" : "url"}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onPaste={handlePaste}
+                placeholder={
+                  isChatMode
+                    ? "Ask a question about these links..."
+                    : "Paste a link"
+                }
+                aria-label={isChatMode ? "Chat message" : "URL to save"}
+                autoComplete="off"
+                spellCheck={false}
+                className="h-12 w-full rounded-full border bg-transparent px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <Button
+                type="submit"
+                disabled={isLoading}
+                aria-label={isChatMode ? "Send message" : "Save link"}
+                className={cn(
+                  "absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center",
+                )}
+              >
+                <ArrowUp aria-hidden="true" />
+              </Button>
+            </form>
+            <p className="text-center text-xs text-muted-foreground mt-2">
+              {isChatMode
+                ? "AI can make mistakes. Please verify the output."
+                : "⌘V anywhere or Paste a URL to in here."}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
