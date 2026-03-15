@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { TilItem } from "@/components/til-item";
 import { TilItemSkeleton } from "@/components/til-item-skeleton";
 import { EmptyState } from "@/components/empty-state";
@@ -74,21 +75,34 @@ function TilGroup({
   const visible = showAll ? tils : tils.slice(0, DEFAULT_VISIBLE);
 
   return (
-    <section>
+    <motion.section layout="position" transition={{ duration: 0.2 }}>
       <h2 className="text-sm font-medium text-muted-foreground py-2">
         {label} <span className="text-xs">({totalCount})</span>
       </h2>
-      <ul className="relative flex flex-col gap-1 divide-border/40 divide-y">
-        {pendingItems.map((til) => (
-          <TilItemSkeleton key={til.id} url={til.url} />
-        ))}
-        {visible.map((til) => (
-          <TilItem key={til.id} til={til} />
-        ))}
-        {hasMore && !showAll && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background to-transparent" />
-        )}
-      </ul>
+      <LayoutGroup>
+        <ul className="relative flex flex-col gap-1 divide-border/40 divide-y">
+          {pendingItems.map((til) => (
+            <TilItemSkeleton key={til.id} url={til.url} />
+          ))}
+          <AnimatePresence initial={false}>
+            {visible.map((til) => (
+              <motion.div
+                key={til.id}
+                layout
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <TilItem til={til} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {hasMore && !showAll && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background to-transparent" />
+          )}
+        </ul>
+      </LayoutGroup>
       {hasMore && (
         <button
           onClick={() => setShowAll(!showAll)}
@@ -103,7 +117,7 @@ function TilGroup({
           {showAll ? "Show less" : `Show ${tils.length - DEFAULT_VISIBLE} more`}
         </button>
       )}
-    </section>
+    </motion.section>
   );
 }
 
@@ -236,24 +250,40 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
           setActiveTags(new Set());
         }}
       />
-      {groups.map((group) => (
-        <TilGroup
-          key={group.label}
-          label={group.label}
-          tils={group.tils}
-          pendingItems={
-            group.label === "Today" && !hasAnyFilter ? pendingTils : []
-          }
-        />
-      ))}
+      <AnimatePresence mode="popLayout" initial={false}>
+        {groups.map((group) => (
+          <motion.div
+            key={group.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            <TilGroup
+              label={group.label}
+              tils={group.tils}
+              pendingItems={
+                group.label === "Today" && !hasAnyFilter ? pendingTils : []
+              }
+            />
+          </motion.div>
+        ))}
 
-      {groups.length === 0 && hasAnyFilter && (
-        <div className="flex flex-col h-52 items-center justify-center">
-          <p className="text-muted-foreground text-sm text-center">
-            No results found.
-          </p>
-        </div>
-      )}
+        {groups.length === 0 && hasAnyFilter && (
+          <motion.div
+            key="no-results"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex flex-col h-52 items-center justify-center"
+          >
+            <p className="text-muted-foreground text-sm text-center">
+              No results found.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

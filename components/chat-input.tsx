@@ -300,10 +300,14 @@ export function ChatInput({ user }: { user: User }) {
                 <ArrowUp aria-hidden="true" />
               </Button>
             </form>
-            <p className="text-center text-xs text-muted-foreground mt-2">
+            <p
+              className={cn("text-center text-xs text-muted-foreground mt-2", {
+                "max-sm:opacity-0 max-sm:mt-0": !isChatMode,
+              })}
+            >
               {isChatMode
                 ? "AI can make mistakes. Verify the output."
-                : "⌘V anywhere to save a link"}
+                : "Copy and Paste anywhere to save a link."}
             </p>
           </>
         )}
