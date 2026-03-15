@@ -26,9 +26,9 @@ import { SuggestedIcon } from "./icons/suggested";
 const urlSchema = z.url().check(z.startsWith("http"));
 
 const suggestionPrompts = [
-  "Summarize this link",
-  "What are the key takeaways?",
-  "Explain like I'm new to this",
+  "Summarize",
+  "Key takeaways",
+  "Explain this, I'm new to this",
 ];
 
 export function ChatInput({ user }: { user: User }) {
@@ -210,7 +210,7 @@ export function ChatInput({ user }: { user: User }) {
 
         {/* Suggestion prompts — show before first message */}
         {isChatMode && !minimized && messages.length === 0 && (
-          <div className="flex flex-col items-start gap-2 mb-2 flex-wrap">
+          <div className="flex flex-col items-end gap-2 mb-2 flex-wrap">
             {suggestionPrompts.map((prompt) => (
               <Badge
                 size="lg"
@@ -285,7 +285,9 @@ export function ChatInput({ user }: { user: User }) {
                 onPaste={handlePaste}
                 placeholder={
                   isChatMode
-                    ? "Ask a question about these links..."
+                    ? attachedTils.length > 1
+                      ? "Ask anything about these links..."
+                      : "Ask anything about this link..."
                     : "Paste a link"
                 }
                 aria-label={isChatMode ? "Chat message" : "URL to save"}
@@ -306,8 +308,8 @@ export function ChatInput({ user }: { user: User }) {
             </form>
             <p className="text-center text-xs text-muted-foreground mt-2">
               {isChatMode
-                ? "AI can make mistakes. Please verify the output."
-                : "⌘V anywhere or Paste a URL to in here."}
+                ? "AI can make mistakes. Verify the output."
+                : "⌘V anywhere to save a link"}
             </p>
           </>
         )}
