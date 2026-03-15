@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchMetadata } from "@/lib/metadata";
 import { generateTags } from "@/lib/ai-tags";
+import { generateMetadata } from "@/lib/ai-metadata";
 
 function extractUrl(text: string): string | null {
   const urlRegex = /https?:\/\/[^\s]+/;
@@ -45,15 +46,32 @@ export async function createTil(input: string) {
   // Fetch metadata and generate tags in the background after response is sent
   after(async () => {
     try {
-      const { title, description } = await fetchMetadata(url);
+      const admin = createAdminClient();
+      let { title, description } = await fetchMetadata(url);
+
       if (title || description) {
-        const admin = createAdminClient();
         await admin
           .from("tils")
           .update({ title, description })
           .eq("id", data.id);
       }
-      await generateTags({ ...data, title, description });
+
+      // Generate better metadata via AI if needed
+      after(async () => {
+        const aiMeta = await generateMetadata(url, title, description);
+
+        if (aiMeta) {
+          title = aiMeta.title;
+          description = aiMeta.description;
+          await admin
+            .from("tils")
+            .update({ title, description })
+            .eq("id", data.id);
+        }
+
+        await generateTags({ ...data, title, description });
+        revalidatePath("/");
+      });
     } catch (err) {
       console.error("[after] Background work failed:", err);
     } finally {
@@ -93,7 +111,15 @@ export async function refreshMetadata(id: string, url: string) {
     return { error: "Sign in to continue" };
   }
 
-  const { title, description } = await fetchMetadata(url);
+  let { title, description } = await fetchMetadata(url);
+
+  // Generate better metadata via AI if needed
+  const aiMeta = await generateMetadata(url, title, description);
+
+  if (aiMeta) {
+    title = aiMeta.title;
+    description = aiMeta.description;
+  }
 
   const { data: til, error } = await supabase
     .from("tils")

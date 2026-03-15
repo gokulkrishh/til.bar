@@ -14,6 +14,7 @@ import { clickSoftSound } from "@/sounds/click-soft";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
+import { cn } from "@/lib/utils";
 
 export function TilActions({
   tilId,
@@ -45,7 +46,10 @@ export function TilActions({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
-        className={buttonVariants({ variant: "ghost", size: "icon" })}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "icon" }),
+          "rounded-full",
+        )}
       >
         <MoreVertical />
       </DropdownMenuTrigger>
