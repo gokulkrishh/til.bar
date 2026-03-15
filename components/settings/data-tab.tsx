@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { exportTils, deleteAccount } from "@/app/actions/account";
 import { toast } from "sonner";
 import { Download, Trash2 } from "lucide-react";
+import { Spinner } from "../ui/spinner";
 
 export function DataTab({
   onOpenChange,
@@ -33,7 +34,7 @@ export function DataTab({
       a.download = `til-bar-export-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Download started");
+      toast.success("Download completed");
     });
   };
 
@@ -69,7 +70,7 @@ export function DataTab({
           </p>
         </div>
         <Button variant="outline" onClick={handleExport} disabled={isPending}>
-          <Download />
+          {isPending ? <Spinner /> : <Download />}
           Export
         </Button>
       </div>
