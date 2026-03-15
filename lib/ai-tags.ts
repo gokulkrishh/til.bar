@@ -39,6 +39,7 @@ export async function generateTags(til: Til) {
 Rules:
 - Prefer reusing existing tags over creating new ones.
 - Tags should be specific and descriptive (e.g. "react", "css", "rust", "ai", "design").
+- If title or description contains clear category hints, use them (e.g. "React tutorial" -> "react").
 - Maximum 1 tags per link, only in exceptional cases use 1 extra tag.
 - Tags must be lowercase, no spaces (use hyphens for multi-word tags).${existingList}`,
       prompt: parts.join("\n"),
