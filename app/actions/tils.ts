@@ -3,6 +3,7 @@
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchMetadata } from "@/lib/metadata";
 import { generateTags } from "@/lib/ai-tags";
 
@@ -43,16 +44,20 @@ export async function createTil(input: string) {
 
   // Fetch metadata and generate tags in the background after response is sent
   after(async () => {
-    const { title, description } = await fetchMetadata(url);
-    if (title || description) {
-      const supabase = await createClient();
-      await supabase
-        .from("tils")
-        .update({ title, description })
-        .eq("id", data.id);
+    try {
+      const { title, description } = await fetchMetadata(url);
+      if (title || description) {
+        const admin = createAdminClient();
+        await admin
+          .from("tils")
+          .update({ title, description })
+          .eq("id", data.id);
+      }
+      await generateTags({ ...data, title, description });
+      revalidatePath("/");
+    } catch (err) {
+      console.error("[after] Background work failed:", err);
     }
-    await generateTags(data.id, url, title, description, user.id);
-    revalidatePath("/");
   });
 
   return { data };
@@ -89,13 +94,25 @@ export async function refreshMetadata(id: string, url: string) {
 
   const { title, description } = await fetchMetadata(url);
 
-  const { error } = await supabase
+  const { data: til, error } = await supabase
     .from("tils")
     .update({ title, description })
-    .eq("id", id);
+    .eq("id", id)
+    .select()
+    .single();
 
-  if (error) {
+  if (error || !til) {
     return { error: "Something went wrong" };
+  }
+
+  // Generate tags if this TIL has none
+  const { count } = await supabase
+    .from("til_tags")
+    .select("*", { count: "exact", head: true })
+    .eq("til_id", id);
+
+  if (!count) {
+    after(() => generateTags(til));
   }
 
   return { success: true };
