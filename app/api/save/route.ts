@@ -4,6 +4,16 @@ import { fetchMetadata } from "@/lib/metadata";
 import { generateMetadata } from "@/lib/ai-metadata";
 import { generateTags } from "@/lib/ai-tags";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}
+
 async function getAuthenticatedUserId(req: Request): Promise<string | null> {
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
@@ -34,20 +44,29 @@ export async function POST(req: Request) {
   const userId = await getAuthenticatedUserId(req);
 
   if (!userId) {
-    return Response.json({ error: "Not authenticated" }, { status: 401 });
+    return Response.json(
+      { error: "Not authenticated" },
+      { status: 401, headers: corsHeaders },
+    );
   }
 
   let body: { url?: string };
   try {
     body = await req.json();
   } catch {
-    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+    return Response.json(
+      { error: "Invalid JSON body" },
+      { status: 400, headers: corsHeaders },
+    );
   }
 
   const url = body.url;
 
   if (!url || !/^https?:\/\/.+/.test(url)) {
-    return Response.json({ error: "Invalid URL" }, { status: 400 });
+    return Response.json(
+      { error: "Invalid URL" },
+      { status: 400, headers: corsHeaders },
+    );
   }
 
   const supabase = createClient(
@@ -62,7 +81,10 @@ export async function POST(req: Request) {
     .single();
 
   if (error) {
-    return Response.json({ error: "Failed to save link" }, { status: 500 });
+    return Response.json(
+      { error: "Failed to save link" },
+      { status: 500, headers: corsHeaders },
+    );
   }
 
   // Background: fetch metadata, enhance with AI, generate tags
@@ -94,5 +116,8 @@ export async function POST(req: Request) {
     }
   })();
 
-  return Response.json({ id: data.id, url: data.url });
+  return Response.json(
+    { id: data.id, url: data.url },
+    { headers: corsHeaders },
+  );
 }
