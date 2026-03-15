@@ -29,7 +29,7 @@ export function ChatMessage({
 
   return (
     <div
-      className={cn("text-sm flex gap-2 max-w-[85%]", {
+      className={cn("text-sm flex gap-2 md:max-w-[85%]", {
         "self-end flex-row-reverse text-foreground": isUser,
         "self-start text-foreground": !isUser,
       })}
@@ -69,7 +69,7 @@ export function ChatMessage({
 
 export function ChatMessageLoading() {
   return (
-    <div className="text-sm text-foreground flex gap-2 self-start max-w-[85%]">
+    <div className="text-sm text-foreground flex gap-2 self-start md:max-w-[85%]">
       <Avatar className="size-6 shrink-0 bg-black animate-spin">
         <AvatarImage src="/logo.svg" alt="AI logo" />
         <AvatarFallback className="font-bold text-xs text-white">
