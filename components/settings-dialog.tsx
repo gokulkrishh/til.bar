@@ -10,7 +10,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AccountTab } from "@/components/settings/account-tab";
 import { AppearanceTab } from "@/components/settings/appearance-tab";
-import { McpTab } from "@/components/settings/mcp-tab";
+import { IntegrationsTab } from "@/components/settings/integrations-tab";
 import { DataTab } from "@/components/settings/data-tab";
 
 export function SettingsDialog({
@@ -32,7 +32,7 @@ export function SettingsDialog({
           <TabsList variant="line">
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
-            <TabsTrigger value="mcp">MCP</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="data">Data control</TabsTrigger>
           </TabsList>
           <TabsContent value="account">
@@ -41,8 +41,8 @@ export function SettingsDialog({
           <TabsContent value="appearance">
             <AppearanceTab />
           </TabsContent>
-          <TabsContent value="mcp">
-            <McpTab />
+          <TabsContent value="integrations">
+            <IntegrationsTab />
           </TabsContent>
           <TabsContent value="data">
             <DataTab onOpenChange={onOpenChange} />
