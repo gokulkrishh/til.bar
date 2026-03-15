@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Globe, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Til } from "@/lib/types";
+import type { TilWithTags } from "@/lib/types";
 import Link from "next/link";
 import { TilActions } from "@/components/til-actions";
 import { useCaptureContext } from "@/context/capture-provider";
@@ -30,7 +30,7 @@ function formatDate(dateStr: string) {
   return dateFormatter.format(new Date(dateStr));
 }
 
-export function TilItem({ til }: { til: Til }) {
+export function TilItem({ til }: { til: TilWithTags }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { deletedIds } = useCaptureContext();
