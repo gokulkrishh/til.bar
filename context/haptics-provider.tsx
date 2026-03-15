@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useState,
-  useEffect,
-} from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import { useWebHaptics } from "web-haptics/react";
 import type { HapticInput } from "web-haptics";
 
@@ -36,14 +30,11 @@ const STORAGE_KEY = "til-bar-haptics";
 
 export function HapticsProvider({ children }: { children: React.ReactNode }) {
   const { trigger: hapticTrigger } = useWebHaptics();
-  const [hapticsEnabled, setHapticsEnabled] = useState(true);
-
-  useEffect(() => {
+  const [hapticsEnabled, setHapticsEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored !== null) {
-      setHapticsEnabled(stored === "true");
-    }
-  }, []);
+    return stored !== null ? stored === "true" : true;
+  });
 
   const handleSetHapticsEnabled = (enabled: boolean) => {
     setHapticsEnabled(enabled);

@@ -7,20 +7,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ExternalLink,
-  Link2,
-  MessageCircle,
-  MoreVertical,
-  Trash2,
-} from "lucide-react";
+import { Link2, MessageCircle, MoreVertical, Trash2 } from "lucide-react";
 import { buttonVariants } from "./ui/button";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { clickSoftSound } from "@/sounds/click-soft/click-soft";
 import { drop003Sound } from "@/sounds/drop-003/drop-003";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
-import { toast } from "sonner";
 
 export function TilActions({ tilId, url }: { tilId: string; url: string }) {
   const [open, setOpen] = useState(false);

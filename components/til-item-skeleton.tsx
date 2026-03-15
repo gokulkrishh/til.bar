@@ -1,4 +1,3 @@
-import { Loader2 } from "lucide-react";
 import { Spinner } from "./ui/spinner";
 
 export function TilItemSkeleton({ url }: { url: string }) {

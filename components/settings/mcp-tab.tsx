@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { generateApiKey, hasApiKey } from "@/app/actions/account";
 import { toast } from "sonner";
@@ -23,20 +23,21 @@ export function McpTab() {
   const [playClick] = useAppSound(clickSoftSound);
   const trigger = useAppHaptics();
 
-  const checkApiKey = useCallback(async () => {
-    setKeyLoading(true);
-    const result = await hasApiKey();
-    if (!result.error) {
-      setKeyExists(result.exists ?? false);
-    }
-    setKeyLoading(false);
-  }, []);
-
   useEffect(() => {
-    checkApiKey();
-    setNewKey(null);
-    setConfirmRegenerate(false);
-  }, [checkApiKey]);
+    let cancelled = false;
+    async function init() {
+      setKeyLoading(true);
+      const result = await hasApiKey();
+      if (!cancelled && !result.error) {
+        setKeyExists(result.exists ?? false);
+      }
+      if (!cancelled) setKeyLoading(false);
+    }
+    init();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleGenerateKey = () => {
     if (keyExists && !confirmRegenerate) {
@@ -82,27 +83,27 @@ export function McpTab() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center min-h-8 justify-between">
           <h3 className="text-sm font-semibold">API Key</h3>
-          {keyLoading ? (
-            <Spinner className="size-4" />
-          ) : (
-            <Button
-              variant={confirmRegenerate ? "destructive" : "outline"}
-              size="sm"
-              disabled={isPending}
-              onClick={handleGenerateKey}
-            >
-              {confirmRegenerate ? (
-                "Revoke and create new?"
-              ) : keyExists ? (
-                <>
-                  <RefreshCw className="size-3.5" />
-                  Regenerate
-                </>
-              ) : (
-                "Create API key"
-              )}
-            </Button>
-          )}
+          <Button
+            variant={confirmRegenerate ? "destructive" : "outline"}
+            size="sm"
+            disabled={isPending || keyLoading}
+            onClick={handleGenerateKey}
+          >
+            {isPending ? (
+              <>
+                <Spinner /> Regenerate
+              </>
+            ) : confirmRegenerate ? (
+              "Revoke and create new?"
+            ) : keyExists || keyLoading ? (
+              <>
+                <RefreshCw />
+                Regenerate
+              </>
+            ) : (
+              "Create API key"
+            )}
+          </Button>
         </div>
         {!newKey && (
           <div className="flex w-full justify-between items-center gap-2 rounded-md bg-muted px-3 py-2.5">
