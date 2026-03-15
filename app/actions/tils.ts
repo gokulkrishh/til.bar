@@ -3,6 +3,7 @@
 import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { fetchMetadata } from "@/lib/metadata";
+import { generateTags } from "@/lib/ai-tags";
 
 function extractUrl(text: string): string | null {
   const urlRegex = /https?:\/\/[^\s]+/;
@@ -39,7 +40,7 @@ export async function createTil(input: string) {
     return { error: "Something went wrong" };
   }
 
-  // Fetch metadata in the background after response is sent
+  // Fetch metadata and generate tags in the background after response is sent
   after(async () => {
     const { title, description } = await fetchMetadata(url);
     if (title || description) {
@@ -49,6 +50,8 @@ export async function createTil(input: string) {
         .update({ title, description })
         .eq("id", data.id);
     }
+
+    await generateTags(data.id, url, title, description, user.id);
   });
 
   return { data };

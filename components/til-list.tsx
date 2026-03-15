@@ -1,25 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { TilItem } from "@/components/til-item";
 import { TilItemSkeleton } from "@/components/til-item-skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { usePendingTils } from "@/context/capture-provider";
-import type { Til } from "@/lib/types";
-import { ChevronDown } from "lucide-react";
+import type { TilWithTags } from "@/lib/types";
+import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 const DEFAULT_VISIBLE = 5;
 
-function groupByRelativeDay(tils: Til[]) {
+function groupByRelativeDay(tils: TilWithTags[]) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
 
-  const groups: { label: string; tils: Til[] }[] = [];
-  const map = new Map<string, Til[]>();
+  const groups: { label: string; tils: TilWithTags[] }[] = [];
+  const map = new Map<string, TilWithTags[]>();
 
   for (const til of tils) {
     const date = new Date(til.created_at);
@@ -61,7 +62,7 @@ function TilGroup({
   pendingItems = [],
 }: {
   label: string;
-  tils: Til[];
+  tils: TilWithTags[];
   pendingItems?: PendingItem[];
 }) {
   const [showAll, setShowAll] = useState(false);
@@ -102,30 +103,110 @@ function TilGroup({
   );
 }
 
-export function TilList({ tils }: { tils: Til[] }) {
+type TagInfo = { id: string; name: string; count: number };
+
+function TagFilter({
+  tags,
+  activeTags,
+  onTagClick,
+  onClear,
+}: {
+  tags: TagInfo[];
+  activeTags: Set<string>;
+  onTagClick: (tagName: string) => void;
+  onClear: () => void;
+}) {
+  if (tags.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      {tags.map((tag) => (
+        <Button
+          className="border-0"
+          size="xs"
+          key={tag.id}
+          onClick={() => onTagClick(tag.name)}
+          variant={activeTags.has(tag.name) ? "secondary" : "outline"}
+        >
+          {tag.name}
+          <span className="ml-1.5 opacity-60 tabular-nums">{tag.count}</span>
+        </Button>
+      ))}
+
+      {activeTags.size > 0 && (
+        <Button size="xs" onClick={onClear} variant="ghost">
+          <X />
+          Clear
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export function TilList({ tils }: { tils: TilWithTags[] }) {
   const pendingTils = usePendingTils();
+  const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
   const hasPending = pendingTils.length > 0;
   const isEmpty = tils.length === 0 && !hasPending;
+
+  const allTags = useMemo(() => {
+    const tags = tils.flatMap((til) => til.tags ?? []);
+    const counts = Map.groupBy(tags, (tag) => tag.name);
+
+    return [...counts.entries()]
+      .map(([name, group]) => ({
+        id: group[0].id,
+        name,
+        count: group.length,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [tils]);
 
   if (isEmpty) {
     return <EmptyState />;
   }
 
-  const groups = groupByRelativeDay(tils);
+  const hasFilter = activeTags.size > 0;
+
+  const filtered = hasFilter
+    ? tils.filter((til) => til.tags?.some((t) => activeTags.has(t.name)))
+    : tils;
+
+  const groups = groupByRelativeDay(filtered);
 
   // If there are pending items but no "Today" group yet, create one
-  if (hasPending && !groups.some((g) => g.label === "Today")) {
+  if (hasPending && !hasFilter && !groups.some((g) => g.label === "Today")) {
     groups.unshift({ label: "Today", tils: [] });
   }
 
+  const toggleTag = (name: string) => {
+    setActiveTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6 py-4 pb-20">
+      <TagFilter
+        tags={allTags}
+        activeTags={activeTags}
+        onTagClick={toggleTag}
+        onClear={() => setActiveTags(new Set())}
+      />
       {groups.map((group) => (
         <TilGroup
           key={group.label}
           label={group.label}
           tils={group.tils}
-          pendingItems={group.label === "Today" ? pendingTils : []}
+          pendingItems={
+            group.label === "Today" && !hasFilter ? pendingTils : []
+          }
         />
       ))}
     </div>

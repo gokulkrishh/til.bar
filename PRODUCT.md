@@ -22,7 +22,7 @@ Pasting anywhere on the page triggers capture in desktop. On mobile, a fixed inp
 
 ## AI Categorisation
 
-🚧 **Planned.** After an entry is saved, the AI assigns up to 2 tags asynchronously — capture never waits on this. Prefers reusing existing tags over creating new ones. Duplicate URLs get a "duplicate" tag. Tags are not editable.
+After an entry is saved, the AI assigns up to 2 tags asynchronously via OpenRouter (Gemini 2.0 Flash) — capture never waits on this. Prefers reusing existing tags over creating new ones. Tags are lowercase, displayed as pills on each item. Tags are not editable.
 
 ---
 
