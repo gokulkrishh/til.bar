@@ -4,11 +4,14 @@ import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSoundSettings } from "@/context/sound-provider";
+import { useHapticsSettings, useAppHaptics } from "@/context/haptics-provider";
 import { Switch } from "@/components/ui/switch";
 
 export function AppearanceTab() {
   const { theme, setTheme } = useTheme();
   const { soundEnabled, setSoundEnabled } = useSoundSettings();
+  const { hapticsEnabled, setHapticsEnabled } = useHapticsSettings();
+  const trigger = useAppHaptics();
 
   return (
     <div className="flex flex-col gap-2 py-4 px-1">
@@ -33,7 +36,10 @@ export function AppearanceTab() {
                 },
               )}
               key={value}
-              onClick={() => setTheme(value)}
+              onClick={() => {
+                setTheme(value);
+                trigger("light");
+              }}
               aria-label={label}
             >
               <Icon className="size-3" />
@@ -50,7 +56,23 @@ export function AppearanceTab() {
         </div>
         <Switch
           checked={soundEnabled}
-          onCheckedChange={() => setSoundEnabled(!soundEnabled)}
+          onCheckedChange={() => {
+            setSoundEnabled(!soundEnabled);
+            trigger("light");
+          }}
+        />
+      </div>
+      <div className="flex items-center justify-between pt-4">
+        <div>
+          <h3 className="text-sm font-semibold">Haptics</h3>
+          <p className="text-xs text-muted-foreground">Vibrate on actions</p>
+        </div>
+        <Switch
+          checked={hapticsEnabled}
+          onCheckedChange={() => {
+            setHapticsEnabled(!hapticsEnabled);
+            trigger("light");
+          }}
         />
       </div>
     </div>

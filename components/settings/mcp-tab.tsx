@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { MCP_TOOLS } from "@/lib/mcp-tools";
 import { clickSoftSound } from "@/sounds/click-soft/click-soft";
 import { useAppSound } from "@/hooks/use-app-sound";
+import { useAppHaptics } from "@/context/haptics-provider";
 
 const MCP_URL = "https://til.bar/api/mcp";
 
@@ -20,6 +21,7 @@ export function McpTab() {
   const [keyLoading, setKeyLoading] = useState(false);
   const [confirmRegenerate, setConfirmRegenerate] = useState(false);
   const [playClick] = useAppSound(clickSoftSound);
+  const trigger = useAppHaptics();
 
   const checkApiKey = useCallback(async () => {
     setKeyLoading(true);
@@ -125,6 +127,7 @@ export function McpTab() {
                 aria-label="Copy API key URL"
                 onClick={async () => {
                   playClick();
+                  trigger("light");
                   await navigator.clipboard.writeText(
                     `${MCP_URL}?api_key=${newKey}`,
                   );

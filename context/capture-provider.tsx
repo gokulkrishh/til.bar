@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { drop003Sound } from "@/sounds/drop-003/drop-003";
+import { useAppHaptics } from "@/context/haptics-provider";
 
 type PendingTil = {
   id: string;
@@ -45,6 +46,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const [pendingTils, setPendingTils] = useState<PendingTil[]>([]);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [playDrop] = useAppSound(drop003Sound);
+  const trigger = useAppHaptics();
 
   const optimisticDelete = useCallback(
     (id: string) => {
@@ -82,6 +84,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
 
       const tempId = crypto.randomUUID();
       playDrop();
+      trigger("success");
       setPendingTils((prev) => [{ id: tempId, url: text }, ...prev]);
       toast.success("Saved");
 
@@ -99,7 +102,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
         }
       });
     },
-    [router, startTransition, playDrop],
+    [router, startTransition, playDrop, trigger],
   );
 
   const handlePaste = useCallback(
