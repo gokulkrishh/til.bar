@@ -66,7 +66,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
             onClick={handleRefresh}
             disabled={isPending}
             aria-label="Refresh metadata"
-            className="relative size-4 shrink-0 group/favicon cursor-pointer"
+            className="relative size-4 shrink-0 group/favicon cursor-pointer hit-area-4"
           >
             {faviconUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
