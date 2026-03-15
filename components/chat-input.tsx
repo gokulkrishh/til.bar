@@ -26,9 +26,9 @@ import { SuggestedIcon } from "./icons/suggested";
 const urlSchema = z.url().check(z.startsWith("http"));
 
 const suggestionPrompts = [
-  "Summarize",
-  "Key takeaways",
-  "Explain this, I'm new to this",
+  "Write me a TIL from this",
+  "Why is this worth remembering?",
+  "Explain this simply",
 ];
 
 export function ChatInput({ user }: { user: User }) {
