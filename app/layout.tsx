@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { CaptureProvider } from "@/context/capture-provider";
 import { SoundProvider } from "@/context/sound-provider";
+import { HapticsProvider } from "@/context/haptics-provider";
 import { Header } from "@/components/header";
 
 const geistSans = Geist({
@@ -104,14 +105,16 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SoundProvider>
-            <TooltipProvider delay={1000}>
-              <CaptureProvider>
-                <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
-                  <Header />
-                  {children}
-                </div>
-              </CaptureProvider>
-            </TooltipProvider>
+            <HapticsProvider>
+              <TooltipProvider delay={1000}>
+                <CaptureProvider>
+                  <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
+                    <Header />
+                    {children}
+                  </div>
+                </CaptureProvider>
+              </TooltipProvider>
+            </HapticsProvider>
           </SoundProvider>
           <Toaster richColors position="top-center" />
           <SWRegister />
