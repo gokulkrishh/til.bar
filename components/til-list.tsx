@@ -8,6 +8,7 @@ import { usePendingTils } from "@/context/capture-provider";
 import type { TilWithTags } from "@/lib/types";
 import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 
 const DEFAULT_VISIBLE = 5;
@@ -126,21 +127,31 @@ function TagFilter({
       className="flex items-center gap-2 flex-wrap"
     >
       {tags.map((tag) => (
-        <Button
-          className="border-0"
-          size="xs"
+        <Badge
           key={tag.id}
+          variant={activeTags.has(tag.name) ? "default" : "outline"}
           onClick={() => onTagClick(tag.name)}
-          variant={activeTags.has(tag.name) ? "secondary" : "outline"}
+          className="cursor-pointer"
         >
           {tag.name}
-          <span className="ml-1.5 opacity-60 tabular-nums">{tag.count}</span>
-        </Button>
+          <span
+            className={cn("ml-1.5 font-mono tabular-nums", {
+              "opacity-60": !activeTags.has(tag.name),
+            })}
+          >
+            {tag.count}
+          </span>
+        </Badge>
       ))}
 
       {activeTags.size > 0 && (
-        <Button size="xs" onClick={onClear} variant="ghost">
-          <X aria-hidden="true" />
+        <Button
+          size="xs"
+          onClick={onClear}
+          variant="ghost"
+          className="rounded-full"
+        >
+          <X className="size-3" aria-hidden="true" />
           Clear
         </Button>
       )}
