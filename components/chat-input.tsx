@@ -48,7 +48,8 @@ export function ChatInput({ user }: { user: User }) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const isChatMode = attachedTils.length > 0;
+  const [chatActive, setChatActive] = useState(false);
+  const isChatMode = attachedTils.length > 0 || chatActive;
   const isLoading = status === "submitted" || status === "streaming";
 
   // Focus input when a TIL is attached
@@ -84,29 +85,31 @@ export function ChatInput({ user }: { user: User }) {
       const trimmed = input.trim();
       if (!trimmed) return;
 
-      if (isChatMode) {
-        send(
-          { text: trimmed },
-          {
-            body: {
-              tils: attachedTils.map((t) => ({
-                url: t.url,
-                title: t.title,
-                description: t.description,
-              })),
-            },
-          },
-        );
+      // If it's a URL, always capture it
+      const result = urlSchema.safeParse(trimmed);
+      if (result.success) {
+        capture(result.data);
         setInput("");
-      } else {
-        const result = urlSchema.safeParse(trimmed);
-        if (result.success) {
-          capture(result.data);
-          setInput("");
-        }
+        return;
       }
+
+      // Non-URL text → send as chat message (with or without attachments)
+      if (!chatActive) setChatActive(true);
+      send(
+        { text: trimmed },
+        {
+          body: {
+            tils: attachedTils.map((t) => ({
+              url: t.url,
+              title: t.title,
+              description: t.description,
+            })),
+          },
+        },
+      );
+      setInput("");
     },
-    [input, isChatMode, send, capture, attachedTils],
+    [input, chatActive, send, capture, attachedTils],
   );
 
   const avatarUrl = user.user_metadata?.avatar_url;
@@ -122,13 +125,14 @@ export function ChatInput({ user }: { user: User }) {
 
   return (
     <div className="fixed inset-x-0 bottom-0 bg-background pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex flex-col max-w-2xl px-6 py-2">
+      <div className="mx-auto flex flex-col max-w-2xl px-2 py-2">
         {/* Minimized bar */}
         {isChatMode && minimized && (
           <div className="flex items-center dark:bg-input/30 border-input bg-transparent justify-between rounded-full border px-4 py-1.25 mb-2">
             <span className="text-sm text-muted-foreground">
-              Chat with {attachedTils.length} link
-              {attachedTils.length > 1 ? "s" : ""}
+              {attachedTils.length > 0
+                ? `Chat with ${attachedTils.length} link${attachedTils.length > 1 ? "s" : ""}`
+                : "Chat"}
               {messages.length > 0 ? ` · ${messages.length} messages` : ""}
             </span>
             <div className="flex items-center gap-1">
@@ -150,6 +154,7 @@ export function ChatInput({ user }: { user: User }) {
                   setMessages([]);
                   setInput("");
                   setMinimized(false);
+                  setChatActive(false);
                 }}
                 aria-label="Close chat"
               >
@@ -177,6 +182,7 @@ export function ChatInput({ user }: { user: User }) {
                   clearAttachment();
                   setMessages([]);
                   setInput("");
+                  setChatActive(false);
                 }}
                 size="xs"
                 className="rounded-full"
@@ -186,7 +192,7 @@ export function ChatInput({ user }: { user: User }) {
                 Close
               </Button>
             </div>
-            <div className="max-h-[60vh] border shadow overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-lg">
+            <div className="max-h-[60vh] border border-muted shadow overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-xl">
               {messages.map((message) => (
                 <ChatMessage
                   key={message.id}
@@ -307,7 +313,7 @@ export function ChatInput({ user }: { user: User }) {
             >
               {isChatMode
                 ? "AI can make mistakes. Verify the output."
-                : "Copy and Paste anywhere to save a link."}
+                : "Tip: Copy and Paste link anywhere to save."}
             </p>
           </>
         )}

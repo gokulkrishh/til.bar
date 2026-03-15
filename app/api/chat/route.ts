@@ -22,7 +22,20 @@ export async function POST(request: Request) {
     tils?: Til[];
   } = await request.json();
 
-  const links = (tils ?? [])
+  // If no TILs attached, fetch user's recent saved links for context
+  let tilsForContext = tils ?? [];
+
+  if (tilsForContext.length === 0) {
+    const { data } = await supabase
+      .from("tils")
+      .select("url, title, description")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    tilsForContext = (data as Til[]) ?? [];
+  }
+
+  const links = tilsForContext
     .map((til) =>
       [
         `- ${til.url}`,
