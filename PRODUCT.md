@@ -16,7 +16,7 @@ Paste a URL → it's saved with a timestamp → AI tags it → appears in this w
 
 ## Capture
 
-Pasting anywhere on the page triggers capture in desktop. On mobile, a fixed input at the bottom provides a tap target for pasting or typing URLs. Only URLs are supported for now. The page title and description are auto-fetched in the background after the response is sent. If the fetch fails, the URL is saved as-is. Every paste creates a new entry. No edit mode after capture. Capture is optimistic — a pending item appears immediately while the server action runs. A drop sound and success haptic fire on capture.
+Pasting anywhere on the page triggers capture in desktop. On mobile, a fixed input at the bottom provides a tap target for pasting or typing URLs. Only URLs are supported for now. The page title, description, and AI-generated tags are fetched/generated in the background via Next.js `after()` callback — the response is sent immediately and metadata work happens post-response. If the fetch fails, the URL is saved as-is. Every paste creates a new entry. No edit mode after capture. Capture is optimistic — a pending item appears immediately while the server action runs. A drop sound and success haptic fire on capture.
 
 ---
 
@@ -28,7 +28,7 @@ After an entry is saved, the AI assigns up to 2 tags asynchronously via OpenRout
 
 ## Search
 
-🚧 **Planned (in-app UI).** Full-text search across saved links (title, description, URL). Already available as the `search_links` MCP tool.
+Client-side search via search icon in the header (or `Cmd+K` / `Ctrl+K`). Filters by title, URL, and description. Combined with tag filtering for narrowing results. Also available as the `search_links` MCP tool for AI assistants.
 
 ---
 
@@ -62,7 +62,7 @@ Each TIL item has a context menu with: **Ask AI**, **Copy link**, and **Delete**
 
 ## AI Chat
 
-Chat with saved URLs as context. Click "Ask AI" on any TIL to attach it, then ask questions. Uses OpenRouter (Gemini 2.5 Flash Lite) for streaming responses. Session-only — no conversation history stored.
+Chat with saved URLs as context. Click "Ask AI" on any TIL to attach it, then ask questions. Multiple links can be attached at once. Suggestion prompts ("Summarize", "Key takeaways", "Explain this, I'm new to this") appear before the first message for quick starts. Uses OpenRouter (Gemini 2.5 Flash Lite) for streaming responses. AI responses rendered with Streamdown for markdown and Shiki for syntax-highlighted code blocks. Chat can be minimized or closed. Session-only — no conversation history stored.
 
 ---
 
