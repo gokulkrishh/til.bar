@@ -18,8 +18,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { z } from "zod";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-
+import { ChatMessage, ChatMessageLoading } from "./chat-message";
 import type { User } from "@supabase/supabase-js";
 
 const urlSchema = z.url().check(z.startsWith("http"));
@@ -118,6 +117,25 @@ export function ChatInput({ user }: { user: User }) {
         {/* Chat messages */}
         {isChatMode && messages.length > 0 && (
           <div className="relative">
+            <div className="relative max-h-[60vh] border shadow overflow-y-auto mb-3 flex flex-col gap-3 p-4 rounded-md">
+              {messages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  avatarUrl={avatarUrl}
+                  fullName={fullName}
+                  initials={initials}
+                  isStreaming={
+                    status === "streaming" &&
+                    message.id === messages[messages.length - 1]?.id
+                  }
+                />
+              ))}
+              {isLoading && messages[messages.length - 1]?.role === "user" && (
+                <ChatMessageLoading />
+              )}
+              <div ref={messagesEndRef} />
+            </div>
             <Button
               onClick={() => {
                 clearAttachment();
@@ -125,69 +143,12 @@ export function ChatInput({ user }: { user: User }) {
                 setInput("");
               }}
               size="xs"
-              className="rounded-full absolute -top-10 right-1 flex items-center justify-center text-muted-foreground hover:text-foreground"
+              className="rounded-full absolute -bottom-6 right-1.5 flex items-center justify-center"
               variant="secondary"
             >
               <X className="size-3" aria-hidden="true" />
               Close chat
             </Button>
-            <div className="relative max-h-80 border overflow-y-auto mb-3 flex flex-col gap-3 p-4 rounded-md">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn("text-sm flex gap-2 max-w-[85%]", {
-                    "self-end flex-row-reverse text-foreground":
-                      message.role === "user",
-                    "self-start text-foreground": message.role === "assistant",
-                  })}
-                >
-                  {message.role === "user" ? (
-                    <Avatar className="size-6 shrink-0">
-                      <AvatarImage src={avatarUrl} alt={fullName} />
-                      <AvatarFallback className="text-xs">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <Avatar className="size-6 shrink-0 bg-black">
-                      <AvatarImage src="/logo.svg" alt="AI logo" />
-                      <AvatarFallback className="font-bold text-xs text-white">
-                        AI
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div
-                    className={cn(
-                      "whitespace-pre-wrap text-foreground rounded-2xl px-3 py-2",
-                      {
-                        "bg-primary text-primary-foreground":
-                          message.role === "user",
-                        "bg-muted": message.role === "assistant",
-                      },
-                    )}
-                  >
-                    {message.parts.map((part, i) =>
-                      part.type === "text" ? (
-                        <span key={i}>{part.text}</span>
-                      ) : null,
-                    )}
-                  </div>
-                </div>
-              ))}
-              {isLoading && messages[messages.length - 1]?.role === "user" && (
-                <div className="text-sm text-foreground flex gap-2 self-start max-w-[85%]">
-                  <Avatar className="size-6 shrink-0">
-                    <AvatarFallback className="ai-avatar font-bold text-white">
-                      AI
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="bg-muted rounded-2xl px-3 py-2">
-                    Thinking...
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
           </div>
         )}
 
