@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { createAdminClient } from "@/lib/supabase/admin";
 import crypto from "crypto";
 
 export async function generateApiKey() {
@@ -12,10 +12,7 @@ export async function generateApiKey() {
 
   if (!user) return { error: "Sign in to generate an API key" };
 
-  const admin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+  const admin = createAdminClient();
 
   // Delete any existing key — only one key per user
   await admin.from("api_keys").delete().eq("user_id", user.id);
@@ -102,10 +99,7 @@ export async function deleteAccount() {
     return { error: "Not authenticated" };
   }
 
-  const admin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+  const admin = createAdminClient();
 
   const { error } = await admin.auth.admin.deleteUser(user.id);
 

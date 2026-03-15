@@ -1,7 +1,8 @@
 import { generateText, Output } from "ai";
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { Til } from "@/lib/types";
 
 const tagSchema = z.object({
   tags: z
@@ -9,14 +10,9 @@ const tagSchema = z.object({
     .describe("1-2 lowercase tags categorising this link"),
 });
 
-export async function generateTags(
-  tilId: string,
-  url: string,
-  title: string | null,
-  description: string | null,
-  userId: string,
-) {
-  const supabase = await createClient();
+export async function generateTags(til: Til) {
+  const { id: tilId, url, title, description, user_id: userId } = til;
+  const supabase = createAdminClient();
 
   // Fetch existing tags for reuse preference
   const { data: existingTags } = await supabase
@@ -43,19 +39,17 @@ export async function generateTags(
 Rules:
 - Prefer reusing existing tags over creating new ones.
 - Tags should be specific and descriptive (e.g. "react", "css", "rust", "ai", "design").
-- Maximum 2 tags per link.
+- Maximum 1 tags per link, only in exceptional cases use 1 extra tag.
 - Tags must be lowercase, no spaces (use hyphens for multi-word tags).${existingList}`,
       prompt: parts.join("\n"),
     });
 
     if (!output?.tags?.length) return;
 
-    // Upsert tags and link them
     for (const tagName of output.tags.slice(0, 2)) {
       const name = tagName.toLowerCase().trim();
       if (!name) continue;
 
-      // Upsert the tag
       const { data: tag } = await supabase
         .from("tags")
         .upsert({ user_id: userId, name }, { onConflict: "user_id,name" })
@@ -64,7 +58,6 @@ Rules:
 
       if (!tag) continue;
 
-      // Link tag to til
       await supabase
         .from("til_tags")
         .upsert(
@@ -74,6 +67,6 @@ Rules:
         .select();
     }
   } catch (error) {
-    console.error("AI tagging failed:", error);
+    console.error("[ai-tags] Failed:", error);
   }
 }

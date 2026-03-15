@@ -283,13 +283,7 @@ export function ChatInput({ user }: { user: User }) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onPaste={handlePaste}
-                placeholder={
-                  isChatMode
-                    ? attachedTils.length > 1
-                      ? "Ask anything about these links..."
-                      : "Ask anything about this link..."
-                    : "Paste a link"
-                }
+                placeholder="Ask a question about your saved links..."
                 aria-label={isChatMode ? "Chat message" : "URL to save"}
                 autoComplete="off"
                 spellCheck={false}
