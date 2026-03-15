@@ -11,6 +11,7 @@ import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import { useAppHaptics } from "@/context/haptics-provider";
 
 const DEFAULT_VISIBLE = 5;
 
@@ -164,6 +165,7 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
   const pendingTils = usePendingTils();
   const { query } = useSearch();
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
+  const trigger = useAppHaptics();
   const hasPending = pendingTils.length > 0;
   const isEmpty = tils.length === 0 && !hasPending;
 
@@ -211,6 +213,7 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
   }
 
   const toggleTag = (name: string) => {
+    trigger("light");
     setActiveTags((prev) => {
       const next = new Set(prev);
       if (next.has(name)) {
