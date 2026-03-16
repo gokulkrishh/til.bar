@@ -57,21 +57,18 @@ export async function createTil(input: string) {
       }
 
       // Generate better metadata via AI if needed
-      after(async () => {
-        const aiMeta = await generateMetadata(url, title, description);
+      const aiMeta = await generateMetadata(url, title, description);
 
-        if (aiMeta) {
-          title = aiMeta.title;
-          description = aiMeta.description;
-          await admin
-            .from("tils")
-            .update({ title, description })
-            .eq("id", data.id);
-        }
+      if (aiMeta) {
+        title = aiMeta.title;
+        description = aiMeta.description;
+        await admin
+          .from("tils")
+          .update({ title, description })
+          .eq("id", data.id);
+      }
 
-        await generateTags({ ...data, title, description });
-        revalidatePath("/");
-      });
+      await generateTags({ ...data, title, description });
     } catch (err) {
       console.error("[after] Background work failed:", err);
     } finally {
