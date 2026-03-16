@@ -1,10 +1,11 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,14 +32,7 @@ export function Profile({ user }: { user: User }) {
 
   const avatarUrl = user.user_metadata?.avatar_url;
   const fullName = user.user_metadata?.full_name ?? user.email ?? "";
-  const initials = useMemo(() => {
-    return fullName
-      .split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  }, [fullName]);
+  const initials = getInitials(fullName);
 
   return (
     <>

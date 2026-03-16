@@ -52,14 +52,14 @@ export function ChatMessage({
           "bg-primary text-primary-foreground": isUser,
         })}
       >
-        {message.parts.map((part, i) => {
+        {message.parts.map((part) => {
           if (part.type !== "text") return null;
           return isUser ? (
-            <span key={i}>{part.text}</span>
+            <span key={`${message.id}-${part.type}`}>{part.text}</span>
           ) : (
             <Streamdown
               linkSafety={{ enabled: false }}
-              key={i}
+              key={`${message.id}-${part.type}`}
               isAnimating={isStreaming}
               plugins={{ code }}
             >

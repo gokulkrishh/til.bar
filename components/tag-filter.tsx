@@ -37,7 +37,7 @@ export function TagFilter({
       {tags.map((tag) => (
         <Badge
           key={tag.id}
-          variant={activeTags.has(tag.name) ? "default" : "outline"}
+          variant={activeTags.has(tag.name) ? "secondary" : "outline"}
           onClick={() => {
             click();
             trigger("light");
@@ -63,7 +63,7 @@ export function TagFilter({
             trigger("light");
             onClear();
           }}
-          variant="secondary"
+          variant="ghost"
           className="rounded-full h-6.5"
         >
           <X className="size-3" aria-hidden="true" />

@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 
 type AttachedTil = {
   id: string;
@@ -44,11 +50,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setAttachedTils([]);
   }, []);
 
-  return (
-    <ChatContext
-      value={{ attachedTils, attachTil, removeTil, clearAttachment }}
-    >
-      {children}
-    </ChatContext>
+  const value = useMemo(
+    () => ({ attachedTils, attachTil, removeTil, clearAttachment }),
+    [attachedTils, attachTil, removeTil, clearAttachment],
   );
+
+  return <ChatContext value={value}>{children}</ChatContext>;
 }

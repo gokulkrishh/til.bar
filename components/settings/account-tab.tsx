@@ -2,6 +2,7 @@
 
 import type { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/lib/utils";
 
 export function AccountTab({ user }: { user: User }) {
   const avatarUrl = user.user_metadata?.avatar_url;
@@ -12,7 +13,7 @@ export function AccountTab({ user }: { user: User }) {
     <div className="flex items-center gap-3 py-4 px-1">
       <Avatar className="size-10">
         <AvatarImage src={avatarUrl} alt={fullName} />
-        <AvatarFallback>{fullName.charAt(0)}</AvatarFallback>
+        <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
       </Avatar>
       <div className="flex flex-col">
         <span className="text-sm font-semibold">{fullName}</span>

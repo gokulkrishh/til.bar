@@ -6,32 +6,26 @@ import {
   useEffect,
   useRef,
   type ClipboardEvent,
-  useMemo,
 } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { ArrowUp, LinkIcon, Maximize2, Minus, X } from "lucide-react";
+import { AnimatePresence } from "motion/react";
+import { ArrowUp, LinkIcon, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { z } from "zod";
-import { ChatMessage, ChatMessageLoading } from "./chat-message";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
-import { SuggestedIcon } from "./icons/suggested";
+import { ChatMinimizedBar } from "./chat-minimized-bar";
+import { ChatMessagesPanel } from "./chat-messages-panel";
+import { ChatSuggestions } from "./chat-suggestions";
 
 const urlSchema = z.url().check(z.startsWith("http"));
-
-const suggestionPrompts = [
-  "Write me a TIL from this",
-  "Why is this worth remembering?",
-  "Explain this simply",
-];
 
 export function ChatInput({ user }: { user: User }) {
   const [input, setInput] = useState("");
@@ -116,16 +110,19 @@ export function ChatInput({ user }: { user: User }) {
     [input, chatActive, send, capture, attachedTils],
   );
 
+  const closeChat = useCallback(() => {
+    trigger("light");
+    stop();
+    clearAttachment();
+    setMessages([]);
+    setInput("");
+    setMinimized(false);
+    setChatActive(false);
+  }, [trigger, stop, clearAttachment, setMessages]);
+
   const avatarUrl = user.user_metadata?.avatar_url;
   const fullName = user.user_metadata?.full_name ?? user.email ?? "";
-  const initials = useMemo(() => {
-    return fullName
-      .split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  }, [fullName]);
+  const initials = getInitials(fullName);
 
   return (
     <div className="fixed inset-x-0 bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]">
@@ -133,179 +130,41 @@ export function ChatInput({ user }: { user: User }) {
         {/* Minimized bar */}
         <AnimatePresence initial={false}>
           {isChatMode && minimized && (
-            <motion.div
-              key="minimized-bar"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ type: "spring", duration: 0.3, bounce: 0.1 }}
-            >
-              <div className="flex items-center bg-muted/50 dark:bg-input/30 backdrop-blur-sm justify-between rounded-full border border-input px-4 py-1.25 mb-2">
-                <span className="text-sm text-muted-foreground">
-                  {attachedTils.length > 0
-                    ? `Chat with ${attachedTils.length} link${attachedTils.length > 1 ? "s" : ""}`
-                    : "Chat"}
-                  {messages.length > 0 ? ` · ${messages.length} messages` : ""}
-                </span>
-                <div className="flex items-center gap-1">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="rounded-full"
-                    onClick={() => {
-                      trigger("light");
-                      setMinimized(false);
-                    }}
-                    aria-label="Expand chat"
-                  >
-                    <Maximize2 className="size-3.5" aria-hidden="true" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    className="rounded-full"
-                    variant="ghost"
-                    onClick={() => {
-                      trigger("light");
-                      stop();
-                      clearAttachment();
-                      setMessages([]);
-                      setInput("");
-                      setMinimized(false);
-                      setChatActive(false);
-                    }}
-                    aria-label="Close chat"
-                  >
-                    <X className="size-3.5" aria-hidden="true" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
+            <ChatMinimizedBar
+              linkCount={attachedTils.length}
+              messageCount={messages.length}
+              onExpand={() => {
+                trigger("light");
+                setMinimized(false);
+              }}
+              onClose={closeChat}
+            />
           )}
         </AnimatePresence>
 
         {/* Chat messages */}
         <AnimatePresence initial={false}>
           {isChatMode && !minimized && messages.length > 0 && (
-            <motion.div
-              key="chat-messages"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ type: "spring", duration: 0.35, bounce: 0.1 }}
-            >
-              <div className="flex items-center justify-end gap-1 mb-2">
-                <Button
-                  onClick={() => {
-                    trigger("light");
-                    setMinimized(true);
-                  }}
-                  size="xs"
-                  className="rounded-full"
-                  variant="secondary"
-                >
-                  <Minus className="size-3" aria-hidden="true" />
-                  Minimize
-                </Button>
-                <Button
-                  onClick={() => {
-                    trigger("light");
-                    stop();
-                    clearAttachment();
-                    setMessages([]);
-                    setInput("");
-                    setChatActive(false);
-                  }}
-                  size="xs"
-                  className="rounded-full"
-                  variant="secondary"
-                >
-                  <X className="size-3" aria-hidden="true" />
-                  Close
-                </Button>
-              </div>
-              <div className="max-h-[60vh] border border-border/40 shadow-lg shadow-black/5 overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-2xl">
-                {messages.map((message) => (
-                  <ChatMessage
-                    key={message.id}
-                    message={message}
-                    avatarUrl={avatarUrl}
-                    fullName={fullName}
-                    initials={initials}
-                    isStreaming={
-                      status === "streaming" &&
-                      message.id === messages[messages.length - 1]?.id
-                    }
-                  />
-                ))}
-                {isLoading &&
-                  messages[messages.length - 1]?.role === "user" && (
-                    <ChatMessageLoading />
-                  )}
-                <div ref={messagesEndRef} />
-              </div>
-            </motion.div>
+            <ChatMessagesPanel
+              messages={messages}
+              status={status}
+              avatarUrl={avatarUrl}
+              fullName={fullName}
+              initials={initials}
+              messagesEndRef={messagesEndRef}
+              onMinimize={() => {
+                trigger("light");
+                setMinimized(true);
+              }}
+              onClose={closeChat}
+            />
           )}
         </AnimatePresence>
 
         {/* Suggestion prompts — show before first message */}
         <AnimatePresence>
           {isChatMode && !minimized && messages.length === 0 && (
-            <motion.div
-              key="suggestions"
-              className="flex flex-col items-end gap-2 mb-2 flex-wrap mx-2"
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={{
-                visible: { transition: { staggerChildren: 0.06 } },
-                hidden: {
-                  transition: { staggerChildren: 0, staggerDirection: 0 },
-                },
-              }}
-            >
-              {suggestionPrompts.map((prompt) => (
-                <motion.div
-                  key={prompt}
-                  variants={{
-                    hidden: {
-                      opacity: 0,
-                      y: 0,
-                      filter: "blur(4px)",
-                      transition: { duration: 0.1, ease: "easeOut" },
-                    },
-                    visible: {
-                      opacity: 1,
-                      y: 0,
-                      filter: "blur(0px)",
-                      transition: { duration: 0.25, ease: "easeOut" },
-                    },
-                  }}
-                >
-                  <Badge
-                    size="lg"
-                    variant="outline"
-                    onClick={() => {
-                      send(
-                        { text: prompt },
-                        {
-                          body: {
-                            tils: attachedTils.map((t) => ({
-                              url: t.url,
-                              title: t.title,
-                              description: t.description,
-                            })),
-                          },
-                        },
-                      );
-                    }}
-                    className="cursor-pointer backdrop-blur-sm bg-background/60 border-border/40 hover:bg-muted/80 transition-all duration-200"
-                  >
-                    <SuggestedIcon className="size-2.75 mr-1" />
-                    {prompt}
-                  </Badge>
-                </motion.div>
-              ))}
-            </motion.div>
+            <ChatSuggestions attachedTils={attachedTils} onSend={send} />
           )}
         </AnimatePresence>
 

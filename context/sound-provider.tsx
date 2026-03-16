@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 type SoundContextType = {
   soundEnabled: boolean;
@@ -25,16 +31,15 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     return stored !== null ? stored === "true" : true;
   });
 
-  const handleSetSoundEnabled = (enabled: boolean) => {
+  const handleSetSoundEnabled = useCallback((enabled: boolean) => {
     setSoundEnabled(enabled);
     localStorage.setItem(STORAGE_KEY, String(enabled));
-  };
+  }, []);
 
-  return (
-    <SoundContext
-      value={{ soundEnabled, setSoundEnabled: handleSetSoundEnabled }}
-    >
-      {children}
-    </SoundContext>
+  const value = useMemo(
+    () => ({ soundEnabled, setSoundEnabled: handleSetSoundEnabled }),
+    [soundEnabled, handleSetSoundEnabled],
   );
+
+  return <SoundContext value={value}>{children}</SoundContext>;
 }

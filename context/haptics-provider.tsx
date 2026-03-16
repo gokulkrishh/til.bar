@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { useWebHaptics } from "web-haptics/react";
 import type { HapticInput } from "web-haptics";
 
@@ -36,10 +42,10 @@ export function HapticsProvider({ children }: { children: React.ReactNode }) {
     return stored !== null ? stored === "true" : true;
   });
 
-  const handleSetHapticsEnabled = (enabled: boolean) => {
+  const handleSetHapticsEnabled = useCallback((enabled: boolean) => {
     setHapticsEnabled(enabled);
     localStorage.setItem(STORAGE_KEY, String(enabled));
-  };
+  }, []);
 
   const trigger = useCallback(
     (input?: HapticInput) => {
@@ -50,15 +56,14 @@ export function HapticsProvider({ children }: { children: React.ReactNode }) {
     [hapticsEnabled, hapticTrigger],
   );
 
-  return (
-    <HapticsContext
-      value={{
-        hapticsEnabled,
-        setHapticsEnabled: handleSetHapticsEnabled,
-        trigger,
-      }}
-    >
-      {children}
-    </HapticsContext>
+  const value = useMemo(
+    () => ({
+      hapticsEnabled,
+      setHapticsEnabled: handleSetHapticsEnabled,
+      trigger,
+    }),
+    [hapticsEnabled, handleSetHapticsEnabled, trigger],
   );
+
+  return <HapticsContext value={value}>{children}</HapticsContext>;
 }

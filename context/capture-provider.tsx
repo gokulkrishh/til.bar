@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useCallback,
+  useMemo,
   useState,
   useTransition,
 } from "react";
@@ -132,11 +133,10 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("paste", handlePaste);
   }, [handlePaste]);
 
-  return (
-    <CaptureContext
-      value={{ pendingTils, deletedIds, optimisticDelete, capture }}
-    >
-      {children}
-    </CaptureContext>
+  const value = useMemo(
+    () => ({ pendingTils, deletedIds, optimisticDelete, capture }),
+    [pendingTils, deletedIds, optimisticDelete, capture],
   );
+
+  return <CaptureContext value={value}>{children}</CaptureContext>;
 }
