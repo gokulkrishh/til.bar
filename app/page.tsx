@@ -2,7 +2,7 @@ import { ChatInput } from "@/components/chat-input";
 import { TilList } from "@/components/til-list";
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
-import Loading from "./loading";
+import PageLoading from "@/components/page-loading";
 import { DemoState } from "@/components/demo-state";
 
 export default async function Home() {
@@ -21,7 +21,7 @@ export default async function Home() {
   ]);
 
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<PageLoading />}>
       {user ? <TilList tils={tils ?? []} /> : <DemoState />}
       {user && <ChatInput user={user} />}
     </Suspense>
