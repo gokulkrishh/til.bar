@@ -50,10 +50,6 @@ export function SearchButton() {
             style={{ originX: 1 }}
           >
             <div className="relative flex gap-2">
-              <Search
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground"
-                aria-hidden="true"
-              />
               <Input
                 ref={inputRef}
                 type="text"
@@ -63,7 +59,7 @@ export function SearchButton() {
                 aria-label="Search links"
                 autoComplete="off"
                 spellCheck={false}
-                className="h-10 w-64 pl-9 pr-8 text-sm rounded-full bg-muted/50 backdrop-blur-sm"
+                className="h-10 w-64 pl-4 pr-8 text-sm rounded-full bg-muted/50 backdrop-blur-sm"
               />
               {query && (
                 <Button
