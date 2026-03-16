@@ -45,6 +45,7 @@ export function ChatInput({ user }: { user: User }) {
     sendMessage: send,
     status,
     setMessages,
+    stop,
   } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
@@ -130,100 +131,121 @@ export function ChatInput({ user }: { user: User }) {
     <div className="fixed inset-x-0 bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex flex-col max-w-2xl px-3 py-2">
         {/* Minimized bar */}
-        {isChatMode && minimized && (
-          <div className="flex items-center bg-muted/50 dark:bg-input/30 backdrop-blur-sm justify-between rounded-full border border-border/40 px-4 py-1.25 mb-2">
-            <span className="text-sm text-muted-foreground">
-              {attachedTils.length > 0
-                ? `Chat with ${attachedTils.length} link${attachedTils.length > 1 ? "s" : ""}`
-                : "Chat"}
-              {messages.length > 0 ? ` · ${messages.length} messages` : ""}
-            </span>
-            <div className="flex items-center gap-1">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="rounded-full"
-                onClick={() => {
-                  trigger("light");
-                  setMinimized(false);
-                }}
-                aria-label="Expand chat"
-              >
-                <Maximize2 className="size-3.5" aria-hidden="true" />
-              </Button>
-              <Button
-                size="icon"
-                className="rounded-full"
-                variant="ghost"
-                onClick={() => {
-                  trigger("light");
-                  clearAttachment();
-                  setMessages([]);
-                  setInput("");
-                  setMinimized(false);
-                  setChatActive(false);
-                }}
-                aria-label="Close chat"
-              >
-                <X className="size-3.5" aria-hidden="true" />
-              </Button>
-            </div>
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {isChatMode && minimized && (
+            <motion.div
+              key="minimized-bar"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ type: "spring", duration: 0.3, bounce: 0.1 }}
+            >
+              <div className="flex items-center bg-muted/50 dark:bg-input/30 backdrop-blur-sm justify-between rounded-full border border-input px-4 py-1.25 mb-2">
+                <span className="text-sm text-muted-foreground">
+                  {attachedTils.length > 0
+                    ? `Chat with ${attachedTils.length} link${attachedTils.length > 1 ? "s" : ""}`
+                    : "Chat"}
+                  {messages.length > 0 ? ` · ${messages.length} messages` : ""}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full"
+                    onClick={() => {
+                      trigger("light");
+                      setMinimized(false);
+                    }}
+                    aria-label="Expand chat"
+                  >
+                    <Maximize2 className="size-3.5" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    className="rounded-full"
+                    variant="ghost"
+                    onClick={() => {
+                      trigger("light");
+                      stop();
+                      clearAttachment();
+                      setMessages([]);
+                      setInput("");
+                      setMinimized(false);
+                      setChatActive(false);
+                    }}
+                    aria-label="Close chat"
+                  >
+                    <X className="size-3.5" aria-hidden="true" />
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Chat messages */}
-        {isChatMode && !minimized && messages.length > 0 && (
-          <div>
-            <div className="flex items-center justify-end gap-1 mb-2">
-              <Button
-                onClick={() => {
-                  trigger("light");
-                  setMinimized(true);
-                }}
-                size="xs"
-                className="rounded-full"
-                variant="secondary"
-              >
-                <Minus className="size-3" aria-hidden="true" />
-                Minimize
-              </Button>
-              <Button
-                onClick={() => {
-                  trigger("light");
-                  clearAttachment();
-                  setMessages([]);
-                  setInput("");
-                  setChatActive(false);
-                }}
-                size="xs"
-                className="rounded-full"
-                variant="secondary"
-              >
-                <X className="size-3" aria-hidden="true" />
-                Close
-              </Button>
-            </div>
-            <div className="max-h-[60vh] border border-border/40 shadow-lg shadow-black/5 overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-2xl">
-              {messages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  avatarUrl={avatarUrl}
-                  fullName={fullName}
-                  initials={initials}
-                  isStreaming={
-                    status === "streaming" &&
-                    message.id === messages[messages.length - 1]?.id
-                  }
-                />
-              ))}
-              {isLoading && messages[messages.length - 1]?.role === "user" && (
-                <ChatMessageLoading />
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {isChatMode && !minimized && messages.length > 0 && (
+            <motion.div
+              key="chat-messages"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ type: "spring", duration: 0.35, bounce: 0.1 }}
+            >
+              <div className="flex items-center justify-end gap-1 mb-2">
+                <Button
+                  onClick={() => {
+                    trigger("light");
+                    setMinimized(true);
+                  }}
+                  size="xs"
+                  className="rounded-full"
+                  variant="secondary"
+                >
+                  <Minus className="size-3" aria-hidden="true" />
+                  Minimize
+                </Button>
+                <Button
+                  onClick={() => {
+                    trigger("light");
+                    stop();
+                    clearAttachment();
+                    setMessages([]);
+                    setInput("");
+                    setChatActive(false);
+                  }}
+                  size="xs"
+                  className="rounded-full"
+                  variant="secondary"
+                >
+                  <X className="size-3" aria-hidden="true" />
+                  Close
+                </Button>
+              </div>
+              <div className="max-h-[60vh] border border-border/40 shadow-lg shadow-black/5 overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-2xl">
+                {messages.map((message) => (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    avatarUrl={avatarUrl}
+                    fullName={fullName}
+                    initials={initials}
+                    isStreaming={
+                      status === "streaming" &&
+                      message.id === messages[messages.length - 1]?.id
+                    }
+                  />
+                ))}
+                {isLoading &&
+                  messages[messages.length - 1]?.role === "user" && (
+                    <ChatMessageLoading />
+                  )}
+                <div ref={messagesEndRef} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Suggestion prompts — show before first message */}
         <AnimatePresence>
@@ -249,7 +271,7 @@ export function ChatInput({ user }: { user: User }) {
                       opacity: 0,
                       y: 0,
                       filter: "blur(4px)",
-                      transition: { duration: 0, ease: "easeIn" },
+                      transition: { duration: 0.1, ease: "easeOut" },
                     },
                     visible: {
                       opacity: 1,
@@ -337,7 +359,7 @@ export function ChatInput({ user }: { user: User }) {
                 aria-label={isChatMode ? "Chat message" : "URL to save"}
                 autoComplete="off"
                 spellCheck={false}
-                className="h-12 w-full rounded-full border bg-transparent shadow-sm px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-12 w-full rounded-full border bg-transparent shadow-sm px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               />
               <Button
                 type="submit"

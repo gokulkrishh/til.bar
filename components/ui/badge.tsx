@@ -2,7 +2,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:scale-[0.97]",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-[transform,color,background-color,border-color,box-shadow] duration-150 outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-98",
   {
     variants: {
       variant: {
@@ -23,17 +23,31 @@ const badgeVariants = cva(
   },
 );
 
-function Badge({
-  className,
-  variant,
-  size,
-  ...props
-}: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
+type BadgeProps = VariantProps<typeof badgeVariants> &
+  (
+    | (React.ComponentProps<"button"> & { onClick: React.MouseEventHandler })
+    | (React.ComponentProps<"span"> & { onClick?: never })
+  );
+
+function Badge({ className, variant, size, ...props }: BadgeProps) {
+  const classes = cn(badgeVariants({ variant, size }), className);
+
+  if (props.onClick) {
+    return (
+      <button
+        type="button"
+        data-slot="badge"
+        className={cn(classes, "cursor-pointer")}
+        {...(props as React.ComponentProps<"button">)}
+      />
+    );
+  }
+
   return (
     <span
       data-slot="badge"
-      className={cn(badgeVariants({ variant, size }), className)}
-      {...props}
+      className={classes}
+      {...(props as React.ComponentProps<"span">)}
     />
   );
 }

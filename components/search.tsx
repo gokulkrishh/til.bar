@@ -55,7 +55,7 @@ export function SearchButton() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search links..."
+                placeholder="Search links… ⌘K"
                 aria-label="Search links"
                 autoComplete="off"
                 spellCheck={false}

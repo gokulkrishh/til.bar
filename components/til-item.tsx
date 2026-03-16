@@ -57,7 +57,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
 
   return (
     <motion.li
-      className="flex items-center group/row gap-4 py-1"
+      className="flex items-center group/row gap-4 py-1 pl-2 pr-1 rounded-lg hover:bg-muted/50 transition-colors duration-150"
       initial="idle"
       whileHover="hover"
     >
@@ -107,7 +107,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
           href={til.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-color w-full flex gap-1 text-sm items-center group font-medium group-hover/row:text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
+          className="transition-colors w-full flex gap-1 text-sm items-center group font-medium group-hover/row:text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
         >
           <span className="truncate">{til.title ?? til.url}</span>
           <motion.span
@@ -123,7 +123,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-muted-foreground hidden group-hover/row:inline-flex transition-opacity">
+        <span className="text-xs text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 inline-flex">
           {formatDate(til.created_at)}
         </span>
         <TilActions

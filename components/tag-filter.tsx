@@ -43,12 +43,11 @@ export function TagFilter({
             trigger("light");
             onTagClick(tag.name);
           }}
-          className="cursor-pointer transition-all duration-200 hover:shadow-sm"
         >
           {tag.name}
           <span
             className={cn("ml-1.5 font-mono tabular-nums text-[0.625rem]", {
-              "opacity-50": !activeTags.has(tag.name),
+              "text-muted-foreground/60": !activeTags.has(tag.name),
             })}
           >
             {tag.count}
