@@ -5,17 +5,13 @@ import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { TilItem } from "@/components/til-item";
 import { TilItemSkeleton } from "@/components/til-item-skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { TagFilter } from "@/components/tag-filter";
 import { usePendingTils, useCaptureContext } from "@/context/capture-provider";
 import { useSearch } from "@/context/search-provider";
 import type { TilWithTags } from "@/lib/types";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
 import { useAppHaptics } from "@/context/haptics-provider";
-import { useSound } from "@/hooks/use-sound";
-import { useAppSound } from "@/hooks/use-app-sound";
-import { drop003Sound } from "@/sounds/drop-003";
 
 const DEFAULT_VISIBLE = 5;
 
@@ -81,11 +77,14 @@ function TilGroup({
 
   return (
     <motion.section layout="position" transition={{ duration: 0.2 }}>
-      <h2 className="text-sm font-medium text-muted-foreground py-2">
-        {label} <span className="text-xs">({totalCount})</span>
+      <h2 className="text-xs font-medium uppercase tracking-widest text-muted-foreground py-2.5">
+        {label}{" "}
+        <span className="font-mono tabular-nums text-muted-foreground/60">
+          {totalCount}
+        </span>
       </h2>
       <LayoutGroup>
-        <ul className="relative flex flex-col gap-1 divide-border/40 divide-y">
+        <ul className="relative flex flex-col gap-0.5">
           {pendingItems.map((til) => (
             <TilItemSkeleton key={til.id} url={til.url} />
           ))}
@@ -115,78 +114,16 @@ function TilGroup({
         >
           <ChevronDown
             aria-hidden="true"
-            className={cn("transition-transform size-4", {
+            className={cn("transition-all size-3.5", {
               "rotate-180": showAll,
             })}
           />
-          {showAll ? "Show less" : `Show ${tils.length - DEFAULT_VISIBLE} more`}
+          {showAll
+            ? "Show less"
+            : `Show ${activeTils.length - DEFAULT_VISIBLE} more`}
         </button>
       )}
     </motion.section>
-  );
-}
-
-type TagInfo = { id: string; name: string; count: number };
-
-function TagFilter({
-  tags,
-  activeTags,
-  onTagClick,
-  onClear,
-}: {
-  tags: TagInfo[];
-  activeTags: Set<string>;
-  onTagClick: (tagName: string) => void;
-  onClear: () => void;
-}) {
-  const [play] = useAppSound(drop003Sound);
-  const trigger = useAppHaptics();
-
-  if (tags.length === 0) return null;
-
-  return (
-    <div
-      role="group"
-      aria-label="Filter by tag"
-      className="flex items-center gap-2 flex-wrap"
-    >
-      {tags.map((tag) => (
-        <Badge
-          key={tag.id}
-          variant={activeTags.has(tag.name) ? "default" : "outline"}
-          onClick={() => {
-            trigger("light");
-            onTagClick(tag.name);
-          }}
-          className="cursor-pointer"
-        >
-          {tag.name}
-          <span
-            className={cn("ml-1.5 font-mono tabular-nums", {
-              "opacity-60": !activeTags.has(tag.name),
-            })}
-          >
-            {tag.count}
-          </span>
-        </Badge>
-      ))}
-
-      {activeTags.size > 0 && (
-        <Button
-          size="xs"
-          onClick={() => {
-            play();
-            trigger("light");
-            onClear();
-          }}
-          variant="secondary"
-          className="rounded-full h-6.5"
-        >
-          <X className="size-3" aria-hidden="true" />
-          Clear
-        </Button>
-      )}
-    </div>
   );
 }
 
@@ -255,7 +192,7 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
   };
 
   return (
-    <div className="flex flex-col gap-6 py-4 pb-20">
+    <div className="flex flex-col gap-2 py-4 pb-20">
       <TagFilter
         tags={allTags}
         activeTags={activeTags}
@@ -266,13 +203,14 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
         }}
       />
       <AnimatePresence mode="popLayout" initial={false}>
-        {groups.map((group) => (
+        {groups.map((group, index) => (
           <motion.div
             key={group.label}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className={cn({ "border-t border-border/30 pt-4 mt-2": index > 0 })}
           >
             <TilGroup
               label={group.label}

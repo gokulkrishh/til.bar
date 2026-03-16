@@ -46,7 +46,7 @@ export function SearchButton() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: "auto", opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             style={{ originX: 1 }}
           >
             <div className="relative flex gap-2">
@@ -63,7 +63,7 @@ export function SearchButton() {
                 aria-label="Search links"
                 autoComplete="off"
                 spellCheck={false}
-                className="h-10 w-64 pl-9 pr-8 text-sm rounded-full"
+                className="h-10 w-64 pl-9 pr-8 text-sm rounded-full bg-muted/50 backdrop-blur-sm"
               />
               {query && (
                 <Button

@@ -12,8 +12,8 @@ function SkeletonItem() {
 function SkeletonGroup() {
   return (
     <section>
-      <div className="h-5 w-32 rounded bg-muted animate-pulse my-2" />
-      <ul className="flex flex-col gap-1 divide-border/40 divide-y">
+      <div className="h-4 w-24 rounded bg-muted animate-pulse my-2" />
+      <ul className="flex flex-col gap-0.5">
         <SkeletonItem />
         <SkeletonItem />
         <SkeletonItem />

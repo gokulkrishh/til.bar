@@ -114,7 +114,7 @@ export default function RootLayout({
                 <SearchProvider>
                   <CaptureProvider>
                     <ChatProvider>
-                      <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4">
+                      <div className="mx-auto flex h-screen max-w-2xl flex-col px-4">
                         <Header />
                         {children}
                       </div>

@@ -1,9 +1,9 @@
 import { ChatInput } from "@/components/chat-input";
 import { TilList } from "@/components/til-list";
 import { createClient } from "@/lib/supabase/server";
-import type { TilWithTags } from "@/lib/types";
 import { Suspense } from "react";
 import Loading from "./loading";
+import { DemoState } from "@/components/demo-state";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -11,25 +11,18 @@ export default async function Home() {
     {
       data: { user },
     },
-    { data: rawTils },
+    { data: tils },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
       .from("tils")
-      .select("*, til_tags(tag:tags(*))")
+      .select("*, tags:til_tags(...tags(*))")
       .order("created_at", { ascending: false }),
   ]);
 
-  const tils: TilWithTags[] = (rawTils ?? []).map((til) => ({
-    ...til,
-    tags: (til.til_tags ?? []).map(
-      (tt: { tag: TilWithTags["tags"][number] }) => tt.tag,
-    ),
-  }));
-
   return (
     <Suspense fallback={<Loading />}>
-      <TilList tils={tils} />
+      {user ? <TilList tils={tils ?? []} /> : <DemoState />}
       {user && <ChatInput user={user} />}
     </Suspense>
   );

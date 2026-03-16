@@ -125,11 +125,11 @@ export function ChatInput({ user }: { user: User }) {
   }, [fullName]);
 
   return (
-    <div className="fixed inset-x-0 bottom-0 bg-background pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed inset-x-0 bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex flex-col max-w-2xl px-2 py-2">
         {/* Minimized bar */}
         {isChatMode && minimized && (
-          <div className="flex items-center dark:bg-input/30 border-input bg-transparent justify-between rounded-full border px-4 py-1.25 mb-2">
+          <div className="flex items-center bg-muted/50 dark:bg-input/30 backdrop-blur-sm justify-between rounded-full border border-border/40 px-4 py-1.25 mb-2">
             <span className="text-sm text-muted-foreground">
               {attachedTils.length > 0
                 ? `Chat with ${attachedTils.length} link${attachedTils.length > 1 ? "s" : ""}`
@@ -193,7 +193,7 @@ export function ChatInput({ user }: { user: User }) {
                 Close
               </Button>
             </div>
-            <div className="max-h-[60vh] border border-muted shadow overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-xl">
+            <div className="max-h-[60vh] border border-border/40 shadow-lg shadow-black/5 overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-2xl">
               {messages.map((message) => (
                 <ChatMessage
                   key={message.id}
@@ -266,7 +266,7 @@ export function ChatInput({ user }: { user: User }) {
                         },
                       );
                     }}
-                    className="cursor-pointer hover:bg-muted"
+                    className="cursor-pointer backdrop-blur-sm bg-background/60 border-border/40 hover:bg-muted/80 transition-all duration-200"
                   >
                     <SuggestedIcon className="size-2.75 mr-1" />
                     {prompt}
@@ -327,7 +327,7 @@ export function ChatInput({ user }: { user: User }) {
                 aria-label={isChatMode ? "Chat message" : "URL to save"}
                 autoComplete="off"
                 spellCheck={false}
-                className="h-12 w-full rounded-full border bg-transparent px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="h-12 w-full rounded-full border bg-transparent shadow-sm px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
               <Button
                 type="submit"
