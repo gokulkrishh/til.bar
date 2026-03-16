@@ -128,7 +128,7 @@ export function ChatInput({ user }: { user: User }) {
 
   return (
     <div className="fixed inset-x-0 bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex flex-col max-w-2xl px-2 py-2">
+      <div className="mx-auto flex flex-col max-w-2xl px-3 py-2">
         {/* Minimized bar */}
         {isChatMode && minimized && (
           <div className="flex items-center bg-muted/50 dark:bg-input/30 backdrop-blur-sm justify-between rounded-full border border-border/40 px-4 py-1.25 mb-2">

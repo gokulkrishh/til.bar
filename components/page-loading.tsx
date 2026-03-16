@@ -32,6 +32,7 @@ export default function Loading() {
         <div className="h-6 w-18 border border-muted rounded-full bg-muted animate-pulse" />
       </div>
       <SkeletonGroup />
+      <div className="flex border-t border-border/30 my-2 w-full"></div>
       <SkeletonGroup />
     </div>
   );

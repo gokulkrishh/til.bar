@@ -70,34 +70,35 @@ export function IntegrationsTab() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center min-h-8 justify-between">
           <h3 className="text-sm font-semibold">API Key</h3>
-          <Button
-            variant={confirmRegenerate ? "destructive" : "outline"}
-            size="sm"
-            disabled={isPending || keyLoading}
-            onClick={handleGenerateKey}
-          >
-            {isPending ? (
-              <>
-                <Spinner /> Regenerate
-              </>
-            ) : confirmRegenerate ? (
-              "Revoke and create new?"
-            ) : keyExists || keyLoading ? (
-              <>
-                <RefreshCw />
-                Regenerate
-              </>
-            ) : (
-              "Create API key"
-            )}
-          </Button>
         </div>
         {!newKey && (
-          <div className="flex w-full justify-between items-center gap-2 rounded-md bg-muted px-3 py-2.5">
-            <code className="text-xs font-mono text-foreground">
-              mcp_sk_••••••••
-            </code>
-            {keyExists && <Check className="size-3 text-green-500" />}
+          <div className="flex w-full justify-between gap-2">
+            <div className="flex w-full justify-between items-center gap-2 rounded-md bg-muted px-3 py-2.5">
+              <code className="text-xs font-mono text-foreground">
+                mcp_sk_••••••••
+              </code>
+              {keyExists && <Check className="size-3 text-green-500" />}
+            </div>
+            <Button
+              variant={confirmRegenerate ? "destructive" : "outline"}
+              disabled={isPending || keyLoading}
+              onClick={handleGenerateKey}
+            >
+              {isPending ? (
+                <>
+                  <Spinner /> Regenerate
+                </>
+              ) : confirmRegenerate ? (
+                "Revoke and create new?"
+              ) : keyExists || keyLoading ? (
+                <>
+                  <RefreshCw />
+                  Regenerate
+                </>
+              ) : (
+                "Create API key"
+              )}
+            </Button>
           </div>
         )}
         {newKey && (
@@ -192,8 +193,13 @@ export function IntegrationsTab() {
             </code>
           </li>
         </ol>
-        <a href={IOS_SHORTCUT_URL} target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" size="sm" className="w-fit">
+        <a
+          className="flex w-full justify-end"
+          href={IOS_SHORTCUT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button variant="outline" className="w-fit">
             <ShortcutIcon className="mr-1" />
             Get shortcut
           </Button>

@@ -14,7 +14,7 @@ export function AppearanceTab() {
   const trigger = useAppHaptics();
 
   return (
-    <div className="flex flex-col gap-2 py-4 px-1">
+    <div className="flex flex-col gap-2 py-4 px-1 overflow-hidden">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold">Theme</h3>
@@ -57,8 +57,8 @@ export function AppearanceTab() {
         <Switch
           checked={soundEnabled}
           onCheckedChange={() => {
-            setSoundEnabled(!soundEnabled);
             trigger("light");
+            setSoundEnabled(!soundEnabled);
           }}
         />
       </div>
