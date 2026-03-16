@@ -14,6 +14,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
+import { useAppHaptics } from "@/context/haptics-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -37,6 +38,7 @@ export function ChatInput({ user }: { user: User }) {
   const [minimized, setMinimized] = useState(false);
   const { capture } = useCaptureContext();
   const { attachedTils, removeTil, clearAttachment } = useChatContext();
+  const { trigger } = useAppHaptics();
 
   const {
     messages,
@@ -141,7 +143,10 @@ export function ChatInput({ user }: { user: User }) {
                 size="icon"
                 variant="ghost"
                 className="rounded-full"
-                onClick={() => setMinimized(false)}
+                onClick={() => {
+                  trigger("light");
+                  setMinimized(false);
+                }}
                 aria-label="Expand chat"
               >
                 <Maximize2 className="size-3.5" aria-hidden="true" />
@@ -151,6 +156,7 @@ export function ChatInput({ user }: { user: User }) {
                 className="rounded-full"
                 variant="ghost"
                 onClick={() => {
+                  trigger("light");
                   clearAttachment();
                   setMessages([]);
                   setInput("");
@@ -170,7 +176,10 @@ export function ChatInput({ user }: { user: User }) {
           <div>
             <div className="flex items-center justify-end gap-1 mb-2">
               <Button
-                onClick={() => setMinimized(true)}
+                onClick={() => {
+                  trigger("light");
+                  setMinimized(true);
+                }}
                 size="xs"
                 className="rounded-full"
                 variant="secondary"
@@ -180,6 +189,7 @@ export function ChatInput({ user }: { user: User }) {
               </Button>
               <Button
                 onClick={() => {
+                  trigger("light");
                   clearAttachment();
                   setMessages([]);
                   setInput("");
