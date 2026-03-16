@@ -24,7 +24,7 @@ function DropdownMenuTrigger({
     <MenuPrimitive.Trigger
       data-slot="dropdown-menu-trigger"
       className={cn(
-        "outline-none rounded-full focus-visible:border-ring cursor-pointer focus-visible:ring-3 focus-visible:ring-ring/50",
+        "outline-none rounded-full cursor-pointer border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-[transform,color,background-color,border-color,box-shadow] duration-150 outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-98",
         className,
       )}
       {...props}

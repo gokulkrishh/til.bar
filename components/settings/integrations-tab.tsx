@@ -77,10 +77,10 @@ export function IntegrationsTab() {
               <code className="text-xs font-mono text-foreground">
                 mcp_sk_••••••••
               </code>
-              {keyExists && <Check className="size-3 text-green-500" />}
+              {keyExists && <Check className="size-4 text-green-700" />}
             </div>
             <Button
-              variant={confirmRegenerate ? "destructive" : "outline"}
+              variant={confirmRegenerate ? "destructive" : "secondary"}
               disabled={isPending || keyLoading}
               onClick={handleGenerateKey}
             >
@@ -111,7 +111,7 @@ export function IntegrationsTab() {
                 {newKey}
               </code>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="icon"
                 aria-label="Copy API key"
                 onClick={async () => {
@@ -123,11 +123,7 @@ export function IntegrationsTab() {
                   setTimeout(() => setKeyCopied(false), 2000);
                 }}
               >
-                {keyCopied ? (
-                  <Check className="size-4" />
-                ) : (
-                  <Copy className="size-4" />
-                )}
+                {keyCopied ? <Check /> : <Copy />}
               </Button>
             </div>
           </div>
@@ -139,31 +135,31 @@ export function IntegrationsTab() {
       {/* MCP Section */}
       <div className="flex flex-col gap-3">
         <h3 className="text-sm font-semibold">MCP</h3>
-        <ol className="list-decimal list-inside space-y-1 px-2 text-sm text-muted-foreground">
-          <li>Create an API key above</li>
-          <li>Copy the server URL below with your key</li>
+        <ol className="list-decimal list-inside space-y-1 px-2 text-sm text-foreground">
+          <li>Create an API key above.</li>
+          <li>Copy the server URL below with your key.</li>
           <li>
             Add it in{" "}
             <span className="font-medium text-foreground">
               Claude.ai &rarr; Settings &rarr; Connectors
             </span>{" "}
-            or your MCP client config
+            or your MCP client config.
           </li>
         </ol>
         <div className="rounded-md bg-muted px-3 py-2.5">
-          <code className="text-xs font-mono text-muted-foreground break-all">
+          <code className="text-xs font-mono text-foreground break-all">
             {MCP_URL}?api_key={"<your-api-key>"}
           </code>
         </div>
-        <div className="flex flex-col gap-2">
-          <h4 className="text-xs font-medium text-muted-foreground">
+        <div className="flex flex-col gap-3">
+          <h4 className="text-xs font-medium text-foreground">
             Available tools
           </h4>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {MCP_TOOLS.map((tool) => (
               <code
                 key={tool.name}
-                className="rounded-md bg-muted px-2 py-1 text-xs font-mono text-muted-foreground"
+                className="rounded-md bg-muted px-2 py-1 text-xs font-mono text-foreground"
                 title={tool.description}
               >
                 {tool.name}
@@ -178,29 +174,30 @@ export function IntegrationsTab() {
       {/* iOS Shortcut Section */}
       <div className="flex flex-col gap-3">
         <h3 className="text-sm font-semibold">iOS Shortcut</h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-foreground">
           Save links from any app using the iOS Share Sheet.
         </p>
-        <ol className="list-decimal list-inside space-y-1 px-2 text-sm text-muted-foreground">
-          <li>Create an API key above</li>
-          <li>Add the shortcut using the button below</li>
+        <ol className="list-decimal list-inside space-y-1 px-2 text-sm text-foreground">
+          <li>Create an API key above.</li>
+          <li>Add the shortcut using the button below.</li>
           <li>
             Open the shortcut, find the{" "}
             <span className="font-medium text-foreground">Authorization</span>{" "}
             header and replace the API key with yours:{" "}
-            <code className="text-xs font-mono text-foreground">
+            <code className="text-xs font-medium font-mono text-foreground">
               Bearer mcp_sk_…
             </code>
           </li>
         </ol>
         <a
+          tabIndex={-1}
           className="flex w-full justify-end"
           href={IOS_SHORTCUT_URL}
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button variant="outline" className="w-fit">
-            <ShortcutIcon className="mr-1" />
+          <Button variant="secondary" className="w-fit">
+            <ShortcutIcon />
             Get shortcut
           </Button>
         </a>

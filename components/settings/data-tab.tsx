@@ -69,7 +69,7 @@ export function DataTab({
             Download all your links as JSON
           </p>
         </div>
-        <Button variant="outline" onClick={handleExport} disabled={isPending}>
+        <Button variant="secondary" onClick={handleExport} disabled={isPending}>
           {isPending ? <Spinner /> : <Download />}
           Export
         </Button>

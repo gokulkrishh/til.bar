@@ -22,7 +22,7 @@ export function AppearanceTab() {
             Choose your preferred theme
           </p>
         </div>
-        <div className="flex border border-muted rounded-full p-0.75 w-fit">
+        <div className="flex bg-muted/50 border border-input rounded-full p-0.75 w-fit">
           {[
             { value: "system", label: "System", icon: Monitor },
             { value: "light", label: "Light", icon: Sun },
@@ -30,7 +30,7 @@ export function AppearanceTab() {
           ].map(({ value, label, icon: Icon }) => (
             <button
               className={cn(
-                "rounded-full cursor-pointer p-1.25 hover:bg-muted hit-area-1",
+                "rounded-full cursor-pointer p-1.5 hover:bg-muted hit-area-1",
                 {
                   "bg-primary text-white hover:bg-primary": theme === value,
                 },
@@ -42,7 +42,7 @@ export function AppearanceTab() {
               }}
               aria-label={label}
             >
-              <Icon className="size-3" />
+              <Icon className="size-4" />
             </button>
           ))}
         </div>

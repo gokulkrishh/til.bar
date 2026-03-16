@@ -57,7 +57,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
 
   return (
     <motion.li
-      className="flex items-center group/row gap-4 py-1 pl-2 pr-1 rounded-lg hover:bg-muted/50 transition-colors duration-150"
+      className="flex items-center group/row gap-4 py-1 pl-2 pr-1 rounded-lg hover:bg-muted transition-all ease-in duration-150"
       initial="idle"
       whileHover="hover"
     >
