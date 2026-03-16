@@ -38,7 +38,7 @@ export function ChatInput({ user }: { user: User }) {
   const [minimized, setMinimized] = useState(false);
   const { capture } = useCaptureContext();
   const { attachedTils, removeTil, clearAttachment } = useChatContext();
-  const { trigger } = useAppHaptics();
+  const trigger = useAppHaptics();
 
   const {
     messages,
