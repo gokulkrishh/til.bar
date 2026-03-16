@@ -210,7 +210,10 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className={cn({ "border-t border-border/30 pt-4 mt-2": index > 0 })}
+            className={cn({
+              "border-t border-border/30 pt-4 mt-2": index > 0,
+              "mb-16": index === groups.length - 1,
+            })}
           >
             <TilGroup
               label={group.label}

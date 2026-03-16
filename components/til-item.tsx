@@ -111,7 +111,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
         >
           <span className="truncate">{til.title ?? til.url}</span>
           <motion.span
-            className="shrink-0 text-muted-foreground group-hover/row:text-foreground"
+            className="shrink-0 text-muted-foreground hidden md:inline-flex group-hover/row:text-foreground"
             variants={{
               idle: { scale: 1 },
               hover: { scale: 1.1 },
@@ -123,7 +123,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity">
+        <span className="text-xs text-muted-foreground hidden group-hover/row:inline-flex transition-opacity">
           {formatDate(til.created_at)}
         </span>
         <TilActions
