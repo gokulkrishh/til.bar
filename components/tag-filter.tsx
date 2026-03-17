@@ -32,12 +32,13 @@ export function TagFilter({
     <div
       role="group"
       aria-label="Filter by tag"
-      className="flex items-center gap-1.5 flex-wrap pb-2"
+      className="flex items-center gap-2 flex-wrap pb-2"
     >
       {tags.map((tag) => (
         <Badge
           key={tag.id}
           variant={activeTags.has(tag.name) ? "secondary" : "outline"}
+          size="lg"
           onClick={() => {
             click();
             trigger("light");
@@ -64,7 +65,7 @@ export function TagFilter({
             onClear();
           }}
           variant="ghost"
-          className="rounded-full h-6.5"
+          className="rounded-full h-7.5"
         >
           <X className="size-3" aria-hidden="true" />
           Clear
