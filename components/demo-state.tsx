@@ -20,10 +20,10 @@ export function DemoState() {
           </div>
           <div className="flex flex-col gap-2">
             <h1 className="text-foreground text-balance text-2xl font-bold tracking-tight">
-              Your links, organized by AI.
+              Your personal TIL log, organized by AI.
             </h1>
             <p className="text-muted-foreground">
-              Paste a URL and let AI tag and organize it for you.
+              Save links from your browser, phone, or ask any AI.
             </p>
           </div>
           <SignIn />

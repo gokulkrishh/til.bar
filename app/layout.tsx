@@ -25,13 +25,13 @@ const geistMono = Geist_Mono({
 });
 
 const title = "til.bar";
-const description = "Capture all your links in one place.";
+const description = "Your personal TIL log, organized by AI.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://til.bar"),
   alternates: { canonical: "/" },
-  title: "til.bar",
-  description: "Capture all your links in one place.",
+  title,
+  description,
   twitter: {
     card: "summary_large_image",
     title,
