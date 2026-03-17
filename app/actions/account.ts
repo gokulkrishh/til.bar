@@ -79,12 +79,14 @@ export async function exportTils() {
 
   const { data: tils, error } = await supabase
     .from("tils")
-    .select()
+    .select("*, tags:til_tags(...tags(*))")
     .order("created_at", { ascending: false });
 
   if (error) {
     return { error: "Couldn't export your links" };
   }
+
+  console.log("tils", tils);
 
   return { data: tils };
 }
