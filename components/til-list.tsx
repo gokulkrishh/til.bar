@@ -10,7 +10,6 @@ import { usePendingTils, useCaptureContext } from "@/context/capture-provider";
 import { useSearch } from "@/context/search-provider";
 import { searchTils } from "@/app/actions/tils";
 import type { TilWithTags } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import { useAppHaptics } from "@/context/haptics-provider";
 
 function groupByRelativeDay(tils: TilWithTags[]) {
@@ -126,10 +125,7 @@ export function TilList({
 
   // Server-side search (debounce handled by SearchProvider)
   useEffect(() => {
-    if (!debouncedQuery && activeTags.size === 0) {
-      setFilteredTils(null);
-      return;
-    }
+    if (!debouncedQuery && activeTags.size === 0) return;
 
     startTransition(async () => {
       const result = await searchTils({
@@ -152,15 +148,12 @@ export function TilList({
       } else {
         next.add(name);
       }
-      // Reset to initial data when all tags cleared
-      if (next.size === 0 && !debouncedQuery) {
-        setFilteredTils(null);
-      }
       return next;
     });
   };
 
-  const displayTils = filteredTils ?? initialTils;
+  // Show filtered results when filtering, initial data otherwise
+  const displayTils = hasAnyFilter ? (filteredTils ?? []) : initialTils;
   const isEmpty = initialTils.length === 0 && !hasPending;
 
   if (isEmpty) {
@@ -193,7 +186,6 @@ export function TilList({
         onClear={() => {
           trigger("light");
           setActiveTags(new Set());
-          if (!debouncedQuery) setFilteredTils(null);
         }}
       />
       <AnimatePresence mode="popLayout" initial={false}>

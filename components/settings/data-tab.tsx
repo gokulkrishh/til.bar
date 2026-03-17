@@ -12,11 +12,6 @@ import { Badge } from "../ui/badge";
 import { parseImportJson, IMPORT_PROMPT } from "@/lib/ai-import";
 import type { ImportLink } from "@/lib/ai-import";
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-});
-
 export function DataTab({
   onOpenChange,
 }: {
