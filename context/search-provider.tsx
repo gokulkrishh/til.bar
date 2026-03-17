@@ -6,6 +6,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
 } from "react";
 
@@ -53,11 +54,10 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     setDebouncedQuery("");
   }, []);
 
-  return (
-    <SearchContext
-      value={{ query, debouncedQuery, setQuery, isOpen, open, close }}
-    >
-      {children}
-    </SearchContext>
+  const value = useMemo(
+    () => ({ query, debouncedQuery, setQuery, isOpen, open, close }),
+    [query, debouncedQuery, setQuery, isOpen, open, close],
   );
+
+  return <SearchContext value={value}>{children}</SearchContext>;
 }

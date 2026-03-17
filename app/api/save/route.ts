@@ -1,6 +1,6 @@
 import { after } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { authenticateApiKey } from "@/lib/auth";
+import { authenticateToken } from "@/lib/auth";
 import { fetchMetadata } from "@/lib/metadata";
 import { generateMetadata } from "@/lib/ai-metadata";
 import { generateTags } from "@/lib/ai-tags";
@@ -21,24 +21,7 @@ async function getAuthenticatedUserId(req: Request): Promise<string | null> {
 
   if (!token) return null;
 
-  // API key auth (mcp_sk_... prefix)
-  if (token.startsWith("mcp_sk_")) {
-    return authenticateApiKey(token);
-  }
-
-  // Supabase access token auth (from extension or other clients)
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(token);
-
-  if (error || !user) return null;
-  return user.id;
+  return authenticateToken(token);
 }
 
 export async function POST(req: Request) {

@@ -51,34 +51,34 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const [playDrop] = useAppSound(drop003Sound);
   const trigger = useAppHaptics();
 
+  const removeDeletedId = useCallback((id: string) => {
+    setDeletedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
   const optimisticDelete = useCallback(
     (id: string) => {
       setDeletedIds((prev) => new Set(prev).add(id));
 
       startTransition(async () => {
         const result = await deleteTil(id);
-        toast.success("Deleted");
 
         if (result.error) {
-          setDeletedIds((prev) => {
-            const next = new Set(prev);
-            next.delete(id);
-            return next;
-          });
+          removeDeletedId(id);
           toast.error(result.error);
         } else {
+          toast.success("Deleted");
           startTransition(() => {
             router.refresh();
-            setDeletedIds((prev) => {
-              const next = new Set(prev);
-              next.delete(id);
-              return next;
-            });
+            removeDeletedId(id);
           });
         }
       });
     },
-    [router, startTransition],
+    [router, startTransition, removeDeletedId],
   );
 
   const capture = useCallback(

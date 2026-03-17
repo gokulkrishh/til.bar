@@ -3,7 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { fetchMetadata } from "@/lib/metadata";
-import { authenticateApiKey } from "@/lib/auth";
+import { authenticateToken } from "@/lib/auth";
 
 function createMcpServer(userId: string) {
   const supabase = createClient(
@@ -299,27 +299,10 @@ async function authenticateRequest(
     (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
   if (!token) return null;
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+  const userId = await authenticateToken(token);
+  if (!userId) return null;
 
-  // API key auth: tokens prefixed with mcp_sk_ are looked up by hash
-  if (token.startsWith("mcp_sk_")) {
-    const userId = await authenticateApiKey(token);
-    if (!userId) return null;
-    return { userId, token };
-  }
-
-  // Fall back to Supabase session token (browser users)
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(token);
-
-  if (error || !user) return null;
-
-  return { userId: user.id, token };
+  return { userId, token };
 }
 
 async function handleMcpRequest(req: Request): Promise<Response> {
