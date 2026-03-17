@@ -72,9 +72,15 @@ export async function POST(req: Request) {
   }
 
   // Background: fetch metadata, enhance with AI, generate tags
+  // Each step is independent so one failure doesn't block the rest
   after(async () => {
+    let title: string | null = null;
+    let description: string | null = null;
+
     try {
-      let { title, description } = await fetchMetadata(url);
+      const meta = await fetchMetadata(url);
+      title = meta.title;
+      description = meta.description;
 
       if (title || description) {
         await supabase
@@ -82,7 +88,11 @@ export async function POST(req: Request) {
           .update({ title, description })
           .eq("id", data.id);
       }
+    } catch (err) {
+      console.error("[api/save] Metadata fetch failed:", err);
+    }
 
+    try {
       const aiMeta = await generateMetadata(url, title, description);
 
       if (aiMeta) {
@@ -93,10 +103,14 @@ export async function POST(req: Request) {
           .update({ title, description })
           .eq("id", data.id);
       }
+    } catch (err) {
+      console.error("[api/save] AI metadata failed:", err);
+    }
 
+    try {
       await generateTags({ ...data, title, description });
     } catch (err) {
-      console.error("[api/save] Background work failed:", err);
+      console.error("[api/save] Tag generation failed:", err);
     }
   });
 

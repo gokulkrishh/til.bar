@@ -5,6 +5,17 @@ import { createClient } from "@supabase/supabase-js";
 import { fetchMetadata } from "@/lib/metadata";
 import { authenticateToken } from "@/lib/auth";
 
+function mcpText(text: string) {
+  return { content: [{ type: "text" as const, text }] };
+}
+
+function mcpError(message: string) {
+  return {
+    content: [{ type: "text" as const, text: `Error: ${message}` }],
+    isError: true,
+  };
+}
+
 function createMcpServer(userId: string) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,21 +67,11 @@ function createMcpServer(userId: string) {
           .range(from, from + pageSize - 1),
       ]);
 
-      if (error) {
-        return {
-          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
-          isError: true,
-        };
-      }
+      if (error) return mcpError(error.message);
 
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Showing ${data.length} of ${count ?? "unknown"} total links (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
-          },
-        ],
-      };
+      return mcpText(
+        `Showing ${data.length} of ${count ?? "unknown"} total links (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
+      );
     },
   );
 
@@ -112,32 +113,13 @@ function createMcpServer(userId: string) {
           .range(from, from + pageSize - 1),
       ]);
 
-      if (error) {
-        return {
-          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
-          isError: true,
-        };
-      }
+      if (error) return mcpError(error.message);
+      if (data.length === 0)
+        return mcpText(`No links found matching "${query}"`);
 
-      if (data.length === 0) {
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `No links found matching "${query}"`,
-            },
-          ],
-        };
-      }
-
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Showing ${data.length} of ${count ?? "unknown"} matches for "${query}" (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
-          },
-        ],
-      };
+      return mcpText(
+        `Showing ${data.length} of ${count ?? "unknown"} matches for "${query}" (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
+      );
     },
   );
 
@@ -157,18 +139,8 @@ function createMcpServer(userId: string) {
         .eq("user_id", userId)
         .single();
 
-      if (error) {
-        return {
-          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
-          isError: true,
-        };
-      }
-
-      return {
-        content: [
-          { type: "text" as const, text: JSON.stringify(data, null, 2) },
-        ],
-      };
+      if (error) return mcpError(error.message);
+      return mcpText(JSON.stringify(data, null, 2));
     },
   );
 
@@ -190,21 +162,10 @@ function createMcpServer(userId: string) {
         .select()
         .single();
 
-      if (error) {
-        return {
-          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
-          isError: true,
-        };
-      }
-
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Saved: ${title ?? url}\n${JSON.stringify(data, null, 2)}`,
-          },
-        ],
-      };
+      if (error) return mcpError(error.message);
+      return mcpText(
+        `Saved: ${title ?? url}\n${JSON.stringify(data, null, 2)}`,
+      );
     },
   );
 
@@ -223,11 +184,7 @@ function createMcpServer(userId: string) {
       if (title !== undefined) update.title = title;
       if (description !== undefined) update.description = description;
 
-      if (Object.keys(update).length === 0) {
-        return {
-          content: [{ type: "text" as const, text: "Nothing to update" }],
-        };
-      }
+      if (Object.keys(update).length === 0) return mcpText("Nothing to update");
 
       const { data, error } = await supabase
         .from("tils")
@@ -237,21 +194,8 @@ function createMcpServer(userId: string) {
         .select()
         .single();
 
-      if (error) {
-        return {
-          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
-          isError: true,
-        };
-      }
-
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Updated:\n${JSON.stringify(data, null, 2)}`,
-          },
-        ],
-      };
+      if (error) return mcpError(error.message);
+      return mcpText(`Updated:\n${JSON.stringify(data, null, 2)}`);
     },
   );
 
@@ -270,16 +214,8 @@ function createMcpServer(userId: string) {
         .eq("id", id)
         .eq("user_id", userId);
 
-      if (error) {
-        return {
-          content: [{ type: "text" as const, text: `Error: ${error.message}` }],
-          isError: true,
-        };
-      }
-
-      return {
-        content: [{ type: "text" as const, text: `Deleted link ${id}` }],
-      };
+      if (error) return mcpError(error.message);
+      return mcpText(`Deleted link ${id}`);
     },
   );
 
