@@ -28,7 +28,7 @@ export function SettingsDialog({
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="account" className="min-h-0 flex flex-col">
+        <Tabs defaultValue="account" className="min-h-0 flex flex-col gap-0">
           <div className="w-full overflow-x-auto pb-2">
             <TabsList variant="line">
               <TabsTrigger value="account">Account</TabsTrigger>

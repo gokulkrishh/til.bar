@@ -20,7 +20,7 @@ function Toaster(props: React.ComponentProps<typeof Sonner>) {
           margin: "0 auto",
           borderRadius: "9999px",
         } as React.CSSProperties,
-        className: "[&_[data-icon]>svg]:size-4",
+        className: "[&_[data-icon]>svg]:size-4 [&_[data-icon]]:shrink-0",
       }}
       {...props}
     />

@@ -31,7 +31,13 @@ function formatDate(dateStr: string) {
   return dateFormatter.format(new Date(dateStr));
 }
 
-export function TilItem({ til }: { til: TilWithTags }) {
+export function TilItem({
+  til,
+  showDate = false,
+}: {
+  til: TilWithTags;
+  showDate?: boolean;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [play] = useSound(clickSoftSound);
@@ -123,7 +129,12 @@ export function TilItem({ til }: { til: TilWithTags }) {
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-muted-foreground md:opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 inline-flex">
+        <span
+          className={cn(
+            "text-xs text-muted-foreground transition-opacity duration-150 inline-flex",
+            { "md:opacity-0 group-hover/row:opacity-100": !showDate },
+          )}
+        >
           {formatDate(til.created_at)}
         </span>
         <TilActions

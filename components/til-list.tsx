@@ -84,7 +84,7 @@ function TilGroup({
         </span>
       </h2>
       <LayoutGroup>
-        <ul className="relative flex flex-col gap-0.25">
+        <ul className="relative flex flex-col gap-px">
           {pendingItems.map((til) => (
             <TilItemSkeleton key={til.id} url={til.url} />
           ))}
@@ -98,7 +98,7 @@ function TilGroup({
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <TilItem til={til} />
+                <TilItem til={til} showDate={label === "Earlier"} />
               </motion.div>
             ))}
           </AnimatePresence>

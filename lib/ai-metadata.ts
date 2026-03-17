@@ -27,24 +27,18 @@ export async function generateMetadata(
     const { output } = await generateText({
       model: openrouter("google/gemini-3.1-flash-lite-preview"),
       output: Output.object({ schema: metadataSchema }),
-      system: `You evaluate web link metadata and improve it if needed.
-
-First, judge whether the existing title and description are "good" or "bad":
-- "good" = title clearly describes the CONTENT of the link (what it's about, what it does, what it teaches).
-- "bad" = title is generic, just a username/platform name, missing, or doesn't describe the content. Examples: "Chris Tate (@ctatedev) on X", "John on Instagram", "r/programming", "Post by someone".
-
-If quality is "good", still return the original title and description as-is.
-If quality is "bad", generate improved versions:
-- Title should describe the CONTENT, not the author or platform.
-- Title must be SHORT — max 50 characters. Be concise, not verbose.
-- Description should be 1 sentence summarizing the key point, max 160 characters.
-- Infer content from the URL path, slug, or any available metadata.
-- If there's truly not enough info, use "[Author] post on [Platform]" as last resort.
-- Do NOT include hashtags or @ mentions in the title.`,
+      system: `You clean and improve web link metadata.
+Rules:
+- Title: max 50 chars, no emojis, no Unicode, no hashtags, no @ mentions
+- Title must describe the CONTENT (what it's about, what it does, what it teaches)
+- NOT the author or platform — never "John Doe on X" or "r/programming"
+- Description: 1 sentence, max 120 chars, key point only
+- If truly no info: "[Author] post on [Platform]"
+- Infer from URL slug/path when metadata is missing`,
       prompt: parts.join("\n"),
     });
 
-    if (!output || output.quality === "good") return null;
+    if (!output) return null;
 
     return {
       title: output.title,
