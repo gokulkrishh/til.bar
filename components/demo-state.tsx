@@ -10,7 +10,11 @@ export function DemoState() {
         className="pointer-events-none select-none max-h-80"
         aria-hidden="true"
       >
-        <TilList tils={DEMO_ITEMS} />
+        <TilList
+          tils={DEMO_ITEMS}
+          totalCount={DEMO_ITEMS.length}
+          allTags={[]}
+        />
       </div>
 
       <div className="absolute flex-1 inset-0 m-auto flex flex-col items-center justify-center bg-linear-to-t from-background via-background/95 to-background/60">

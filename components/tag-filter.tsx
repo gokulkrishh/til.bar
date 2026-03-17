@@ -36,10 +36,10 @@ export function TagFilter({
     >
       {tags.map((tag) => (
         <Badge
-          className="hover:bg-muted"
+          className="inline-flex gap-2"
           size="lg"
           key={tag.id}
-          variant={activeTags.has(tag.name) ? "secondary" : "outline"}
+          variant={activeTags.has(tag.name) ? "default" : "outline"}
           onClick={() => {
             click();
             trigger("light");
@@ -48,7 +48,7 @@ export function TagFilter({
         >
           {tag.name}
           <span
-            className={cn("ml-1.5 font-mono tabular-nums text-[0.625rem]", {
+            className={cn("font-mono tabular-nums text-[0.625rem]", {
               "text-muted-foreground/60": !activeTags.has(tag.name),
             })}
           >

@@ -1,19 +1,17 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { TilItem } from "@/components/til-item";
 import { TilItemSkeleton } from "@/components/til-item-skeleton";
 import { EmptyState } from "@/components/empty-state";
-import { TagFilter } from "@/components/tag-filter";
+import { TagFilter, type TagInfo } from "@/components/tag-filter";
 import { usePendingTils, useCaptureContext } from "@/context/capture-provider";
 import { useSearch } from "@/context/search-provider";
+import { searchTils } from "@/app/actions/tils";
 import type { TilWithTags } from "@/lib/types";
-import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppHaptics } from "@/context/haptics-provider";
-
-const DEFAULT_VISIBLE = 5;
 
 function groupByRelativeDay(tils: TilWithTags[]) {
   const today = new Date();
@@ -46,7 +44,6 @@ function groupByRelativeDay(tils: TilWithTags[]) {
     }
   }
 
-  // Maintain order: Today, Yesterday, Earlier
   for (const label of ["Today", "Yesterday", "Earlier"]) {
     const tils = map.get(label);
     if (tils) {
@@ -63,17 +60,17 @@ function TilGroup({
   label,
   tils,
   pendingItems = [],
+  totalCount: totalCountOverride,
 }: {
   label: string;
   tils: TilWithTags[];
   pendingItems?: PendingItem[];
+  totalCount?: number;
 }) {
-  const [showAll, setShowAll] = useState(false);
   const { deletedIds } = useCaptureContext();
   const activeTils = tils.filter((til) => !deletedIds.has(til.id));
-  const totalCount = activeTils.length + pendingItems.length;
-  const hasMore = activeTils.length > DEFAULT_VISIBLE;
-  const visible = showAll ? activeTils : activeTils.slice(0, DEFAULT_VISIBLE);
+  const totalCount =
+    totalCountOverride ?? activeTils.length + pendingItems.length;
 
   return (
     <motion.section layout="position" transition={{ duration: 0.2 }}>
@@ -89,7 +86,7 @@ function TilGroup({
             <TilItemSkeleton key={til.id} url={til.url} />
           ))}
           <AnimatePresence initial={false}>
-            {visible.map((til) => (
+            {activeTils.map((til) => (
               <motion.div
                 key={til.id}
                 layout
@@ -102,82 +99,49 @@ function TilGroup({
               </motion.div>
             ))}
           </AnimatePresence>
-          {hasMore && !showAll && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background to-transparent" />
-          )}
         </ul>
       </LayoutGroup>
-      {hasMore && (
-        <button
-          onClick={() => setShowAll(!showAll)}
-          aria-expanded={showAll}
-          className="text-muted-foreground hover:text-foreground flex w-full cursor-pointer items-center justify-center gap-1 py-2 text-xs transition-colors duration-150 active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-        >
-          <ChevronDown
-            aria-hidden="true"
-            className={cn("transition-transform duration-150 size-3.5", {
-              "rotate-180": showAll,
-            })}
-          />
-          {showAll
-            ? "Show less"
-            : `Show ${activeTils.length - DEFAULT_VISIBLE} more`}
-        </button>
-      )}
     </motion.section>
   );
 }
 
-export function TilList({ tils }: { tils: TilWithTags[] }) {
+export function TilList({
+  tils: initialTils,
+  totalCount,
+  allTags,
+}: {
+  tils: TilWithTags[];
+  totalCount: number;
+  allTags: TagInfo[];
+}) {
   const pendingTils = usePendingTils();
-  const { query } = useSearch();
+  const { debouncedQuery } = useSearch();
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
+  const [filteredTils, setFilteredTils] = useState<TilWithTags[] | null>(null);
+  const [, startTransition] = useTransition();
   const trigger = useAppHaptics();
+
   const hasPending = pendingTils.length > 0;
-  const isEmpty = tils.length === 0 && !hasPending;
+  const hasAnyFilter = activeTags.size > 0 || !!debouncedQuery;
 
-  const allTags = useMemo(() => {
-    const tags = tils.flatMap((til) => til.tags ?? []);
-    const counts = Map.groupBy(tags, (tag) => tag.name);
+  // Server-side search (debounce handled by SearchProvider)
+  useEffect(() => {
+    if (!debouncedQuery && activeTags.size === 0) {
+      setFilteredTils(null);
+      return;
+    }
 
-    return [...counts.entries()]
-      .map(([name, group]) => ({
-        id: group[0].id,
-        name,
-        count: group.length,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }, [tils]);
+    startTransition(async () => {
+      const result = await searchTils({
+        query: debouncedQuery || undefined,
+        tags: activeTags.size > 0 ? [...activeTags] : undefined,
+      });
 
-  if (isEmpty) {
-    return <EmptyState />;
-  }
-
-  const hasTagFilter = activeTags.size > 0;
-  const searchLower = query.toLowerCase();
-  const hasAnyFilter = hasTagFilter || !!query;
-
-  let filtered = tils;
-  if (hasTagFilter) {
-    filtered = filtered.filter((til) =>
-      til.tags?.some((t) => activeTags.has(t.name)),
-    );
-  }
-  if (query) {
-    filtered = filtered.filter(
-      (til) =>
-        til.title?.toLowerCase().includes(searchLower) ||
-        til.url.toLowerCase().includes(searchLower) ||
-        til.description?.toLowerCase().includes(searchLower),
-    );
-  }
-
-  const groups = groupByRelativeDay(filtered);
-
-  // If there are pending items but no "Today" group yet, create one
-  if (hasPending && !hasAnyFilter && !groups.some((g) => g.label === "Today")) {
-    groups.unshift({ label: "Today", tils: [] });
-  }
+      if ("data" in result) {
+        setFilteredTils(result.data ?? []);
+      }
+    });
+  }, [debouncedQuery, activeTags]);
 
   const toggleTag = (name: string) => {
     trigger("light");
@@ -188,9 +152,37 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
       } else {
         next.add(name);
       }
+      // Reset to initial data when all tags cleared
+      if (next.size === 0 && !debouncedQuery) {
+        setFilteredTils(null);
+      }
       return next;
     });
   };
+
+  const displayTils = filteredTils ?? initialTils;
+  const isEmpty = initialTils.length === 0 && !hasPending;
+
+  if (isEmpty) {
+    return <EmptyState />;
+  }
+
+  const groups = groupByRelativeDay(displayTils);
+  const hiddenCount = totalCount - initialTils.length;
+
+  // Compute real total for "Earlier" when not filtering
+  const groupTotals: Record<string, number | undefined> = {};
+  if (!hasAnyFilter && hiddenCount > 0) {
+    const todayCount =
+      groups.find((g) => g.label === "Today")?.tils.length ?? 0;
+    const yesterdayCount =
+      groups.find((g) => g.label === "Yesterday")?.tils.length ?? 0;
+    groupTotals["Earlier"] = totalCount - todayCount - yesterdayCount;
+  }
+
+  if (hasPending && !hasAnyFilter && !groups.some((g) => g.label === "Today")) {
+    groups.unshift({ label: "Today", tils: [] });
+  }
 
   return (
     <div className="flex flex-col gap-4 py-4 pb-20">
@@ -201,6 +193,7 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
         onClear={() => {
           trigger("light");
           setActiveTags(new Set());
+          if (!debouncedQuery) setFilteredTils(null);
         }}
       />
       <AnimatePresence mode="popLayout" initial={false}>
@@ -211,11 +204,11 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className={cn({ "mb-16": index === groups.length - 1 })}
           >
             <TilGroup
               label={group.label}
               tils={group.tils}
+              totalCount={groupTotals[group.label]}
               pendingItems={
                 group.label === "Today" && !hasAnyFilter ? pendingTils : []
               }
@@ -242,6 +235,14 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {!hasAnyFilter && hiddenCount > 0 ? (
+        <p className="text-xs text-muted-foreground text-center mb-8">
+          Use search or tags to find {hiddenCount} more
+        </p>
+      ) : (
+        <div className="h-16" />
+      )}
     </div>
   );
 }

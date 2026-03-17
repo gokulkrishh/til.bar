@@ -8,6 +8,70 @@ import { fetchMetadata } from "@/lib/metadata";
 import { generateTags } from "@/lib/ai-tags";
 import { generateMetadata } from "@/lib/ai-metadata";
 
+export async function searchTils({
+  query,
+  tags,
+}: {
+  query?: string;
+  tags?: string[];
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Sign in to search" };
+  }
+
+  let q = supabase
+    .from("tils")
+    .select("*, tags:til_tags(...tags(*))")
+    .order("created_at", { ascending: false });
+
+  if (query) {
+    const escaped = query.replace(/%/g, "\\%");
+    q = q.or(
+      `title.ilike.%${escaped}%,url.ilike.%${escaped}%,description.ilike.%${escaped}%`,
+    );
+  }
+
+  if (tags?.length) {
+    const { data: tagRows } = await supabase
+      .from("tags")
+      .select("id")
+      .eq("user_id", user.id)
+      .in("name", tags);
+
+    if (tagRows?.length) {
+      const tagIds = tagRows.map((t) => t.id);
+      const { data: tilIds } = await supabase
+        .from("til_tags")
+        .select("til_id")
+        .in("tag_id", tagIds);
+
+      if (tilIds?.length) {
+        q = q.in(
+          "id",
+          tilIds.map((t) => t.til_id),
+        );
+      } else {
+        return { data: [] };
+      }
+    } else {
+      return { data: [] };
+    }
+  }
+
+  const { data, error } = await q;
+
+  if (error) {
+    return { error: "Search failed" };
+  }
+
+  return { data: data ?? [] };
+}
+
 function extractUrl(text: string): string | null {
   const urlRegex = /https?:\/\/[^\s]+/;
   const match = text.match(urlRegex);

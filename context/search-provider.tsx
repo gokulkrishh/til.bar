@@ -1,9 +1,17 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 
 type SearchContextType = {
   query: string;
+  debouncedQuery: string;
   setQuery: (query: string) => void;
   isOpen: boolean;
   open: () => void;
@@ -12,6 +20,7 @@ type SearchContextType = {
 
 const SearchContext = createContext<SearchContextType>({
   query: "",
+  debouncedQuery: "",
   setQuery: () => {},
   isOpen: false,
   open: () => {},
@@ -24,17 +33,30 @@ export function useSearch() {
 
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [query]);
 
   const open = useCallback(() => setIsOpen(true), []);
 
   const close = useCallback(() => {
     setIsOpen(false);
     setQuery("");
+    setDebouncedQuery("");
   }, []);
 
   return (
-    <SearchContext value={{ query, setQuery, isOpen, open, close }}>
+    <SearchContext
+      value={{ query, debouncedQuery, setQuery, isOpen, open, close }}
+    >
       {children}
     </SearchContext>
   );
