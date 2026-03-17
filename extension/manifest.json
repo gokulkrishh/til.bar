@@ -3,7 +3,13 @@
   "name": "til.bar",
   "description": "Save links to til.bar with one click",
   "version": "1.0.0",
-  "permissions": ["activeTab", "contextMenus", "storage", "identity"],
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "storage",
+    "identity",
+    "scripting"
+  ],
   "background": {
     "service_worker": "background.js"
   },

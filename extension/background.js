@@ -20,6 +20,7 @@ chrome.action.onClicked.addListener(async (tab) => {
       const result = await saveLink(tab.url, session);
       if (result.success) {
         setBadge("✓", "#22C55E", tab.id);
+        playSound(tab.id);
       } else {
         setBadge("!", "#EF4444", tab.id);
       }
@@ -52,6 +53,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const result = await saveLink(url, session);
       if (result.success) {
         setBadge("✓", "#22C55E", tab?.id);
+        playSound(tab?.id);
       } else {
         setBadge("!", "#EF4444", tab?.id);
       }
@@ -211,7 +213,7 @@ async function saveLink(url, session) {
   }
 }
 
-// --- Badge ---
+// --- Badge & Sound ---
 
 function setBadge(text, color, tabId) {
   chrome.action.setBadgeText({ text, tabId });
@@ -220,4 +222,14 @@ function setBadge(text, color, tabId) {
 
 function clearBadge(tabId) {
   chrome.action.setBadgeText({ text: "", tabId });
+}
+
+function playSound(tabId) {
+  if (!tabId) return;
+  chrome.scripting
+    .executeScript({
+      target: { tabId },
+      func: () => new Audio("https://til.bar/sounds/success.mp3").play(),
+    })
+    .catch(() => {});
 }
