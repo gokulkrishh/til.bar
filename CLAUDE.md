@@ -75,6 +75,7 @@
 - **CSS units**: Prefer `rem` over `px` where possible. Use Tailwind spacing scale (`w-30`) instead of arbitrary values (`w-[120px]`).
 - **Tailwind classes**: Prefer named utility classes over arbitrary values when an equivalent exists (e.g. `blur-xs` not `blur-[4px]`, `rounded-lg` not `rounded-[8px]`).
 - **Base UI components**: shadcn uses `@base-ui/react`, NOT Radix. No `asChild` prop — use `render` prop or pass children directly. Triggers (Menu, Tooltip, Dialog) render their own element. Check `components/ui/*.tsx` for the actual API before using.
+- **React event types**: Never use `React.FormEvent` (deprecated). Use `React.SyntheticEvent` for form submit handlers, `React.ChangeEvent` for input changes.
 
 ## 10. Tooling
 

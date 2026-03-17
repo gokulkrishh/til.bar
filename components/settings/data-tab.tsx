@@ -4,13 +4,12 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { exportTils, deleteAccount } from "@/app/actions/account";
-import { confirmImport } from "@/app/actions/import";
 import { toast } from "sonner";
-import { Check, Copy, Download, Trash2, Upload, X } from "lucide-react";
+import { Check, Copy, Download, Trash2, Upload } from "lucide-react";
 import { Spinner } from "../ui/spinner";
-import { Badge } from "../ui/badge";
 import { parseImportJson, IMPORT_PROMPT } from "@/lib/ai-import";
 import type { ImportLink } from "@/lib/ai-import";
+import { ImportPreview } from "./import-preview";
 
 export function DataTab({
   onOpenChange,
@@ -18,7 +17,6 @@ export function DataTab({
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
-  const [isImporting, startImportTransition] = useTransition();
   const [isExporting, startExportTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -73,26 +71,6 @@ export function DataTab({
     }
   };
 
-  const handleConfirmImport = () => {
-    if (!previewLinks) return;
-
-    startImportTransition(async () => {
-      const result = await confirmImport(previewLinks);
-
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success(`Imported ${result.count} links`);
-      setPreviewLinks(null);
-    });
-  };
-
-  const handleCancelImport = () => {
-    setPreviewLinks(null);
-  };
-
   const handleDeleteAccount = () => {
     if (!confirmDelete) {
       setConfirmDelete(true);
@@ -117,83 +95,10 @@ export function DataTab({
 
   if (previewLinks) {
     return (
-      <div className="flex flex-col gap-3 py-4 px-1">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">
-            Preview ({previewLinks.length} links)
-          </h3>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleCancelImport}
-            disabled={isImporting}
-          >
-            <X />
-          </Button>
-        </div>
-        <div className="max-h-64 overflow-y-auto rounded-md border">
-          <table className="w-full text-xs">
-            <thead className="sticky top-0 bg-background border-b">
-              <tr>
-                <th className="text-left p-2 font-medium">Title</th>
-                <th className="text-left p-2 font-medium">Tags</th>
-                <th className="text-left p-2 font-medium">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {previewLinks.map((link, i) => (
-                <tr key={i}>
-                  <td className="p-2 max-w-48">
-                    <div className="truncate">{link.title || "—"}</div>
-                    <div className="truncate text-blue-700 text-[0.625rem]">
-                      {link.url}
-                    </div>
-                  </td>
-                  <td className="p-2">
-                    {link.tags?.length ? (
-                      <div className="flex flex-wrap gap-1">
-                        {link.tags.map((tag) => (
-                          <Badge
-                            key={tag}
-                            variant="secondary"
-                            className="text-[0.625rem]"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </td>
-                  <td className="p-2 text-muted-foreground whitespace-nowrap">
-                    {link.created_at
-                      ? new Intl.DateTimeFormat(undefined, {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        }).format(new Date(link.created_at))
-                      : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="flex gap-2 justify-end">
-          <Button
-            variant="secondary"
-            onClick={handleCancelImport}
-            disabled={isImporting}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmImport} disabled={isImporting}>
-            {isImporting ? <Spinner /> : null}
-            Import {previewLinks.length} links
-          </Button>
-        </div>
-      </div>
+      <ImportPreview
+        links={previewLinks}
+        onClose={() => setPreviewLinks(null)}
+      />
     );
   }
 
@@ -218,9 +123,8 @@ export function DataTab({
             <Button
               variant="secondary"
               onClick={() => fileInputRef.current?.click()}
-              disabled={isImporting}
             >
-              {isImporting ? <Spinner /> : <Upload />}
+              <Upload />
               Upload JSON
             </Button>
           </div>
