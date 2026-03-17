@@ -14,7 +14,10 @@
 - **Toasts**: Sonner
 - **Haptics**: web-haptics (vibration feedback for meaningful interactions)
 - **DB / Auth**: Supabase (`@supabase/supabase-js`, `@supabase/ssr`)
-- **MCP**: Remote HTTP MCP server (`@modelcontextprotocol/sdk`) with Supabase OAuth — tools: `get_link`, `save_link`, `update_link`, `delete_link`
+- **MCP**: Remote HTTP MCP server (`@modelcontextprotocol/sdk`) with API key auth — tools: `list_links`, `search_links`, `get_link`, `save_link`, `update_link`, `delete_link` (with pagination support)
+- **Chrome Extension**: `extension/` directory — saves current tab URL via `/api/save` endpoint, uses Supabase access token auth with `/api/auth/refresh` for token renewal
+- **iOS Shortcut**: Save links via `/api/save` endpoint with API key auth
+- **Import/Export**: Settings > Data tab — export all links as JSON, import via JSON file with AI prompt for format conversion. Import preserves tags and dates.
 - **Animation**: Motion (framer-motion) for spring physics and fluid interactions
 - **Sound**: soundcn (Web Audio API, inline base64 sounds via shadcn registry)
 - **Path alias**: `@/*` maps to project root

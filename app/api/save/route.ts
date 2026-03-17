@@ -4,15 +4,15 @@ import { authenticateApiKey } from "@/lib/auth";
 import { fetchMetadata } from "@/lib/metadata";
 import { generateMetadata } from "@/lib/ai-metadata";
 import { generateTags } from "@/lib/ai-tags";
+import { getCorsHeaders } from "@/lib/cors";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-export async function OPTIONS() {
-  return new Response(null, { status: 204, headers: corsHeaders });
+export async function OPTIONS(req: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: getCorsHeaders(req, {
+      allowedHeaders: "Content-Type, Authorization",
+    }),
+  });
 }
 
 async function getAuthenticatedUserId(req: Request): Promise<string | null> {
@@ -42,12 +42,15 @@ async function getAuthenticatedUserId(req: Request): Promise<string | null> {
 }
 
 export async function POST(req: Request) {
+  const headers = getCorsHeaders(req, {
+    allowedHeaders: "Content-Type, Authorization",
+  });
   const userId = await getAuthenticatedUserId(req);
 
   if (!userId) {
     return Response.json(
       { error: "Not authenticated" },
-      { status: 401, headers: corsHeaders },
+      { status: 401, headers },
     );
   }
 
@@ -57,17 +60,14 @@ export async function POST(req: Request) {
   } catch {
     return Response.json(
       { error: "Invalid JSON body" },
-      { status: 400, headers: corsHeaders },
+      { status: 400, headers },
     );
   }
 
   const url = body.url;
 
   if (!url || !/^https?:\/\/.+/.test(url)) {
-    return Response.json(
-      { error: "Invalid URL" },
-      { status: 400, headers: corsHeaders },
-    );
+    return Response.json({ error: "Invalid URL" }, { status: 400, headers });
   }
 
   const supabase = createClient(
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
   if (error) {
     return Response.json(
       { error: "Failed to save link" },
-      { status: 500, headers: corsHeaders },
+      { status: 500, headers },
     );
   }
 
@@ -117,8 +117,5 @@ export async function POST(req: Request) {
     }
   });
 
-  return Response.json(
-    { id: data.id, url: data.url },
-    { headers: corsHeaders },
-  );
+  return Response.json({ id: data.id, url: data.url }, { headers });
 }
