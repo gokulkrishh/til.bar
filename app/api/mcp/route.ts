@@ -26,21 +26,35 @@ function createMcpServer(userId: string) {
   server.registerTool(
     "list_links",
     {
-      description: "List all saved links, most recent first",
+      description:
+        "List saved links, most recent first. Supports pagination via offset.",
       inputSchema: {
         limit: z
           .number()
           .optional()
           .describe("Max number of links to return (default 50)"),
+        offset: z
+          .number()
+          .optional()
+          .describe("Number of links to skip for pagination (default 0)"),
       },
     },
-    async ({ limit }) => {
-      const { data, error } = await supabase
-        .from("tils")
-        .select()
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(limit ?? 50);
+    async ({ limit, offset }) => {
+      const pageSize = limit ?? 50;
+      const from = offset ?? 0;
+
+      const [{ count }, { data, error }] = await Promise.all([
+        supabase
+          .from("tils")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("tils")
+          .select()
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1),
+      ]);
 
       if (error) {
         return {
@@ -53,7 +67,7 @@ function createMcpServer(userId: string) {
         content: [
           {
             type: "text" as const,
-            text: `${data.length} links:\n${JSON.stringify(data, null, 2)}`,
+            text: `Showing ${data.length} of ${count ?? "unknown"} total links (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
           },
         ],
       };
@@ -64,26 +78,39 @@ function createMcpServer(userId: string) {
     "search_links",
     {
       description:
-        "Search saved links by keyword. Matches against title, description, and URL.",
+        "Search saved links by keyword. Matches against title, description, and URL. Supports pagination.",
       inputSchema: {
         query: z.string().describe("Search keyword"),
         limit: z
           .number()
           .optional()
           .describe("Max number of results to return (default 20)"),
+        offset: z
+          .number()
+          .optional()
+          .describe("Number of results to skip for pagination (default 0)"),
       },
     },
-    async ({ query, limit }) => {
+    async ({ query, limit, offset }) => {
+      const pageSize = limit ?? 20;
+      const from = offset ?? 0;
       const pattern = `%${query}%`;
-      const { data, error } = await supabase
-        .from("tils")
-        .select()
-        .eq("user_id", userId)
-        .or(
-          `title.ilike.${pattern},description.ilike.${pattern},url.ilike.${pattern}`,
-        )
-        .order("created_at", { ascending: false })
-        .limit(limit ?? 20);
+      const filter = `title.ilike.${pattern},description.ilike.${pattern},url.ilike.${pattern}`;
+
+      const [{ count }, { data, error }] = await Promise.all([
+        supabase
+          .from("tils")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .or(filter),
+        supabase
+          .from("tils")
+          .select()
+          .eq("user_id", userId)
+          .or(filter)
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1),
+      ]);
 
       if (error) {
         return {
@@ -107,7 +134,7 @@ function createMcpServer(userId: string) {
         content: [
           {
             type: "text" as const,
-            text: `${data.length} links matching "${query}":\n${JSON.stringify(data, null, 2)}`,
+            text: `Showing ${data.length} of ${count ?? "unknown"} matches for "${query}" (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
           },
         ],
       };
