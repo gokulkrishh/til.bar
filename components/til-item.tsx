@@ -57,7 +57,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
 
   return (
     <motion.li
-      className="flex items-center group/row gap-4 py-1 pl-2 pr-1 rounded-lg hover:bg-muted transition-all ease-in duration-150"
+      className="flex items-center group/row gap-4 py-1 pl-2 pr-1 rounded-lg hover:bg-muted transition-[background-color] ease-in duration-150"
       initial="idle"
       whileHover="hover"
     >
@@ -77,8 +77,8 @@ export function TilItem({ til }: { til: TilWithTags }) {
                 width={16}
                 height={16}
                 className={cn(
-                  "size-4 rounded-sm transition-opacity group-hover/favicon:opacity-0",
-                  { "opacity-0": isPending },
+                  "size-4 rounded-sm transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)] group-hover/favicon:scale-[0.25] group-hover/favicon:opacity-0 ",
+                  { "scale-[0.25] opacity-0": isPending },
                 )}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
@@ -88,16 +88,16 @@ export function TilItem({ til }: { til: TilWithTags }) {
               <Globe
                 aria-hidden="true"
                 className={cn(
-                  "size-4 transition-opacity group-hover/favicon:opacity-0",
-                  { "opacity-0": isPending },
+                  "size-4 transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)] group-hover/favicon:scale-[0.25] group-hover/favicon:opacity-0",
+                  { "scale-[0.25] opacity-0": isPending },
                 )}
               />
             )}
             <RefreshCw
               aria-hidden="true"
               className={cn(
-                "absolute inset-0 size-4 opacity-0 transition-opacity group-hover/favicon:opacity-100",
-                { "opacity-100 animate-spin": isPending },
+                "absolute inset-0 size-4 scale-[0.25] opacity-0 transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)] group-hover/favicon:scale-100 group-hover/favicon:opacity-100 group-hover/favicon:blur-0",
+                { "scale-100 opacity-100 animate-spin": isPending },
               )}
             />
           </TooltipTrigger>
@@ -111,7 +111,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
         >
           <span className="truncate">{til.title ?? til.url}</span>
           <motion.span
-            className="shrink-0 text-muted-foreground hidden md:inline-flex group-hover/row:text-foreground"
+            className="shrink-0 text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity duration-150"
             variants={{
               idle: { scale: 1 },
               hover: { scale: 1.1 },

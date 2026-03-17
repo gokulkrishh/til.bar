@@ -15,6 +15,7 @@ import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
 import { cn } from "@/lib/utils";
+import { Kbd } from "./ui/kbd";
 
 export function TilActions({
   tilId,
@@ -46,6 +47,9 @@ export function TilActions({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
+        onClick={() => {
+          trigger("light");
+        }}
         className={cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
           "rounded-full hit-area-2",
