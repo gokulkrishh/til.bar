@@ -15,7 +15,7 @@ import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
 import { cn } from "@/lib/utils";
-import { Kbd } from "./ui/kbd";
+import { drop003Sound } from "@/sounds/drop-003";
 
 export function TilActions({
   tilId,
@@ -28,6 +28,7 @@ export function TilActions({
 }) {
   const [open, setOpen] = useState(false);
   const [playClick] = useAppSound(clickSoftSound);
+  const [playDelete] = useAppSound(drop003Sound);
   const { optimisticDelete } = useCaptureContext();
   const { attachTil } = useChatContext();
   const trigger = useAppHaptics();
@@ -39,7 +40,7 @@ export function TilActions({
   };
 
   const handleDelete = () => {
-    playClick();
+    playDelete();
     trigger("heavy");
     optimisticDelete(tilId);
   };
@@ -47,6 +48,7 @@ export function TilActions({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
+        aria-label="Actions"
         onClick={() => {
           trigger("light");
         }}
@@ -55,7 +57,7 @@ export function TilActions({
           "rounded-full hit-area-2",
         )}
       >
-        <MoreVertical />
+        <MoreVertical aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
         <DropdownMenuItem
@@ -65,15 +67,15 @@ export function TilActions({
             setOpen(false);
           }}
         >
-          <MessageCircle />
+          <MessageCircle aria-hidden="true" />
           Ask AI
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
-          <Link2 />
+          <Link2 aria-hidden="true" />
           Copy link
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onClick={handleDelete}>
-          <Trash2 />
+          <Trash2 aria-hidden="true" />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

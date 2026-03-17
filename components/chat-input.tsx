@@ -177,7 +177,7 @@ export function ChatInput({ user }: { user: User }) {
                 variant="secondary"
                 className="gap-1 flex flex-row"
               >
-                <LinkIcon className="size-2.75 mr-0.75" />
+                <LinkIcon aria-hidden="true" className="size-2.75 mr-0.75" />
                 <Link href={til.url} target="_blank">
                   <span className="truncate">{til.title ?? til.url}</span>
                 </Link>

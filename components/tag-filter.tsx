@@ -36,6 +36,8 @@ export function TagFilter({
     >
       {tags.map((tag) => (
         <Badge
+          className="hover:bg-muted"
+          size="lg"
           key={tag.id}
           variant={activeTags.has(tag.name) ? "secondary" : "outline"}
           onClick={() => {

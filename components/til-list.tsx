@@ -84,7 +84,7 @@ function TilGroup({
         </span>
       </h2>
       <LayoutGroup>
-        <ul className="relative flex flex-col gap-0.5">
+        <ul className="relative flex flex-col gap-0.25">
           {pendingItems.map((til) => (
             <TilItemSkeleton key={til.id} url={til.url} />
           ))}
@@ -193,7 +193,7 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
   };
 
   return (
-    <div className="flex flex-col gap-2 py-4 pb-20">
+    <div className="flex flex-col gap-4 py-4 pb-20">
       <TagFilter
         tags={allTags}
         activeTags={activeTags}
@@ -211,10 +211,7 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className={cn({
-              "border-t border-border/30 pt-4 mt-2": index > 0,
-              "mb-16": index === groups.length - 1,
-            })}
+            className={cn({ "mb-16": index === groups.length - 1 })}
           >
             <TilGroup
               label={group.label}
@@ -223,6 +220,10 @@ export function TilList({ tils }: { tils: TilWithTags[] }) {
                 group.label === "Today" && !hasAnyFilter ? pendingTils : []
               }
             />
+
+            {groups.length > 1 && index !== groups.length - 1 && (
+              <div className="border-t border-border/30 mt-5 w-[95%]" />
+            )}
           </motion.div>
         ))}
 

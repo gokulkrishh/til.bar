@@ -57,7 +57,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
 
   return (
     <motion.li
-      className="flex items-center group/row gap-4 py-1 pl-2 pr-1 rounded-lg hover:bg-muted transition-[background-color] ease-in duration-150"
+      className="flex items-center group/row gap-4 py-1 pl-2 pr-1 rounded-lg hover:bg-muted/60 transition-[background-color] ease-in duration-150"
       initial="idle"
       whileHover="hover"
     >
@@ -123,7 +123,7 @@ export function TilItem({ til }: { til: TilWithTags }) {
         </Link>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-xs text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 inline-flex">
+        <span className="text-xs text-muted-foreground md:opacity-0 group-hover/row:opacity-100 transition-opacity duration-150 inline-flex">
           {formatDate(til.created_at)}
         </span>
         <TilActions

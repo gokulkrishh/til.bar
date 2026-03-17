@@ -23,3 +23,11 @@ export async function Header() {
     </header>
   );
 }
+
+export const FallbackHeader = () => (
+  <header className="flex items-center justify-between h-20">
+    <Link className="active:scale-98 inline-flex items-center" href="/">
+      <Image priority src="/logo.svg" alt="TIL Logo" width={28} height={28} />
+    </Link>
+  </header>
+);

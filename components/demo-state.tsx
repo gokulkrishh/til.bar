@@ -16,7 +16,7 @@ export function DemoState() {
       <div className="absolute flex-1 inset-0 m-auto flex flex-col items-center justify-center bg-linear-to-t from-background via-background/95 to-background/60">
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="flex size-14 items-center justify-center bg-muted rounded-full p-2">
-            <LinkIcon />
+            <LinkIcon aria-hidden="true" />
           </div>
           <div className="flex flex-col gap-2">
             <h2 className="text-foreground text-balance text-2xl font-bold tracking-tight">

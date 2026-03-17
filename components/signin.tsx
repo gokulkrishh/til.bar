@@ -30,7 +30,7 @@ export default function SignIn() {
 
   return (
     <Button size="lg" variant="outline" onClick={handleSignIn}>
-      {loading ? <Spinner /> : <GoogleIcon />}
+      {loading ? <Spinner /> : <GoogleIcon aria-hidden="true" />}
       Sign in
     </Button>
   );

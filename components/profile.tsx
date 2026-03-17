@@ -37,7 +37,7 @@ export function Profile({ user }: { user: User }) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger aria-label="Account menu">
           <Avatar className="size-9 hit-area-2">
             <AvatarImage
               className="object-contain"
@@ -49,11 +49,11 @@ export function Profile({ user }: { user: User }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
-            <Settings />
+            <Settings aria-hidden="true" />
             Settings
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleSignOut}>
-            <LogOut />
+            <LogOut aria-hidden="true" />
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>

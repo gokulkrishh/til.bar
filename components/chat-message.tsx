@@ -81,7 +81,7 @@ export function ChatMessageLoading() {
           AI
         </AvatarFallback>
       </Avatar>
-      <div className="bg-muted rounded-2xl px-3 py-2">Thinking...</div>
+      <div className="bg-muted rounded-2xl px-3 py-2">Thinking…</div>
     </div>
   );
 }

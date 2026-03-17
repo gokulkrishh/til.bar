@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="flex flex-col gap-6 py-10 max-w-xl mx-auto text-sm text-muted-foreground leading-relaxed">
+    <div className="flex flex-col gap-6 py-10 max-w-2xl mx-auto text-sm text-muted-foreground leading-relaxed">
       <h1 className="text-xl font-semibold text-foreground">Privacy Policy</h1>
       <p className="text-xs text-muted-foreground">
         Last updated: March 15, 2026
