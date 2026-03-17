@@ -19,9 +19,9 @@ export function DemoState() {
             <LinkIcon aria-hidden="true" />
           </div>
           <div className="flex flex-col gap-2">
-            <h2 className="text-foreground text-balance text-2xl font-bold tracking-tight">
+            <h1 className="text-foreground text-balance text-2xl font-bold tracking-tight">
               Your links, organized by AI.
-            </h2>
+            </h1>
             <p className="text-muted-foreground">
               Paste a URL and let AI tag and organize it for you.
             </p>
