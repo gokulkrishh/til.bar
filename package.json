@@ -45,6 +45,7 @@
     "eslint": "^9.27.0",
     "eslint-config-next": "^16.1.7",
     "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
@@ -56,5 +57,8 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,json,css,md}": "prettier --write --cache"
+  }
 }
