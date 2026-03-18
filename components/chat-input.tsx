@@ -8,7 +8,7 @@ import {
   type ClipboardEvent,
 } from "react";
 import { AnimatePresence } from "motion/react";
-import { ArrowUp, LinkIcon, X } from "lucide-react";
+import { ArrowUp, LinkIcon, Square, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCaptureContext } from "@/context/capture-provider";
@@ -220,16 +220,27 @@ export function ChatInput({ user }: { user: User }) {
                 spellCheck={false}
                 className="h-12 w-full rounded-full border bg-transparent shadow-sm px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               />
-              <Button
-                type="submit"
-                disabled={isLoading}
-                aria-label={isChatMode ? "Send message" : "Save link"}
-                className={cn(
-                  "absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center",
-                )}
-              >
-                <ArrowUp aria-hidden="true" />
-              </Button>
+              {isLoading ? (
+                <Button
+                  type="button"
+                  onClick={stop}
+                  aria-label="Stop generating"
+                  className="absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center"
+                >
+                  <Square
+                    aria-hidden="true"
+                    className="size-3.5 fill-current"
+                  />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  aria-label={isChatMode ? "Send message" : "Save link"}
+                  className="absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center"
+                >
+                  <ArrowUp aria-hidden="true" />
+                </Button>
+              )}
             </form>
             <p
               className={cn("text-center text-xs text-muted-foreground mt-2", {
