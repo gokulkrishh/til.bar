@@ -6,23 +6,27 @@ const SESSION_KEY = "supabase_session";
 const BADGE_CLEAR_MS = 2000;
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: "save-to-tilbar",
-    title: "Save to til.bar",
-    contexts: ["link", "page"],
-  });
+  if (chrome.contextMenus) {
+    chrome.contextMenus.create({
+      id: "save-to-tilbar",
+      title: "Save to til.bar",
+      contexts: ["link", "page"],
+    });
+  }
 });
 
 chrome.action.onClicked.addListener(async (tab) => {
   await handleSave(tab.url, tab.id, true);
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== "save-to-tilbar") return;
-  const url = info.linkUrl || info.pageUrl;
-  if (!url) return;
-  await handleSave(url, tab?.id, false);
-});
+if (chrome.contextMenus) {
+  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if (info.menuItemId !== "save-to-tilbar") return;
+    const url = info.linkUrl || info.pageUrl;
+    if (!url) return;
+    await handleSave(url, tab?.id, true);
+  });
+}
 
 async function handleSave(url, tabId, canAuthenticate) {
   try {
@@ -39,11 +43,19 @@ async function handleSave(url, tabId, canAuthenticate) {
       }
     } else if (canAuthenticate) {
       const auth = await authenticate();
-      setBadge(
-        auth.success ? "✓" : "!",
-        auth.success ? "#22C55E" : "#EF4444",
-        tabId,
-      );
+      if (auth.success) {
+        setBadge("…", "#6B7280", tabId);
+        const newSession = await getSession();
+        const result = await saveLink(url, newSession);
+        if (result.success) {
+          setBadge("✓", "#22C55E", tabId);
+          playSound(tabId);
+        } else {
+          setBadge("!", "#EF4444", tabId);
+        }
+      } else {
+        setBadge("!", "#EF4444", tabId);
+      }
     } else {
       setBadge("!", "#EF4444", tabId);
     }
@@ -183,7 +195,6 @@ async function saveLink(url, session) {
     }
 
     if (response.status === 401) {
-      // Use dedup promise to avoid redundant refresh calls
       if (!refreshPromise) {
         refreshPromise = refreshSession(session);
       }
