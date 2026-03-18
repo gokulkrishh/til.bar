@@ -43,7 +43,10 @@ export function SettingsDialog({
           <TabsContent value="appearance">
             <AppearanceTab />
           </TabsContent>
-          <TabsContent value="integrations">
+          <TabsContent
+            value="integrations"
+            className="max-h-120 overflow-y-auto"
+          >
             <IntegrationsTab />
           </TabsContent>
           <TabsContent value="data">

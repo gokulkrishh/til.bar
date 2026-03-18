@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { generateApiKey, hasApiKey } from "@/app/actions/account";
 import { toast } from "sonner";
-import { Check, Copy, RefreshCw } from "lucide-react";
+import { Check, Chrome, Copy, RefreshCw } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { MCP_TOOLS } from "@/lib/mcp-tools";
 import { clickSoftSound } from "@/sounds/click-soft";
@@ -16,6 +16,9 @@ const MCP_URL = "https://til.bar/api/mcp";
 
 const IOS_SHORTCUT_URL =
   "https://www.icloud.com/shortcuts/7c183f258862457bb639ca1ee537d277";
+
+const CHROME_EXTENSION_URL =
+  "https://chromewebstore.google.com/detail/tilbar/gbicabbfdiljmpcoemmejcibpmgichgp";
 
 export function IntegrationsTab() {
   const [isPending, startTransition] = useTransition();
@@ -59,13 +62,13 @@ export function IntegrationsTab() {
       if (result.key) {
         setNewKey(result.key);
         setKeyExists(true);
-        toast.success("New API key created");
+        toast.success("API key created");
       }
     });
   };
 
   return (
-    <div className="flex flex-col gap-6 py-4 px-1">
+    <div className="flex flex-col gap-6 py-4 pl-1 pr-3">
       {/* API Key — shared across integrations */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center min-h-8 justify-between">
@@ -104,7 +107,7 @@ export function IntegrationsTab() {
         {newKey && (
           <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
             <p className="text-xs font-medium text-yellow-700 dark:text-yellow-400 mb-2">
-              Copy this key — it&apos;s only shown once
+              Save this key now — you won&apos;t see it again
             </p>
             <div className="flex items-center gap-2">
               <code className="flex-1 rounded-md bg-muted px-3 py-2.5 text-xs font-mono truncate">
@@ -119,7 +122,7 @@ export function IntegrationsTab() {
                   trigger("light");
                   await navigator.clipboard.writeText(newKey);
                   setKeyCopied(true);
-                  toast.success("Copied to clipboard");
+                  toast.success("Copied");
                   setTimeout(() => setKeyCopied(false), 2000);
                 }}
               >
@@ -130,11 +133,11 @@ export function IntegrationsTab() {
         )}
       </div>
 
-      <hr className="border-border" />
+      <div className="border-t border-border" />
 
       {/* MCP Section */}
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold">MCP</h3>
+        <h3 className="text-sm font-semibold">Model Context Protocol (MCP)</h3>
         <ol className="list-decimal list-inside space-y-1 px-2 text-sm text-foreground">
           <li>Create an API key above.</li>
           <li>Copy the server URL below with your key.</li>
@@ -169,13 +172,35 @@ export function IntegrationsTab() {
         </div>
       </div>
 
-      <hr className="border-border" />
+      <div className="border-t border-border" />
+
+      {/* Chrome Extension Section */}
+      <div className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">Chrome Extension</h3>
+        <p className="text-sm text-foreground">
+          Save any page or link with one click.
+        </p>
+        <a
+          tabIndex={-1}
+          className="self-end"
+          href={CHROME_EXTENSION_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button variant="secondary">
+            <Chrome />
+            Get extension
+          </Button>
+        </a>
+      </div>
+
+      <div className="border-t border-border" />
 
       {/* iOS Shortcut Section */}
       <div className="flex flex-col gap-3">
         <h3 className="text-sm font-semibold">iOS Shortcut</h3>
         <p className="text-sm text-foreground">
-          Save links from any app using the iOS Share Sheet.
+          Save links from any app via the Share Sheet.
         </p>
         <ol className="list-decimal list-inside space-y-1 px-2 text-sm text-foreground">
           <li>Create an API key above.</li>
@@ -191,12 +216,12 @@ export function IntegrationsTab() {
         </ol>
         <a
           tabIndex={-1}
-          className="flex w-full justify-end"
+          className="self-end"
           href={IOS_SHORTCUT_URL}
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button variant="secondary" className="w-fit">
+          <Button variant="secondary">
             <ShortcutIcon />
             Get shortcut
           </Button>
