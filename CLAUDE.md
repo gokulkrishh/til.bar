@@ -5,6 +5,17 @@
 > Read `PRODUCT.md` for product context, features, and design decisions.
 > Read `TECH.md` for tech stack and tooling details.
 
+## Core Principles
+
+- When I ask you to fix or change something, make the code change directly. Do not fetch external docs, run exploratory commands, or build infrastructure unless I explicitly ask for it. Bias toward minimal, targeted edits.
+- When I ask you to update CLAUDE.md or project config, do it proactively as part of the task — don't wait for me to remind you.
+- **Read docs first**: Before implementing with any external library, read the official docs (via WebFetch). Never guess at APIs, type names, or method signatures — especially for AI SDK, Base UI, or any library with major version changes.
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
+- **Supabase awareness**: Always consider RLS policies when touching Supabase queries. When caching data, ensure realtime updates still work correctly.
+- Never propose hacky workarounds (setTimeout polling, admin client bypasses, RLS workarounds). If a clean solution isn't obvious, explain the tradeoffs and ask before implementing.
+
 ## Workflow Orchestration
 
 ### 1. Plan Mode Default
@@ -49,7 +60,7 @@
 - Zero context switching required from the user
 - Go fix failing CI tests without being told how
 
-## 7. Task Management
+## Task Management
 
 1. **Plan First**: Write plan to `tasks/todo.md` with checkable items
 2. **Verify Plan**: Check in before starting implementation
@@ -58,26 +69,19 @@
 5. **Document Results**: Add review section to `tasks/todo.md`
 6. **Capture Lessons**: Update `tasks/lessons.md` after corrections
 
-## 8. Core Principles
-
-- **Read docs first**: Before implementing with any external library, read the official docs (via WebFetch). Never guess at APIs, type names, or method signatures — especially for AI SDK, Base UI, or any library with major version changes.
-
-- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
-- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
-- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.
-
-## 9. Code Conventions
+## Code Conventions
 
 - **Conditional classes**: Always use `cn()` from `@/lib/utils` with object syntax: `cn("static-classes", { "conditional-class": condition })`. Never use template literal ternaries.
 - **Server actions**: Return `{ error: string }` for known errors, never throw. Use human-friendly messages, never expose raw DB errors.
 - **Formatting**: Use `Intl.DateTimeFormat` / `Intl.NumberFormat` with `undefined` locale, not `toLocaleDateString`. Create formatter instances outside functions for reuse.
 - **Toasts**: Use Sonner (`toast.success` / `toast.error`), not custom toast UI.
 - **CSS units**: Prefer `rem` over `px` where possible. Use Tailwind spacing scale (`w-30`) instead of arbitrary values (`w-[120px]`).
-- **Tailwind classes**: Prefer named utility classes over arbitrary values when an equivalent exists (e.g. `blur-xs` not `blur-[4px]`, `rounded-lg` not `rounded-[8px]`).
+- **Tailwind classes**: Prefer named utility classes over arbitrary values when an equivalent exists (e.g. `blur-xs` not `blur-[4px]`, `rounded-lg` not `rounded-[8px]`). Use design system tokens (spacing, colors) — avoid arbitrary values like `p-[13px]`.
+- **Styling scope**: Do not add custom fonts or make large aesthetic changes (font families, color schemes) unless explicitly requested. Keep UI changes scoped to what was asked.
 - **Base UI components**: shadcn uses `@base-ui/react`, NOT Radix. No `asChild` prop — use `render` prop or pass children directly. Triggers (Menu, Tooltip, Dialog) render their own element. Check `components/ui/*.tsx` for the actual API before using.
 - **React event types**: Never use `React.FormEvent` (deprecated). Use `React.SyntheticEvent` for form submit handlers, `React.ChangeEvent` for input changes.
 
-## 10. Tooling
+## Tooling
 
 - **Package manager**: Always use `bun` (never npm, yarn, or pnpm)
 - **Icons**: Use `lucide-react` for all icons
