@@ -81,6 +81,11 @@
 - **Base UI components**: shadcn uses `@base-ui/react`, NOT Radix. No `asChild` prop — use `render` prop or pass children directly. Triggers (Menu, Tooltip, Dialog) render their own element. Check `components/ui/*.tsx` for the actual API before using.
 - **React event types**: Never use `React.FormEvent` (deprecated). Use `React.SyntheticEvent` for form submit handlers, `React.ChangeEvent` for input changes.
 
+## Environment Variables
+
+- **`env.example`** is the source of truth for which env vars are needed. Always keep it in sync.
+- When adding or removing a variable in `.env.local`, update `env.example` in the same change (without real values).
+
 ## Tooling
 
 - **Package manager**: Always use `bun` (never npm, yarn, or pnpm)

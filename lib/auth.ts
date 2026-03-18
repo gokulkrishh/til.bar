@@ -1,5 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { jwtVerify } from "jose";
+
+const jwtSecret = new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET!);
 
 export async function authenticateApiKey(
   token: string,
@@ -29,17 +32,10 @@ export async function authenticateToken(token: string): Promise<string | null> {
     return authenticateApiKey(token);
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser(token);
-
-  if (error || !user) return null;
-
-  return user.id;
+  try {
+    const { payload } = await jwtVerify(token, jwtSecret);
+    return (payload.sub as string) ?? null;
+  } catch {
+    return null;
+  }
 }

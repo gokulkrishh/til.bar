@@ -25,5 +25,11 @@
       "32": "icons/32.png"
     },
     "default_title": "Save to til.bar"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["sounds/success.mp3"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

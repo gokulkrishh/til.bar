@@ -226,10 +226,12 @@ function clearBadge(tabId) {
 
 function playSound(tabId) {
   if (!tabId) return;
+  const soundUrl = chrome.runtime.getURL("sounds/success.mp3");
   chrome.scripting
     .executeScript({
       target: { tabId },
-      func: () => new Audio("https://til.bar/sounds/success.mp3").play(),
+      func: (url) => new Audio(url).play(),
+      args: [soundUrl],
     })
     .catch(() => {});
 }

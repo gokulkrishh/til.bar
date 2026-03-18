@@ -3,11 +3,12 @@
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": "npx tsc --noEmit --pretty 2>&1 | head -20"
-      },
-      {
-        "matcher": "Edit|Write",
         "hooks": [
+          {
+            "type": "command",
+            "matcher": "Edit|Write",
+            "command": "npx tsc --noEmit --pretty 2>&1 | head -20"
+          },
           {
             "type": "command",
             "command": "bunx prettier --write \"$CLAUDE_FILE_PATHS\" 2>/dev/null; bunx eslint --fix \"$CLAUDE_FILE_PATHS\" 2>/dev/null; exit 0"
