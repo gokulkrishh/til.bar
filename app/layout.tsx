@@ -77,11 +77,16 @@ export const metadata: Metadata = {
       media: "(prefers-color-scheme: dark)",
       url: "/logo-light.svg",
     },
+    {
+      rel: "icon",
+      url: "/favicon-96x96.png",
+      type: "image/png",
+    },
   ],
   appleWebApp: {
     title,
     statusBarStyle: "default",
-    startupImage: ["/512.png"],
+    startupImage: ["/apple-touch-icon.png"],
   },
 };
 
