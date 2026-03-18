@@ -1,7 +1,7 @@
 import { LinkIcon } from "lucide-react";
 import SignIn from "@/components/signin";
 import { TilList } from "./til-list";
-import { DEMO_ITEMS } from "./data/demo";
+import { DEMO_ITEMS, DEMO_TAGS } from "./data/demo";
 
 export function DemoState() {
   return (
@@ -13,7 +13,7 @@ export function DemoState() {
         <TilList
           tils={DEMO_ITEMS}
           totalCount={DEMO_ITEMS.length}
-          allTags={[]}
+          allTags={DEMO_TAGS}
         />
       </div>
 

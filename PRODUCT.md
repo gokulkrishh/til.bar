@@ -89,6 +89,12 @@ Installable as a Progressive Web App. Service worker caches assets (cache-first)
 
 ---
 
+## Demo State
+
+When logged out, the landing page shows a blurred, non-interactive preview of TIL items behind a sign-in prompt. Demo data lives in `components/data/demo.ts` and uses `new Date()` to generate dynamic timestamps — items always appear grouped under Today, Yesterday, and Earlier. Tags are pre-assigned to showcase the AI categorisation feature.
+
+---
+
 ## Design Principles
 
 **Capture is the product.** Optimise for the 10-second paste, not for browsing.
