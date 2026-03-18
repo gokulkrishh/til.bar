@@ -12,60 +12,48 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.action.onClicked.addListener(async (tab) => {
-  try {
-    const session = await getSession();
-
-    if (session) {
-      setBadge("…", "#6B7280", tab.id);
-      const result = await saveLink(tab.url, session);
-      if (result.success) {
-        setBadge("✓", "#22C55E", tab.id);
-        playSound(tab.id);
-      } else {
-        setBadge("!", "#EF4444", tab.id);
-      }
-      setTimeout(() => clearBadge(tab.id), 2000);
-    } else {
-      const auth = await authenticate();
-      if (auth.success) {
-        setBadge("✓", "#22C55E", tab.id);
-        setTimeout(() => clearBadge(tab.id), 2000);
-      } else {
-        setBadge("!", "#EF4444", tab.id);
-        setTimeout(() => clearBadge(tab.id), 2000);
-      }
-    }
-  } catch (err) {
-    console.error("[til.bar] Error:", err);
-  }
+  await handleSave(tab.url, tab.id, true);
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== "save-to-tilbar") return;
   const url = info.linkUrl || info.pageUrl;
   if (!url) return;
+  await handleSave(url, tab?.id, false);
+});
 
+async function handleSave(url, tabId, canAuthenticate) {
   try {
     const session = await getSession();
 
     if (session) {
-      setBadge("…", "#6B7280", tab?.id);
+      setBadge("…", "#6B7280", tabId);
       const result = await saveLink(url, session);
       if (result.success) {
-        setBadge("✓", "#22C55E", tab?.id);
-        playSound(tab?.id);
+        setBadge("✓", "#22C55E", tabId);
+        playSound(tabId);
       } else {
-        setBadge("!", "#EF4444", tab?.id);
+        setBadge("!", "#EF4444", tabId);
       }
-      setTimeout(() => clearBadge(tab?.id), 2000);
-    } else {
-      setBadge("!", "#EF4444", tab?.id);
-      setTimeout(() => clearBadge(tab?.id), 2000);
+      setTimeout(() => clearBadge(tabId), 2000);
+      return;
     }
+
+    if (canAuthenticate) {
+      const auth = await authenticate();
+      if (auth.success) {
+        setBadge("✓", "#22C55E", tabId);
+      } else {
+        setBadge("!", "#EF4444", tabId);
+      }
+    } else {
+      setBadge("!", "#EF4444", tabId);
+    }
+    setTimeout(() => clearBadge(tabId), 2000);
   } catch (err) {
-    console.error("[til.bar] Context menu error:", err);
+    console.error("[til.bar] Error:", err);
   }
-});
+}
 
 // --- Session management ---
 
@@ -142,29 +130,37 @@ async function authenticate() {
       interactive: true,
     });
 
+    const url = new URL(responseUrl);
+
+    // PKCE flow: session comes as JSON query param from callback route
+    const sessionParam = url.searchParams.get("session");
+    if (sessionParam) {
+      const session = JSON.parse(sessionParam);
+      await chrome.storage.local.set({ supabase_session: session });
+      return { success: true };
+    }
+
+    // Fallback: implicit flow returns tokens in hash
     const hashIndex = responseUrl.indexOf("#");
-    if (hashIndex === -1) {
-      throw new Error("No tokens received");
+    if (hashIndex !== -1) {
+      const params = new URLSearchParams(responseUrl.substring(hashIndex + 1));
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      const expiresAt = params.get("expires_at");
+
+      if (accessToken && refreshToken) {
+        await chrome.storage.local.set({
+          supabase_session: {
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            expires_at: expiresAt ? parseInt(expiresAt) : null,
+          },
+        });
+        return { success: true };
+      }
     }
 
-    const params = new URLSearchParams(responseUrl.substring(hashIndex + 1));
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
-    const expiresAt = params.get("expires_at");
-
-    if (!accessToken || !refreshToken) {
-      throw new Error("Missing tokens in response");
-    }
-
-    await chrome.storage.local.set({
-      supabase_session: {
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        expires_at: expiresAt ? parseInt(expiresAt) : null,
-      },
-    });
-
-    return { success: true };
+    throw new Error("No session received");
   } catch (err) {
     console.error("[til.bar] Auth failed:", err);
     return { success: false, error: err.message };
