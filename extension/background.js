@@ -2,6 +2,8 @@ const BASE_URL = "https://til.bar";
 const API_URL = `${BASE_URL}/api/save`;
 const REFRESH_URL = `${BASE_URL}/api/auth/refresh`;
 const CONNECT_URL = `${BASE_URL}/auth/extension/connect`;
+const SESSION_KEY = "supabase_session";
+const BADGE_CLEAR_MS = 2000;
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -35,21 +37,18 @@ async function handleSave(url, tabId, canAuthenticate) {
       } else {
         setBadge("!", "#EF4444", tabId);
       }
-      setTimeout(() => clearBadge(tabId), 2000);
-      return;
-    }
-
-    if (canAuthenticate) {
+    } else if (canAuthenticate) {
       const auth = await authenticate();
-      if (auth.success) {
-        setBadge("✓", "#22C55E", tabId);
-      } else {
-        setBadge("!", "#EF4444", tabId);
-      }
+      setBadge(
+        auth.success ? "✓" : "!",
+        auth.success ? "#22C55E" : "#EF4444",
+        tabId,
+      );
     } else {
       setBadge("!", "#EF4444", tabId);
     }
-    setTimeout(() => clearBadge(tabId), 2000);
+
+    setTimeout(() => clearBadge(tabId), BADGE_CLEAR_MS);
   } catch (err) {
     console.error("[til.bar] Error:", err);
   }
@@ -62,8 +61,8 @@ let refreshBackoffUntil = 0;
 const REFRESH_BACKOFF_MS = 60000;
 
 async function getSession() {
-  const { supabase_session: session } =
-    await chrome.storage.local.get("supabase_session");
+  const { [SESSION_KEY]: session } =
+    await chrome.storage.local.get(SESSION_KEY);
 
   if (!session) return null;
 
@@ -82,6 +81,10 @@ async function getSession() {
   return session;
 }
 
+async function clearSession() {
+  await chrome.storage.local.remove([SESSION_KEY]);
+}
+
 async function refreshSession(session) {
   try {
     const response = await fetch(REFRESH_URL, {
@@ -98,12 +101,12 @@ async function refreshSession(session) {
         expires_at: data.expires_at,
         user: data.user || session.user,
       };
-      await chrome.storage.local.set({ supabase_session: newSession });
+      await chrome.storage.local.set({ [SESSION_KEY]: newSession });
       return newSession;
     }
 
     if (response.status === 400 || response.status === 401) {
-      await chrome.storage.local.remove(["supabase_session"]);
+      await clearSession();
       return null;
     }
 
@@ -130,37 +133,29 @@ async function authenticate() {
       interactive: true,
     });
 
-    const url = new URL(responseUrl);
-
-    // PKCE flow: session comes as JSON query param from callback route
-    const sessionParam = url.searchParams.get("session");
-    if (sessionParam) {
-      const session = JSON.parse(sessionParam);
-      await chrome.storage.local.set({ supabase_session: session });
-      return { success: true };
-    }
-
-    // Fallback: implicit flow returns tokens in hash
     const hashIndex = responseUrl.indexOf("#");
-    if (hashIndex !== -1) {
-      const params = new URLSearchParams(responseUrl.substring(hashIndex + 1));
-      const accessToken = params.get("access_token");
-      const refreshToken = params.get("refresh_token");
-      const expiresAt = params.get("expires_at");
-
-      if (accessToken && refreshToken) {
-        await chrome.storage.local.set({
-          supabase_session: {
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            expires_at: expiresAt ? parseInt(expiresAt) : null,
-          },
-        });
-        return { success: true };
-      }
+    if (hashIndex === -1) {
+      throw new Error("No tokens received");
     }
 
-    throw new Error("No session received");
+    const params = new URLSearchParams(responseUrl.substring(hashIndex + 1));
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    const expiresAt = params.get("expires_at");
+
+    if (!accessToken || !refreshToken) {
+      throw new Error("Missing tokens in response");
+    }
+
+    await chrome.storage.local.set({
+      [SESSION_KEY]: {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        expires_at: expiresAt ? parseInt(expiresAt) : null,
+      },
+    });
+
+    return { success: true };
   } catch (err) {
     console.error("[til.bar] Auth failed:", err);
     return { success: false, error: err.message };
@@ -188,7 +183,11 @@ async function saveLink(url, session) {
     }
 
     if (response.status === 401) {
-      const newSession = await refreshSession(session);
+      // Use dedup promise to avoid redundant refresh calls
+      if (!refreshPromise) {
+        refreshPromise = refreshSession(session);
+      }
+      const newSession = await refreshPromise;
       if (!newSession) {
         return { success: false, error: "unauthorized" };
       }
@@ -198,7 +197,7 @@ async function saveLink(url, session) {
         return { success: true };
       }
 
-      await chrome.storage.local.remove(["supabase_session"]);
+      await clearSession();
       return { success: false, error: "unauthorized" };
     }
 

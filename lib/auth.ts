@@ -1,8 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
-import { jwtVerify } from "jose";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
 const jwtSecret = new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET!);
+
+const jwksUrl = new URL(
+  "/auth/v1/.well-known/jwks.json",
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+);
+const jwks = createRemoteJWKSet(jwksUrl);
 
 export async function authenticateApiKey(
   token: string,
@@ -32,10 +38,16 @@ export async function authenticateToken(token: string): Promise<string | null> {
     return authenticateApiKey(token);
   }
 
+  // Try ECC (ES256) verification via JWKS first, fallback to HS256 legacy secret
   try {
-    const { payload } = await jwtVerify(token, jwtSecret);
+    const { payload } = await jwtVerify(token, jwks);
     return (payload.sub as string) ?? null;
   } catch {
-    return null;
+    try {
+      const { payload } = await jwtVerify(token, jwtSecret);
+      return (payload.sub as string) ?? null;
+    } catch {
+      return null;
+    }
   }
 }
