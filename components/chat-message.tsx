@@ -62,6 +62,7 @@ export function ChatMessage({
               key={`${message.id}-${part.type}`}
               isAnimating={isStreaming}
               plugins={{ code }}
+              lineNumbers
             >
               {part.text}
             </Streamdown>

@@ -14,6 +14,8 @@ import { ShareTargetHandler } from "@/components/share-target-handler";
 import { ChatProvider } from "@/context/chat-provider";
 import { SearchProvider } from "@/context/search-provider";
 
+import "streamdown/styles.css";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
