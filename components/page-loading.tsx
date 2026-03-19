@@ -16,9 +16,9 @@ function SkeletonItem({ stagger = 1 }: { stagger?: 1 | 2 | 3 }) {
   );
 }
 
-function SkeletonGroup() {
+export function SkeletonGroup() {
   return (
-    <section>
+    <section className="w-full">
       <div className="h-4 w-24 rounded bg-muted skeleton-stagger-1 my-2 mb-3" />
       <ul className="flex flex-col gap-0.5">
         <SkeletonItem stagger={1} />

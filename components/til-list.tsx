@@ -11,6 +11,8 @@ import { useSearch } from "@/context/search-provider";
 import { searchTils } from "@/app/actions/tils";
 import type { TilWithTags } from "@/lib/types";
 import { useAppHaptics } from "@/context/haptics-provider";
+import { Spinner } from "./ui/spinner";
+import { SkeletonGroup } from "./page-loading";
 
 function groupByRelativeDay(tils: TilWithTags[]) {
   const today = new Date();
@@ -117,7 +119,7 @@ export function TilList({
   const { debouncedQuery } = useSearch();
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
   const [filteredTils, setFilteredTils] = useState<TilWithTags[] | null>(null);
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const trigger = useAppHaptics();
 
   const hasPending = pendingTils.length > 0;
@@ -212,7 +214,7 @@ export function TilList({
           </motion.div>
         ))}
 
-        {groups.length === 0 && hasAnyFilter && (
+        {groups.length === 0 && hasAnyFilter && !isPending && (
           <motion.div
             key="no-results"
             initial={{ opacity: 0 }}
@@ -224,6 +226,19 @@ export function TilList({
             <p className="text-muted-foreground text-sm text-center">
               No results found. Try a different search or tag.
             </p>
+          </motion.div>
+        )}
+
+        {isPending && groups.length === 0 && (
+          <motion.div
+            key="no-results"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex flex-col w-full h-52 items-center justify-center"
+          >
+            <SkeletonGroup />
           </motion.div>
         )}
       </AnimatePresence>
