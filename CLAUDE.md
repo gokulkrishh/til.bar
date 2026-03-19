@@ -2,12 +2,10 @@
 
 **til.bar** — a "Today I Learned" application. Capture all your links in one place.
 
-> Read `PRODUCT.md` for product context, features, and design decisions.
-> Read `TECH.md` for tech stack and tooling details.
-
 ## Core Principles
 
-- **Read docs first**: Before implementing with any external library, read the official docs (via WebFetch). Never guess at APIs, type names, or method signatures — especially for AI SDK, Base UI, or any library with major version changes.
+- **Read project docs first**: Before answering ANY question about til.bar — even conceptual ones — read `PRODUCT.md` and `TECH.md`. Never assume architecture, auth model, or deployment from generic patterns. til.bar is a remote HTTP MCP server with per-user API key auth, not a local STDIO server.
+- **Read library docs first**: Before implementing with any external library, read the official docs (via WebFetch). Never guess at APIs, type names, or method signatures — especially for AI SDK, Base UI, or any library with major version changes.
 - **Supabase awareness**: Always consider RLS policies when touching Supabase queries. When caching data, ensure realtime updates still work correctly.
 
 ## Workflow Orchestration
