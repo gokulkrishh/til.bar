@@ -58,6 +58,7 @@ export function SearchButton() {
                 placeholder="Search links… ⌘K"
                 aria-label="Search links"
                 autoComplete="off"
+                autoFocus
                 spellCheck={false}
                 className="h-10 w-64 pl-4 pr-8 text-sm rounded-full bg-muted/50 backdrop-blur-sm"
               />
