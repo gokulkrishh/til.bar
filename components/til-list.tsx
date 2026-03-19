@@ -231,7 +231,7 @@ export function TilList({
 
         {isPending && groups.length === 0 && (
           <motion.div
-            key="no-results"
+            key="loading"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
