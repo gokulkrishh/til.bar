@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+@AGENTS.md
+
 **til.bar** — a "Today I Learned" application. Capture all your links in one place.
 
 ## Core Principles
