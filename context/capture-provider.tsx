@@ -70,7 +70,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
           removeDeletedId(id);
           toast.error(result.error);
         } else {
-          toast.success("Deleted");
+          toast.success("Link deleted");
           startTransition(() => {
             router.refresh();
             removeDeletedId(id);
@@ -89,7 +89,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
       playDrop();
       trigger("success");
       setPendingTils((prev) => [{ id: tempId, url: text }, ...prev]);
-      toast.success("Saved");
+      toast.success("Link saved");
 
       startTransition(async () => {
         const result = await createTil(text);

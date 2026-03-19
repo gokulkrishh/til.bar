@@ -222,7 +222,7 @@ export function TilList({
             className="flex flex-col h-52 items-center justify-center"
           >
             <p className="text-muted-foreground text-sm text-center">
-              No results found.
+              No results found. Try a different search or tag.
             </p>
           </motion.div>
         )}

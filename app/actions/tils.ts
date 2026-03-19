@@ -104,7 +104,7 @@ export async function createTil(input: string) {
     .single();
 
   if (error) {
-    return { error: "Couldn't save this link" };
+    return { error: "Couldn't save this link. Try again." };
   }
 
   // Fetch metadata and generate tags in the background after response is sent
@@ -156,7 +156,7 @@ export async function deleteTil(id: string) {
   const { error } = await supabase.from("tils").delete().eq("id", id);
 
   if (error) {
-    return { error: "Couldn't delete this link" };
+    return { error: "Couldn't delete this link. Try again." };
   }
 
   return { success: true };
@@ -194,7 +194,7 @@ export async function refreshMetadata(id: string, url: string) {
     .single();
 
   if (error || !til) {
-    return { error: "Couldn't refresh metadata" };
+    return { error: "Couldn't refresh metadata. Try again." };
   }
 
   // Generate tags if this TIL has none

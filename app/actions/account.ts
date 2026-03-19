@@ -25,7 +25,7 @@ export async function generateApiKey() {
     key_hash: keyHash,
   });
 
-  if (error) return { error: "Couldn't generate API key" };
+  if (error) return { error: "Couldn't generate API key. Try again." };
 
   // Return the plain key once — it cannot be recovered after this point
   return { key };
@@ -83,7 +83,7 @@ export async function exportTils() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return { error: "Couldn't export your links" };
+    return { error: "Couldn't export your links. Try again." };
   }
 
   console.log("tils", tils);
@@ -106,7 +106,7 @@ export async function deleteAccount() {
   const { error } = await admin.auth.admin.deleteUser(user.id);
 
   if (error) {
-    return { error: "Couldn't delete your account" };
+    return { error: "Couldn't delete your account. Please try again." };
   }
 
   await supabase.auth.signOut();

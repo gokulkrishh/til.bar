@@ -54,7 +54,7 @@ export function TilItem({
           toast.success("Metadata refreshed");
         }
       } catch {
-        toast.error("An error occurred.");
+        toast.error("Something went wrong. Try again.");
       } finally {
         router.refresh();
       }

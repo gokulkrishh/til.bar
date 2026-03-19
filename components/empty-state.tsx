@@ -8,10 +8,10 @@ export function EmptyState() {
       </div>
       <div className="flex flex-col gap-2">
         <h2 className="text-foreground text-balance text-2xl font-bold tracking-tight">
-          Capture your first learning.
+          Save your first link.
         </h2>
         <p className="text-muted-foreground">
-          Paste a URL anywhere to get started.
+          Paste a URL or use the browser extension.
         </p>
       </div>
     </div>

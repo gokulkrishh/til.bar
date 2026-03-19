@@ -47,7 +47,7 @@ export function DataTab({
       a.download = `til-bar-export-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Download completed");
+      toast.success("Links exported");
     });
   };
 
@@ -180,7 +180,7 @@ export function DataTab({
           disabled={isDeleting}
         >
           <Trash2 />
-          {confirmDelete ? "Delete? Can't be undone" : "Delete"}
+          {confirmDelete ? "Delete account? This can't be undone" : "Delete"}
         </Button>
       </div>
     </div>

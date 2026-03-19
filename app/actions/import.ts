@@ -38,7 +38,7 @@ export async function confirmImport(links: ImportLink[]) {
     .select();
 
   if (error) {
-    return { error: "Couldn't import links" };
+    return { error: "Couldn't import links. Check your file and try again." };
   }
 
   // Insert existing tags in the background
