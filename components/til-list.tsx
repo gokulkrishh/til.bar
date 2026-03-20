@@ -96,7 +96,11 @@ function TilGroup({
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <TilItem til={til} showDate={label === "Earlier"} />
+                <TilItem
+                  til={til}
+                  showDate={label === "Earlier"}
+                  showYear={label === "Earlier"}
+                />
               </motion.div>
             ))}
           </AnimatePresence>

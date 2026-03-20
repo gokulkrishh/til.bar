@@ -22,21 +22,31 @@ function getFaviconUrl(url: string): string {
   }
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
   month: "short",
   day: "numeric",
 });
 
-function formatDate(dateStr: string) {
-  return dateFormatter.format(new Date(dateStr));
+const dateFormatterWithYear = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+function formatDate(dateStr: string, showYear = false) {
+  return (showYear ? dateFormatterWithYear : dateFormatter).format(
+    new Date(dateStr),
+  );
 }
 
 export function TilItem({
   til,
   showDate = false,
+  showYear = false,
 }: {
   til: TilWithTags;
   showDate?: boolean;
+  showYear?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -135,7 +145,7 @@ export function TilItem({
             { "md:opacity-0 group-hover/row:opacity-100": !showDate },
           )}
         >
-          {formatDate(til.created_at)}
+          {formatDate(til.created_at, showYear)}
         </span>
         <TilActions
           key={til.id}
