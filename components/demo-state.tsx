@@ -58,7 +58,7 @@ export function DemoState() {
         />
       </div>
 
-      <div className="absolute flex-1 inset-0 m-auto flex flex-col items-center justify-center bg-linear-to-t from-background via-background/95 to-background/60">
+      <div className="absolute flex-1 inset-0 -top-16 m-auto flex flex-col items-center justify-center bg-linear-to-t from-background via-background/95 to-background/60">
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="flex size-14 items-center justify-center rounded-full">
             <Logo aria-hidden="true" />
