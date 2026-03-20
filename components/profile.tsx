@@ -33,8 +33,6 @@ export function Profile({ user }: { user: User }) {
   const avatarUrl = user.user_metadata?.avatar_url;
   const fullName = user.user_metadata?.full_name ?? user.email ?? "";
   const initials = getInitials(fullName);
-  const githubUsername = user.user_metadata?.user_name;
-
   return (
     <>
       <DropdownMenu>
@@ -49,20 +47,18 @@ export function Profile({ user }: { user: User }) {
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {githubUsername && (
-            <DropdownMenuItem
-              render={
-                <a
-                  href={`https://github.com/${githubUsername}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                />
-              }
-            >
-              <Github aria-hidden="true" />
-              GitHub
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem
+            render={
+              <a
+                href="https://github.com/gokulkrishh"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            }
+          >
+            <Github aria-hidden="true" />
+            GitHub
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
             <Settings aria-hidden="true" />
             Settings
