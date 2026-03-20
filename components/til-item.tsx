@@ -22,12 +22,12 @@ function getFaviconUrl(url: string): string {
   }
 }
 
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
 });
 
-const dateFormatterWithYear = new Intl.DateTimeFormat(undefined, {
+const dateFormatterWithYear = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
   year: "numeric",
