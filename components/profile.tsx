@@ -50,7 +50,7 @@ export function Profile({ user }: { user: User }) {
           <DropdownMenuItem
             render={
               <a
-                href="https://github.com/gokulkrishh"
+                href="https://github.com/gokulkrishh/til.bar"
                 target="_blank"
                 rel="noopener noreferrer"
               />
