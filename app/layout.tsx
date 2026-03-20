@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { ThemeProvider } from "@/context/theme-provider";
 import { SWRegister } from "@/components/sw-register";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,8 +26,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const title = "til.bar";
-const description = "Your personal TIL log, organized by AI.";
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const title = "til.bar — Your personal TIL log, organized by AI.";
+const description =
+  "Your personal TIL log, organized by AI. Save links from your browser, phone, or ask any AI.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://til.bar"),
@@ -116,7 +123,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
