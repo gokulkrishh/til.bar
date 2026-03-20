@@ -67,7 +67,7 @@
 
 - **Conditional classes**: Always use `cn()` from `@/lib/utils` with object syntax: `cn("static-classes", { "conditional-class": condition })`. Never use template literal ternaries.
 - **Server actions**: Return `{ error: string }` for known errors, never throw. Use human-friendly messages, never expose raw DB errors.
-- **Formatting**: Use `Intl.DateTimeFormat` / `Intl.NumberFormat` with `undefined` locale, not `toLocaleDateString`. Create formatter instances outside functions for reuse.
+- **Formatting**: Use `Intl.DateTimeFormat` / `Intl.NumberFormat` with `"en-US"` locale (never `undefined`), not `toLocaleDateString`. Create formatter instances outside functions for reuse. Do not change an existing hardcoded locale to `undefined` when adding new formatters alongside it.
 - **Toasts**: Use Sonner (`toast.success` / `toast.error`), not custom toast UI.
 - **CSS units**: Prefer `rem` over `px` where possible. Use Tailwind spacing scale (`w-30`) instead of arbitrary values (`w-[120px]`).
 - **Tailwind classes**: Prefer named utility classes over arbitrary values when an equivalent exists (e.g. `blur-xs` not `blur-[4px]`, `rounded-lg` not `rounded-[8px]`).
