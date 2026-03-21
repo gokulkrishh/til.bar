@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import crypto from "crypto";
 
-export async function generateApiKey() {
+export async function generateApiKey(label: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -12,10 +12,10 @@ export async function generateApiKey() {
 
   if (!user) return { error: "Sign in to generate an API key" };
 
-  const admin = createAdminClient();
+  const trimmed = label.trim();
+  if (!trimmed) return { error: "Label is required" };
 
-  // Delete any existing key — only one key per user
-  await admin.from("api_keys").delete().eq("user_id", user.id);
+  const admin = createAdminClient();
 
   const key = `mcp_sk_${crypto.randomBytes(32).toString("hex")}`;
   const keyHash = crypto.createHash("sha256").update(key).digest("hex");
@@ -23,6 +23,7 @@ export async function generateApiKey() {
   const { error } = await admin.from("api_keys").insert({
     user_id: user.id,
     key_hash: keyHash,
+    label: trimmed,
   });
 
   if (error) return { error: "Couldn't generate API key. Try again." };
@@ -31,7 +32,7 @@ export async function generateApiKey() {
   return { key };
 }
 
-export async function deleteApiKey() {
+export async function deleteApiKey(keyId: string) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,14 +43,15 @@ export async function deleteApiKey() {
   const { error } = await supabase
     .from("api_keys")
     .delete()
+    .eq("id", keyId)
     .eq("user_id", user.id);
 
-  if (error) return { error: "Couldn't delete API key" };
+  if (error) return { error: "Couldn't revoke API key" };
 
   return { success: true };
 }
 
-export async function hasApiKey() {
+export async function listApiKeys() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -57,14 +59,15 @@ export async function hasApiKey() {
 
   if (!user) return { error: "Sign in to manage API keys" };
 
-  const { count, error } = await supabase
+  const { data, error } = await supabase
     .from("api_keys")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id);
+    .select("id, label, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
-  if (error) return { error: "Couldn't check API key status" };
+  if (error) return { error: "Couldn't load API keys" };
 
-  return { exists: (count ?? 0) > 0 };
+  return { keys: data };
 }
 
 export async function exportTils() {

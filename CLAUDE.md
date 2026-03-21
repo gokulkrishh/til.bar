@@ -79,6 +79,13 @@
 - **`env.example`** is the source of truth for which env vars are needed. Always keep it in sync.
 - When adding or removing a variable in `.env.local`, update `env.example` in the same change (without real values).
 
+## Chrome Extension
+
+- Located in `extension/` folder — plain JS (no build step), MV3 service worker
+- Auth via API key (`mcp_sk_*`) stored in `chrome.storage.local` — no OAuth/JWT refresh needed
+- Options page (`options.html` + `options.js`) for API key setup
+- `background.js` handles save via `POST /api/save` with `Authorization: Bearer <api_key>`
+
 ## Tooling
 
 - **Package manager**: Always use `bun` (never npm, yarn, or pnpm)

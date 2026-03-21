@@ -6,6 +6,11 @@ import { generateMetadata } from "@/lib/ai-metadata";
 import { generateTags } from "@/lib/ai-tags";
 import { getCorsHeaders } from "@/lib/cors";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
+
 export async function OPTIONS(req: Request) {
   return new Response(null, {
     status: 204,
@@ -25,9 +30,17 @@ async function getAuthenticatedUserId(req: Request): Promise<string | null> {
 }
 
 export async function POST(req: Request) {
+  const body = await req.json();
   const headers = getCorsHeaders(req, {
     allowedHeaders: "Content-Type, Authorization",
   });
+
+  const url = body.url;
+
+  if (!url || !/^https?:\/\/.+/.test(url)) {
+    return Response.json({ error: "Invalid URL" }, { status: 400, headers });
+  }
+
   const userId = await getAuthenticatedUserId(req);
 
   if (!userId) {
@@ -36,27 +49,6 @@ export async function POST(req: Request) {
       { status: 401, headers },
     );
   }
-
-  let body: { url?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return Response.json(
-      { error: "Invalid JSON body" },
-      { status: 400, headers },
-    );
-  }
-
-  const url = body.url;
-
-  if (!url || !/^https?:\/\/.+/.test(url)) {
-    return Response.json({ error: "Invalid URL" }, { status: 400, headers });
-  }
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
 
   const { data, error } = await supabase
     .from("tils")

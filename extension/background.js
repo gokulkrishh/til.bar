@@ -1,9 +1,6 @@
-const BASE_URL = "https://til.bar";
+const BASE_URL = "http://localhost:3000"; // Change to your til.bar URL if self-hosted
 const API_URL = `${BASE_URL}/api/save`;
-const REFRESH_URL = `${BASE_URL}/api/auth/refresh`;
-const CONNECT_URL = `${BASE_URL}/auth/extension/connect`;
-const SESSION_KEY = "supabase_session";
-const BADGE_CLEAR_MS = 2000;
+const API_KEY_STORAGE = "api_key";
 
 chrome.runtime.onInstalled.addListener(() => {
   if (chrome.contextMenus) {
@@ -16,7 +13,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.action.onClicked.addListener(async (tab) => {
-  await handleSave(tab.url, tab.id, true);
+  await handleSave(tab.url, tab.id);
 });
 
 if (chrome.contextMenus) {
@@ -24,191 +21,64 @@ if (chrome.contextMenus) {
     if (info.menuItemId !== "save-to-tilbar") return;
     const url = info.linkUrl || info.pageUrl;
     if (!url) return;
-    await handleSave(url, tab?.id, true);
+    await handleSave(url, tab?.id);
   });
 }
 
-async function handleSave(url, tabId, canAuthenticate) {
+async function handleSave(url, tabId) {
   try {
-    const session = await getSession();
+    const apiKey = await getApiKey();
 
-    if (session) {
-      setBadge("…", "#6B7280", tabId);
-      const result = await saveLink(url, session);
-      if (result.success) {
-        setBadge("✓", "#22C55E", tabId);
-        playSound(tabId);
-      } else {
-        setBadge("!", "#EF4444", tabId);
-      }
-    } else if (canAuthenticate) {
-      const auth = await authenticate();
-      if (auth.success) {
-        setBadge("…", "#6B7280", tabId);
-        const newSession = await getSession();
-        const result = await saveLink(url, newSession);
-        if (result.success) {
-          setBadge("✓", "#22C55E", tabId);
-          playSound(tabId);
-        } else {
-          setBadge("!", "#EF4444", tabId);
-        }
-      } else {
-        setBadge("!", "#EF4444", tabId);
-      }
-    } else {
-      setBadge("!", "#EF4444", tabId);
+    if (!apiKey) {
+      chrome.runtime.openOptionsPage();
+      return;
     }
 
-    setTimeout(() => clearBadge(tabId), BADGE_CLEAR_MS);
+    // Save in background
+    const result = await saveLink(url, apiKey);
+
+    if (!result.success) {
+      showToast(tabId, "Failed to save", "error");
+    } else {
+      // Optimistic — show success immediately
+      playSound(tabId);
+      showToast(tabId, "Saved", "success");
+    }
   } catch (err) {
     console.error("[til.bar] Error:", err);
+    showToast(tabId, "Failed to save", "error");
   }
 }
 
-// --- Session management ---
+// --- API Key management ---
 
-let refreshPromise = null;
-let refreshBackoffUntil = 0;
-const REFRESH_BACKOFF_MS = 60000;
-
-async function getSession() {
-  const { [SESSION_KEY]: session } =
-    await chrome.storage.local.get(SESSION_KEY);
-
-  if (!session) return null;
-
-  const now = Math.floor(Date.now() / 1000);
-
-  // Refresh if token expires within 5 minutes
-  if (session.expires_at && now >= session.expires_at - 300) {
-    if (Date.now() < refreshBackoffUntil) return session;
-
-    if (!refreshPromise) {
-      refreshPromise = refreshSession(session);
-    }
-    return refreshPromise;
-  }
-
-  return session;
-}
-
-async function clearSession() {
-  await chrome.storage.local.remove([SESSION_KEY]);
-}
-
-async function refreshSession(session) {
-  try {
-    const response = await fetch(REFRESH_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: session.refresh_token }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const newSession = {
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        expires_at: data.expires_at,
-        user: data.user || session.user,
-      };
-      await chrome.storage.local.set({ [SESSION_KEY]: newSession });
-      return newSession;
-    }
-
-    if (response.status === 400 || response.status === 401) {
-      await clearSession();
-      return null;
-    }
-
-    refreshBackoffUntil = Date.now() + REFRESH_BACKOFF_MS;
-    return session;
-  } catch (err) {
-    console.warn("[til.bar] Refresh error:", err);
-    refreshBackoffUntil = Date.now() + REFRESH_BACKOFF_MS;
-    return session;
-  } finally {
-    refreshPromise = null;
-  }
-}
-
-// --- Auth flow ---
-
-async function authenticate() {
-  try {
-    const redirectUrl = chrome.identity.getRedirectURL();
-    const connectUrl = `${CONNECT_URL}?redirect_uri=${encodeURIComponent(redirectUrl)}&state=${chrome.runtime.id}`;
-
-    const responseUrl = await chrome.identity.launchWebAuthFlow({
-      url: connectUrl,
-      interactive: true,
-    });
-
-    const hashIndex = responseUrl.indexOf("#");
-    if (hashIndex === -1) {
-      throw new Error("No tokens received");
-    }
-
-    const params = new URLSearchParams(responseUrl.substring(hashIndex + 1));
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
-    const expiresAt = params.get("expires_at");
-
-    if (!accessToken || !refreshToken) {
-      throw new Error("Missing tokens in response");
-    }
-
-    await chrome.storage.local.set({
-      [SESSION_KEY]: {
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        expires_at: expiresAt ? parseInt(expiresAt) : null,
-      },
-    });
-
-    return { success: true };
-  } catch (err) {
-    console.error("[til.bar] Auth failed:", err);
-    return { success: false, error: err.message };
-  }
+async function getApiKey() {
+  const { [API_KEY_STORAGE]: apiKey } =
+    await chrome.storage.local.get(API_KEY_STORAGE);
+  return apiKey || null;
 }
 
 // --- Save link ---
 
-async function saveLink(url, session) {
+async function saveLink(url, apiKey) {
   try {
-    const doFetch = (token) =>
-      fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ url }),
-      });
-
-    const response = await doFetch(session.access_token);
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ url }),
+    });
 
     if (response.ok) {
       return { success: true };
     }
 
     if (response.status === 401) {
-      if (!refreshPromise) {
-        refreshPromise = refreshSession(session);
-      }
-      const newSession = await refreshPromise;
-      if (!newSession) {
-        return { success: false, error: "unauthorized" };
-      }
-
-      const retryResponse = await doFetch(newSession.access_token);
-      if (retryResponse.ok) {
-        return { success: true };
-      }
-
-      await clearSession();
+      console.error(
+        "[til.bar] Invalid API key. Check your key in extension options.",
+      );
       return { success: false, error: "unauthorized" };
     }
 
@@ -219,20 +89,89 @@ async function saveLink(url, session) {
   }
 }
 
-// --- Badge & Sound ---
+function showToast(tabId, message, type) {
+  if (!tabId) return;
+  chrome.scripting
+    .executeScript({
+      target: { tabId },
+      func: (msg, t) => {
+        const existing = document.getElementById("tilbar-toast");
+        if (existing) existing.remove();
 
-function setBadge(text, color, tabId) {
-  chrome.action.setBadgeText({ text, tabId });
-  chrome.action.setBadgeBackgroundColor({ color, tabId });
+        const toast = document.createElement("div");
+        toast.id = "tilbar-toast";
+
+        if (t === "success") {
+          const icon = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg",
+          );
+          icon.setAttribute("viewBox", "0 0 24 24");
+          icon.setAttribute("fill", "none");
+          icon.setAttribute("stroke", "currentColor");
+          icon.setAttribute("stroke-width", "2");
+          icon.setAttribute("stroke-linecap", "round");
+          icon.setAttribute("stroke-linejoin", "round");
+          Object.assign(icon.style, {
+            width: "1rem",
+            height: "1rem",
+            flexShrink: "0",
+            color: "#22c55e",
+          });
+          icon.innerHTML =
+            '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>';
+          toast.appendChild(icon);
+        }
+
+        const text = document.createElement("span");
+        text.textContent = msg;
+        toast.appendChild(text);
+
+        Object.assign(toast.style, {
+          position: "fixed",
+          top: "1.5rem",
+          right: "1.5rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.375rem",
+          padding: "0.5rem 0.625rem",
+          borderRadius: "10rem",
+          fontFamily:
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontSize: "0.8125rem",
+          fontWeight: "500",
+          color: "#fff",
+          background: t === "success" ? "#171717" : "#dc2626",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          zIndex: "2147483647",
+          opacity: "0",
+          transform: "translateY(0.5rem)",
+          transition: "opacity 0.2s, transform 0.2s",
+        });
+
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => {
+          toast.style.opacity = "1";
+          toast.style.transform = "translateY(0)";
+        });
+
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateY(0.5rem)";
+          setTimeout(() => toast.remove(), 30000);
+        }, 2000);
+      },
+      args: [message, type],
+    })
+    .catch(() => {});
 }
 
-function clearBadge(tabId) {
-  chrome.action.setBadgeText({ text: "", tabId });
-}
+const soundUrl =
+  "data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAAADTGF2ZjYyLjMuMTAwAAAAAAAAAAAAAAD/+1DAAAAAAAAAAAAAAAAAAAAAAABJbmZvAAAADwAAAAIAAAJxAKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr//////////////////////////////////////////////////////////////////wAAAABMYXZjNjIuMTEAAAAAAAAAAAAAAAAkBYYAAAAAAAACcU7MYgYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//tQxAAACghZUlTHgAGDlWufHzAAAVWgJg3EszX3mlF95pSk7enve+GBDEMNMg4R8BLACwAsA7BVjjOhDEMQxWKx5EcJwfB/KBiU8/wI7QH+BHaA/ynv6PB8/LgQEMgD78CHO/oGiAIBAQBAYFAA1hDi4z22DmJ7Et+PSEd1f8Y4PmLI5uDYKAWyCmBlSZJ3gAmD0RBEUDS/HKFzC5iZIr/5FTIvE0Yl3/8ipkXi8Yl0u/xEFQVER7/WCoiCoKiL/4VBURPOqgAQuacbblgZh//7UsQEg8aUBv9cMIAgAAA0gAAABIKqErhFDZUNQ7PRK4S8s8r1HiuGlHuSnenrcW9yvO/PcFflep5XqPKfrO9NTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
 
 function playSound(tabId) {
   if (!tabId) return;
-  const soundUrl = chrome.runtime.getURL("sounds/success.mp3");
+
   chrome.scripting
     .executeScript({
       target: { tabId },

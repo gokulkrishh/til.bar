@@ -1,0 +1,311 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>til.bar — Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        color-scheme: light dark;
+      }
+
+      body {
+        font-family:
+          "Geist",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: #fff;
+        color: #1a1a1a;
+        display: flex;
+        justify-content: center;
+        padding: 3rem 1.5rem;
+        line-height: 1.5;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 30rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .logo {
+        width: 2rem;
+        height: 2rem;
+        flex-shrink: 0;
+      }
+
+      .header h1 {
+        font-size: 1.6rem;
+        font-weight: 900;
+        letter-spacing: -0.01em;
+      }
+
+      /* Form */
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .field label {
+        font-size: 1rem;
+        font-weight: 500;
+      }
+
+      .hint {
+        font-size: 0.85rem;
+        color: #737373;
+      }
+
+      .hint a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .hint a:hover {
+        color: #1a1a1a;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      input {
+        flex: 1;
+        min-width: 0;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e5e5e5;
+        border-radius: 0.5rem;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 0.8125rem;
+        background: #fafafa;
+        color: #1a1a1a;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+
+      input::placeholder {
+        color: #a3a3a3;
+      }
+
+      input:focus {
+        border-color: #a3a3a3;
+      }
+
+      /* Buttons */
+      button {
+        padding: 0.5rem 0.875rem;
+        border: 1px solid #e5e5e5;
+        border-radius: 0.5rem;
+        background: #fafafa;
+        font-family:
+          "Geist",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #1a1a1a;
+        cursor: pointer;
+        transition: background 0.15s;
+        white-space: nowrap;
+      }
+
+      button:hover {
+        background: #f0f0f0;
+      }
+
+      button.primary {
+        background: #171717;
+        color: #fafafa;
+        border-color: #171717;
+      }
+
+      button.primary:hover {
+        background: #262626;
+      }
+
+      button.danger {
+        color: #dc2626;
+        border-color: #fecaca;
+        background: #fef2f2;
+      }
+
+      button.danger:hover {
+        background: #fee2e2;
+      }
+
+      /* Status */
+      .status {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        min-height: 1.25rem;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+
+      .status.visible {
+        opacity: 1;
+      }
+
+      .status.success {
+        color: #16a34a;
+      }
+
+      .status.error {
+        color: #dc2626;
+      }
+
+      /* Dark mode */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #0a0a0a;
+          color: #fafafa;
+        }
+
+        .hint {
+          color: #a3a3a3;
+        }
+
+        .hint a:hover {
+          color: #fafafa;
+        }
+
+        input {
+          background: #171717;
+          border-color: rgba(255, 255, 255, 0.1);
+          color: #fafafa;
+        }
+
+        input::placeholder {
+          color: #525252;
+        }
+
+        input:focus {
+          border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        button {
+          background: #171717;
+          border-color: rgba(255, 255, 255, 0.1);
+          color: #fafafa;
+        }
+
+        button:hover {
+          background: #262626;
+        }
+
+        button.primary {
+          background: #fafafa;
+          color: #0a0a0a;
+          border-color: #fafafa;
+        }
+
+        button.primary:hover {
+          background: #e5e5e5;
+        }
+
+        button.danger {
+          color: #f87171;
+          border-color: rgba(248, 113, 113, 0.2);
+          background: rgba(248, 113, 113, 0.1);
+        }
+
+        button.danger:hover {
+          background: rgba(248, 113, 113, 0.15);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <svg
+          class="logo"
+          viewBox="0 0 148 148"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect width="148" height="148" rx="36" fill="#1a1917" />
+          <g transform="translate(74,74)">
+            <line
+              x1="0"
+              y1="-42"
+              x2="0"
+              y2="42"
+              stroke="white"
+              stroke-width="6"
+              stroke-linecap="round"
+            />
+            <line
+              x1="-36"
+              y1="-21"
+              x2="36"
+              y2="21"
+              stroke="white"
+              stroke-width="6"
+              stroke-linecap="round"
+            />
+            <line
+              x1="36"
+              y1="-21"
+              x2="-36"
+              y2="21"
+              stroke="white"
+              stroke-width="6"
+              stroke-linecap="round"
+            />
+            <circle cx="0" cy="0" r="9" fill="#1a1917" />
+            <circle cx="0" cy="0" r="5" fill="white" />
+          </g>
+        </svg>
+        <h1>til.bar</h1>
+      </div>
+
+      <div class="field">
+        <label for="apiKey">API Key</label>
+        <p class="hint">
+          Create a key at
+          <a href="https://til.bar" target="_blank">til.bar</a> → Settings →
+          Integrations
+        </p>
+        <div class="input-group">
+          <input
+            id="apiKey"
+            type="password"
+            placeholder="mcp_sk_…"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <button class="primary" id="save">Save</button>
+        </div>
+        <div class="input-group">
+          <button class="danger" id="clear" style="display: none">
+            Clear key
+          </button>
+          <p class="status" id="status"></p>
+        </div>
+      </div>
+    </div>
+    <script src="options.js"></script>
+  </body>
+</html>
