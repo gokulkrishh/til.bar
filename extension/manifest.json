@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "til.bar",
   "description": "Save links to til.bar with one click",
-  "version": "2.1.0",
+  "version": "1.2.0",
   "permissions": ["activeTab", "contextMenus", "storage", "scripting"],
   "options_ui": {
     "page": "options.html",
