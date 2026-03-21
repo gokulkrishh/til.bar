@@ -22,7 +22,7 @@ const IOS_SHORTCUT_URL =
   "https://www.icloud.com/shortcuts/7c183f258862457bb639ca1ee537d277";
 
 const CHROME_EXTENSION_URL =
-  "https://chromewebstore.google.com/detail/tilbar/gbicabbfdiljmpcoemmejcibpmgichgp";
+  "https://chromewebstore.google.com/detail/tilbar/afmgmolhlebpekeinagokegpghkaegpi";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -149,7 +149,7 @@ export function IntegrationsTab() {
               disabled={isCreating}
               onClick={handleCreateKey}
             >
-              {isCreating ? <Spinner /> : "Create"}
+              {isCreating ? <Spinner /> : null} Create
             </Button>
             <Button
               variant="ghost"
