@@ -11,7 +11,7 @@ import { useSearch } from "@/context/search-provider";
 import { searchTils } from "@/app/actions/tils";
 import type { TilWithTags } from "@/lib/types";
 import { useAppHaptics } from "@/context/haptics-provider";
-import { Spinner } from "./ui/spinner";
+import { AnimateNumber } from "motion-plus/react";
 import { SkeletonGroup } from "./page-loading";
 
 function groupByRelativeDay(tils: TilWithTags[]) {
@@ -75,11 +75,11 @@ function TilGroup({
 
   return (
     <motion.section layout="position" transition={{ duration: 0.2 }}>
-      <h2 className="text-xs font-medium uppercase tracking-widest text-muted-foreground py-2.5">
+      <h2 className="text-xs inline-flex items-center gap-2 font-medium uppercase tracking-widest text-muted-foreground py-2.5">
         {label}{" "}
-        <span className="font-mono tabular-nums text-muted-foreground/60">
+        <AnimateNumber className="font-mono tabular-nums text-[11px] text-muted-foreground/60">
           {totalCount}
-        </span>
+        </AnimateNumber>
       </h2>
       <LayoutGroup>
         <ul className="relative flex flex-col gap-px">

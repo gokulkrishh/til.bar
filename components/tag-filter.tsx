@@ -9,6 +9,7 @@ import { useAppHaptics } from "@/context/haptics-provider";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { drop003Sound } from "@/sounds/drop-003";
 import { clickSoftSound } from "@/sounds/click-soft";
+import { AnimateNumber } from "motion-plus/react";
 
 const DEFAULT_VISIBLE_TAGS = 10;
 
@@ -65,7 +66,7 @@ export function TagFilter({
               "text-muted-foreground/60": !activeTags.has(tag.name),
             })}
           >
-            {tag.count}
+            <AnimateNumber>{tag.count}</AnimateNumber>
           </span>
         </Badge>
       ))}
