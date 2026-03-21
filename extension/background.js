@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000"; // Change to your til.bar URL if self-hosted
+const BASE_URL = "https://til.bar";
 const API_URL = `${BASE_URL}/api/save`;
 const API_KEY_STORAGE = "api_key";
 
