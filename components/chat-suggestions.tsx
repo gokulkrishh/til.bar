@@ -55,7 +55,7 @@ export function ChatSuggestions({
             onClick={() =>
               onSend({ text: prompt }, { body: { tils: tilsBody } })
             }
-            className="cursor-pointer backdrop-blur-sm bg-background/60 border-border/40 hover:bg-muted/80 transition-[color,background-color,border-color] duration-200"
+            className="cursor-pointer backdrop-blur-sm bg-input/30 border-border/40 hover:bg-muted/80 transition-[color,background-color,border-color] duration-200"
           >
             <SuggestedIcon aria-hidden="true" className="size-2.75 mr-1" />
             {prompt}

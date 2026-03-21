@@ -8,13 +8,13 @@ import {
   type ClipboardEvent,
 } from "react";
 import { AnimatePresence } from "motion/react";
-import { ArrowUp, LinkIcon, Square, X } from "lucide-react";
+import { ArrowUp, LinkIcon, MessageCircle, Square, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
-import { cn, getInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
@@ -24,6 +24,8 @@ import Link from "next/link";
 import { ChatMinimizedBar } from "./chat-minimized-bar";
 import { ChatMessagesPanel } from "./chat-messages-panel";
 import { ChatSuggestions } from "./chat-suggestions";
+import { useAppSound } from "@/hooks/use-app-sound";
+import { clickSoftSound } from "@/sounds/click-soft";
 
 const urlSchema = z.url().check(z.startsWith("http"));
 
@@ -33,6 +35,7 @@ export function ChatInput({ user }: { user: User }) {
   const { capture } = useCaptureContext();
   const { attachedTils, removeTil, clearAttachment } = useChatContext();
   const trigger = useAppHaptics();
+  const [playSound] = useAppSound(clickSoftSound);
 
   const {
     messages,
@@ -47,13 +50,18 @@ export function ChatInput({ user }: { user: User }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatActive, setChatActive] = useState(false);
+  const [inputOpen, setInputOpen] = useState(false);
   const isChatMode = attachedTils.length > 0 || chatActive;
   const isLoading = status === "submitted" || status === "streaming";
+  const showInput = inputOpen || isChatMode;
 
-  // Focus input when a TIL is attached
+  // Open and focus input when a TIL is attached
   useEffect(() => {
     if (isChatMode) {
-      inputRef.current?.focus();
+      requestAnimationFrame(() => {
+        setInputOpen(true);
+        inputRef.current?.focus();
+      });
     }
   }, [isChatMode]);
 
@@ -118,6 +126,7 @@ export function ChatInput({ user }: { user: User }) {
     setInput("");
     setMinimized(false);
     setChatActive(false);
+    setInputOpen(false);
   }, [trigger, stop, clearAttachment, setMessages]);
 
   const avatarUrl = user.user_metadata?.avatar_url;
@@ -125,8 +134,8 @@ export function ChatInput({ user }: { user: User }) {
   const initials = getInitials(fullName);
 
   return (
-    <div className="fixed inset-x-0 bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto flex flex-col max-w-2xl px-3 py-2">
+    <div className="fixed inset-x-0 bottom-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto flex flex-col max-w-xl px-3 py-2">
         {/* Minimized bar */}
         <AnimatePresence initial={false}>
           {isChatMode && minimized && (
@@ -200,57 +209,70 @@ export function ChatInput({ user }: { user: User }) {
 
         {!(isChatMode && minimized) && (
           <>
-            <form onSubmit={handleSubmit} className="relative">
-              <Input
-                ref={inputRef}
-                type="text"
-                name={isChatMode ? "message" : "url"}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onPaste={handlePaste}
-                placeholder={
-                  attachedTils.length > 1
-                    ? "Ask about these links…"
-                    : attachedTils.length === 1
-                      ? "Ask about this link…"
-                      : "Ask about your saved links…"
-                }
-                aria-label={isChatMode ? "Chat message" : "URL to save"}
-                autoComplete="off"
-                spellCheck={false}
-                className="h-12 w-full rounded-full border bg-transparent shadow-sm px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              />
-              {isLoading ? (
+            {!showInput ? (
+              <div className="flex justify-center">
                 <Button
-                  type="button"
-                  onClick={stop}
-                  aria-label="Stop generating"
-                  className="absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center"
+                  variant="secondary"
+                  onClick={() => {
+                    trigger("light");
+                    playSound();
+                    setInputOpen(true);
+                    requestAnimationFrame(() => inputRef.current?.focus());
+                  }}
+                  size="lg"
+                  className="rounded-full gap-2 px-4 shadow-sm"
                 >
-                  <Square
-                    aria-hidden="true"
-                    className="size-3.5 fill-current"
-                  />
+                  <MessageCircle className="size-4" />
+                  Chat
                 </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  aria-label={isChatMode ? "Send message" : "Save link"}
-                  className="absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center"
-                >
-                  <ArrowUp aria-hidden="true" />
-                </Button>
-              )}
-            </form>
-            <p
-              className={cn("text-center text-xs text-muted-foreground mt-2", {
-                "max-sm:opacity-0 max-sm:mt-0": !isChatMode,
-              })}
-            >
-              {isChatMode
-                ? "AI can make mistakes. Verify the output."
-                : "Tip: Copy and Paste link anywhere to save."}
-            </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="relative">
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  name={isChatMode ? "message" : "url"}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onBlur={() => {
+                    if (!input && !isChatMode) setInputOpen(false);
+                  }}
+                  onPaste={handlePaste}
+                  placeholder={
+                    attachedTils.length > 1
+                      ? "Ask about these links…"
+                      : attachedTils.length === 1
+                        ? "Ask about this link…"
+                        : "Ask about your saved links…"
+                  }
+                  aria-label={isChatMode ? "Chat message" : "URL to save"}
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="h-12 w-full rounded-full border bg-muted! shadow-sm px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                />
+                {isLoading ? (
+                  <Button
+                    type="button"
+                    onClick={stop}
+                    aria-label="Stop generating"
+                    className="absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center"
+                  >
+                    <Square
+                      aria-hidden="true"
+                      className="size-3.5 fill-current"
+                    />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    aria-label={isChatMode ? "Send message" : "Save link"}
+                    className="absolute right-2 rounded-full top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center"
+                  >
+                    <ArrowUp aria-hidden="true" />
+                  </Button>
+                )}
+              </form>
+            )}
           </>
         )}
       </div>

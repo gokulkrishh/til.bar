@@ -51,7 +51,7 @@ export function ChatMessagesPanel({
           Close
         </Button>
       </div>
-      <div className="max-h-[60vh] border border-border/40 shadow-lg shadow-black/5 overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-2xl">
+      <div className="max-h-[60vh] bg-background border border-border/40 shadow-lg shadow-black/5 overflow-y-auto mb-3 flex flex-col gap-6 px-3 py-4 rounded-2xl">
         {messages.map((message) => (
           <ChatMessage
             key={message.id}

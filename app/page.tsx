@@ -12,11 +12,7 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <Suspense fallback={<PageLoading />}>
-        <DemoState />
-      </Suspense>
-    );
+    return <DemoState />;
   }
 
   const now = new Date();

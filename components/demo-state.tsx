@@ -17,8 +17,8 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
         x2="0"
         y2="42"
         stroke="white"
-        stroke-width="6"
-        stroke-linecap="round"
+        strokeWidth="6"
+        strokeLinecap="round"
       />
       <line
         x1="-36"
@@ -26,8 +26,8 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
         x2="36"
         y2="21"
         stroke="white"
-        stroke-width="6"
-        stroke-linecap="round"
+        strokeWidth="6"
+        strokeLinecap="round"
       />
       <line
         x1="36"
@@ -35,8 +35,8 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
         x2="-36"
         y2="21"
         stroke="white"
-        stroke-width="6"
-        stroke-linecap="round"
+        strokeWidth="6"
+        strokeLinecap="round"
       />
       <circle cx="0" cy="0" r="9" fill="#1a1917" />
       <circle cx="0" cy="0" r="5" fill="white" />

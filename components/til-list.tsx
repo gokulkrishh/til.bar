@@ -240,7 +240,7 @@ export function TilList({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="flex flex-col w-full h-52 items-center justify-center"
+            className="flex flex-col w-full items-center justify-center"
           >
             <SkeletonGroup />
           </motion.div>
