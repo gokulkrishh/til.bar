@@ -101,27 +101,27 @@ function showToast(tabId, message, type) {
         const toast = document.createElement("div");
         toast.id = "tilbar-toast";
 
-        if (t === "success") {
-          const icon = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "svg",
-          );
-          icon.setAttribute("viewBox", "0 0 24 24");
-          icon.setAttribute("fill", "none");
-          icon.setAttribute("stroke", "currentColor");
-          icon.setAttribute("stroke-width", "2");
-          icon.setAttribute("stroke-linecap", "round");
-          icon.setAttribute("stroke-linejoin", "round");
-          Object.assign(icon.style, {
-            width: "1rem",
-            height: "1rem",
-            flexShrink: "0",
-            color: "#22c55e",
-          });
-          icon.innerHTML =
-            '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>';
-          toast.appendChild(icon);
-        }
+        const icon = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "svg",
+        );
+        icon.setAttribute("viewBox", "0 0 24 24");
+        icon.setAttribute("fill", "none");
+        icon.setAttribute("stroke", "currentColor");
+        icon.setAttribute("stroke-width", "2");
+        icon.setAttribute("stroke-linecap", "round");
+        icon.setAttribute("stroke-linejoin", "round");
+        Object.assign(icon.style, {
+          width: "1rem",
+          height: "1rem",
+          flexShrink: "0",
+          color: t === "success" ? "#22c55e" : "#fff",
+        });
+        icon.innerHTML =
+          t === "success"
+            ? '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'
+            : '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>';
+        toast.appendChild(icon);
 
         const text = document.createElement("span");
         text.textContent = msg;
@@ -136,6 +136,7 @@ function showToast(tabId, message, type) {
           gap: "0.375rem",
           padding: "0.5rem 0.625rem",
           borderRadius: "10rem",
+          flexShrink: "0",
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           fontSize: "0.8125rem",
@@ -158,8 +159,8 @@ function showToast(tabId, message, type) {
         setTimeout(() => {
           toast.style.opacity = "0";
           toast.style.transform = "translateY(0.5rem)";
-          setTimeout(() => toast.remove(), 30000);
-        }, 2000);
+          setTimeout(() => toast.remove(), 3000);
+        }, 4000);
       },
       args: [message, type],
     })
