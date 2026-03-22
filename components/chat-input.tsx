@@ -25,7 +25,7 @@ import { ChatMinimizedBar } from "./chat-minimized-bar";
 import { ChatMessagesPanel } from "./chat-messages-panel";
 import { ChatSuggestions } from "./chat-suggestions";
 import { useAppSound } from "@/hooks/use-app-sound";
-import { clickSoftSound } from "@/sounds/click-soft";
+import { drop003Sound } from "@/sounds/drop-003 copy";
 
 const urlSchema = z.url().check(z.startsWith("http"));
 
@@ -35,7 +35,7 @@ export function ChatInput({ user }: { user: User }) {
   const { capture } = useCaptureContext();
   const { attachedTils, removeTil, clearAttachment } = useChatContext();
   const trigger = useAppHaptics();
-  const [playSound] = useAppSound(clickSoftSound);
+  const [playSound] = useAppSound(drop003Sound);
 
   const {
     messages,
