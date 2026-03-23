@@ -73,29 +73,29 @@ export const metadata: Metadata = {
       },
     ],
   },
-  icons: {
-    icon: [
-      {
-        rel: "icon",
-        type: "image/svg+xml",
-        media: "(prefers-color-scheme: light)",
-        url: "/logo-dark.svg",
-      },
-      {
-        rel: "icon",
-        type: "image/svg+xml",
-        media: "(prefers-color-scheme: dark)",
-        url: "/logo-light.svg",
-      },
-      {
-        rel: "icon",
-        url: "/favicon-96x96.png",
-        type: "image/png",
-        sizes: "96x96",
-      },
-    ],
-    shortcut: "/favicon.ico",
-  },
+  icons: [
+    {
+      rel: "shortcut icon",
+      url: "/favicon.ico",
+    },
+    {
+      rel: "icon",
+      type: "image/svg+xml",
+      media: "(prefers-color-scheme: light)",
+      url: "/logo-dark.svg",
+    },
+    {
+      rel: "icon",
+      type: "image/svg+xml",
+      media: "(prefers-color-scheme: dark)",
+      url: "/logo-light.svg",
+    },
+    {
+      rel: "icon",
+      url: "/favicon-96x96.png",
+      type: "image/png",
+    },
+  ],
   appleWebApp: {
     title,
     statusBarStyle: "default",
@@ -154,9 +154,9 @@ export default function RootLayout({
               </TooltipProvider>
             </HapticsProvider>
           </SoundProvider>
-          <Toaster richColors position="top-center" />
           <SWRegister />
         </ThemeProvider>
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );

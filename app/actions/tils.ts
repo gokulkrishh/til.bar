@@ -174,8 +174,6 @@ export async function refreshMetadata(id: string, url: string) {
 
   let { title, description } = await fetchMetadata(url);
 
-  console.log("before", title, description);
-
   // Generate better metadata via AI if needed
   const aiMeta = await generateMetadata(url, title, description);
 
@@ -183,8 +181,6 @@ export async function refreshMetadata(id: string, url: string) {
     title = aiMeta.title;
     description = aiMeta.description;
   }
-
-  console.log("after", aiMeta, title, description);
 
   const { data: til, error } = await supabase
     .from("tils")
@@ -204,9 +200,14 @@ export async function refreshMetadata(id: string, url: string) {
     .eq("til_id", id);
 
   if (!count) {
-    after(() => {
-      generateTags(til);
-      revalidatePath("/");
+    after(async () => {
+      try {
+        await generateTags(til);
+      } catch (err) {
+        console.error("[after] Background work failed:", err);
+      } finally {
+        revalidatePath("/");
+      }
     });
   }
 

@@ -42,18 +42,23 @@ export async function confirmImport(links: ImportLink[]) {
     return { error: "Couldn't import links. Check your file and try again." };
   }
 
-  // Insert existing tags in the background
-  const linksWithTags = validLinks.filter((l) => l.tags?.length);
+  // Insert existing tags in the background (use index-based matching
+  // since Supabase preserves array order in returned data)
+  const linksWithTagIndexes = validLinks.reduce<number[]>((acc, link, i) => {
+    if (link.tags?.length) acc.push(i);
+    return acc;
+  }, []);
 
-  if (linksWithTags.length) {
+  if (linksWithTagIndexes.length) {
     const userId = user.id;
 
     after(async () => {
       try {
         const admin = createAdminClient();
 
-        for (const link of linksWithTags) {
-          const til = tils.find((t) => t.url === link.url);
+        for (const i of linksWithTagIndexes) {
+          const link = validLinks[i];
+          const til = tils[i];
           if (!til || !link.tags) continue;
 
           await upsertTags(admin, userId, til.id, link.tags);
