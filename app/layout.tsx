@@ -76,6 +76,11 @@ export const metadata: Metadata = {
   icons: [
     {
       rel: "icon",
+      url: "/favicon.ico",
+      sizes: "48x48",
+    },
+    {
+      rel: "icon",
       type: "image/svg+xml",
       media: "(prefers-color-scheme: light)",
       url: "/logo-dark.svg",
@@ -90,6 +95,7 @@ export const metadata: Metadata = {
       rel: "icon",
       url: "/favicon-96x96.png",
       type: "image/png",
+      sizes: "96x96",
     },
   ],
   appleWebApp: {
