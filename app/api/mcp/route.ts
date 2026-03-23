@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { fetchMetadata } from "@/lib/metadata";
 import { authenticateToken } from "@/lib/auth";
 import { generateTags } from "@/lib/ai-tags";
+import { generateMetadata } from "@/lib/ai-metadata";
 import { getTilIdsByTag, upsertTags } from "@/lib/tag-utils";
 
 function mcpText(text: string) {
@@ -120,7 +121,8 @@ function createMcpServer(userId: string) {
     async ({ query, limit, offset, tag }) => {
       const pageSize = limit ?? 20;
       const from = offset ?? 0;
-      const pattern = `%${query}%`;
+      const escaped = query.replace(/%/g, "\\%");
+      const pattern = `%${escaped}%`;
       const filter = `title.ilike.${pattern},description.ilike.${pattern},url.ilike.${pattern}`;
 
       const tilIds = tag
@@ -194,7 +196,7 @@ function createMcpServer(userId: string) {
       },
     },
     async ({ url }) => {
-      const { title, description } = await fetchMetadata(url);
+      let { title, description } = await fetchMetadata(url);
 
       const { data, error } = await supabase
         .from("tils")
@@ -204,7 +206,25 @@ function createMcpServer(userId: string) {
 
       if (error) return mcpError(error.message);
 
-      await generateTags({ ...data, title, description });
+      try {
+        const aiMeta = await generateMetadata(url, title, description);
+        if (aiMeta) {
+          title = aiMeta.title;
+          description = aiMeta.description;
+          await supabase
+            .from("tils")
+            .update({ title, description })
+            .eq("id", data.id);
+        }
+      } catch {
+        // AI metadata enhancement is best-effort
+      }
+
+      try {
+        await generateTags({ ...data, title, description });
+      } catch {
+        // Tag generation is best-effort
+      }
 
       const { data: saved } = await supabase
         .from("tils")
