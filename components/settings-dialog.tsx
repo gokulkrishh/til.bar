@@ -11,8 +11,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AccountTab } from "@/components/settings/account-tab";
 import { AppearanceTab } from "@/components/settings/appearance-tab";
 import { IntegrationsTab } from "@/components/settings/integrations-tab";
-import { DataTab } from "@/components/settings/data-tab";
-
 export function SettingsDialog({
   user,
   open,
@@ -34,11 +32,10 @@ export function SettingsDialog({
               <TabsTrigger value="account">Account</TabsTrigger>
               <TabsTrigger value="appearance">Appearance</TabsTrigger>
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
-              <TabsTrigger value="data">Data control</TabsTrigger>
             </TabsList>
           </div>
-          <TabsContent value="account">
-            <AccountTab user={user} />
+          <TabsContent value="account" className="max-h-120 overflow-y-auto">
+            <AccountTab user={user} onOpenChange={onOpenChange} />
           </TabsContent>
           <TabsContent value="appearance">
             <AppearanceTab />
@@ -48,9 +45,6 @@ export function SettingsDialog({
             className="max-h-120 overflow-y-auto"
           >
             <IntegrationsTab />
-          </TabsContent>
-          <TabsContent value="data">
-            <DataTab onOpenChange={onOpenChange} />
           </TabsContent>
         </Tabs>
       </DialogContent>
