@@ -4,6 +4,8 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { fetchMetadata } from "@/lib/metadata";
 import { authenticateToken } from "@/lib/auth";
+import { generateTags } from "@/lib/ai-tags";
+import { getTilIdsByTag, upsertTags } from "@/lib/tag-utils";
 
 function mcpText(text: string) {
   return { content: [{ type: "text" as const, text }] };
@@ -38,7 +40,7 @@ function createMcpServer(userId: string) {
     "list_links",
     {
       description:
-        "List saved links, most recent first. Supports pagination via offset.",
+        "List saved links with their tags, most recent first. Supports pagination and filtering by tag.",
       inputSchema: {
         limit: z
           .number()
@@ -48,29 +50,48 @@ function createMcpServer(userId: string) {
           .number()
           .optional()
           .describe("Number of links to skip for pagination (default 0)"),
+        tag: z
+          .string()
+          .optional()
+          .describe("Filter by tag name (e.g. 'react', 'css')"),
       },
     },
-    async ({ limit, offset }) => {
+    async ({ limit, offset, tag }) => {
       const pageSize = limit ?? 50;
       const from = offset ?? 0;
 
+      const tilIds = tag
+        ? await getTilIdsByTag(supabase, userId, tag)
+        : undefined;
+      if (tag && !tilIds) return mcpText(`No links found with tag "${tag}"`);
+
+      let countQuery = supabase
+        .from("tils")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      let dataQuery = supabase
+        .from("tils")
+        .select("*, tags:til_tags(...tags(*))")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .range(from, from + pageSize - 1);
+
+      if (tilIds) {
+        countQuery = countQuery.in("id", tilIds);
+        dataQuery = dataQuery.in("id", tilIds);
+      }
+
       const [{ count }, { data, error }] = await Promise.all([
-        supabase
-          .from("tils")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId),
-        supabase
-          .from("tils")
-          .select()
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .range(from, from + pageSize - 1),
+        countQuery,
+        dataQuery,
       ]);
 
       if (error) return mcpError(error.message);
 
+      const tagSuffix = tag ? ` with tag "${tag}"` : "";
       return mcpText(
-        `Showing ${data.length} of ${count ?? "unknown"} total links (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
+        `Showing ${data.length} of ${count ?? "unknown"} total links${tagSuffix} (offset: ${from}):\n${JSON.stringify(data, null, 2)}`,
       );
     },
   );
@@ -79,7 +100,7 @@ function createMcpServer(userId: string) {
     "search_links",
     {
       description:
-        "Search saved links by keyword. Matches against title, description, and URL. Supports pagination.",
+        "Search saved links by keyword. Matches against title, description, and URL. Supports pagination and filtering by tag.",
       inputSchema: {
         query: z.string().describe("Search keyword"),
         limit: z
@@ -90,27 +111,46 @@ function createMcpServer(userId: string) {
           .number()
           .optional()
           .describe("Number of results to skip for pagination (default 0)"),
+        tag: z
+          .string()
+          .optional()
+          .describe("Filter by tag name (e.g. 'react', 'css')"),
       },
     },
-    async ({ query, limit, offset }) => {
+    async ({ query, limit, offset, tag }) => {
       const pageSize = limit ?? 20;
       const from = offset ?? 0;
       const pattern = `%${query}%`;
       const filter = `title.ilike.${pattern},description.ilike.${pattern},url.ilike.${pattern}`;
 
+      const tilIds = tag
+        ? await getTilIdsByTag(supabase, userId, tag)
+        : undefined;
+      if (tag && !tilIds)
+        return mcpText(`No links found matching "${query}" with tag "${tag}"`);
+
+      let countQuery = supabase
+        .from("tils")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .or(filter);
+
+      let dataQuery = supabase
+        .from("tils")
+        .select("*, tags:til_tags(...tags(*))")
+        .eq("user_id", userId)
+        .or(filter)
+        .order("created_at", { ascending: false })
+        .range(from, from + pageSize - 1);
+
+      if (tilIds) {
+        countQuery = countQuery.in("id", tilIds);
+        dataQuery = dataQuery.in("id", tilIds);
+      }
+
       const [{ count }, { data, error }] = await Promise.all([
-        supabase
-          .from("tils")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .or(filter),
-        supabase
-          .from("tils")
-          .select()
-          .eq("user_id", userId)
-          .or(filter)
-          .order("created_at", { ascending: false })
-          .range(from, from + pageSize - 1),
+        countQuery,
+        dataQuery,
       ]);
 
       if (error) return mcpError(error.message);
@@ -134,7 +174,7 @@ function createMcpServer(userId: string) {
     async ({ id }) => {
       const { data, error } = await supabase
         .from("tils")
-        .select()
+        .select("*, tags:til_tags(...tags(*))")
         .eq("id", id)
         .eq("user_id", userId)
         .single();
@@ -148,9 +188,9 @@ function createMcpServer(userId: string) {
     "save_link",
     {
       description:
-        "Save a new link. Automatically fetches the page title and description.",
+        "Save a new link. Automatically fetches the page title, description, and generates tags via AI.",
       inputSchema: {
-        url: z.string().url().describe("The URL to save"),
+        url: z.url().describe("The URL to save"),
       },
     },
     async ({ url }) => {
@@ -163,8 +203,17 @@ function createMcpServer(userId: string) {
         .single();
 
       if (error) return mcpError(error.message);
+
+      await generateTags({ ...data, title, description });
+
+      const { data: saved } = await supabase
+        .from("tils")
+        .select("*, tags:til_tags(...tags(*))")
+        .eq("id", data.id)
+        .single();
+
       return mcpText(
-        `Saved: ${title ?? url}\n${JSON.stringify(data, null, 2)}`,
+        `Saved: ${title ?? url}\n${JSON.stringify(saved ?? data, null, 2)}`,
       );
     },
   );
@@ -172,26 +221,59 @@ function createMcpServer(userId: string) {
   server.registerTool(
     "update_link",
     {
-      description: "Update a saved link's title or description",
+      description:
+        "Update a saved link's title, description, or tags. When tags are provided, they replace all existing tags.",
       inputSchema: {
         id: z.string().describe("The unique ID of the link"),
         title: z.string().optional().describe("New title"),
         description: z.string().optional().describe("New description"),
+        tags: z
+          .array(z.string())
+          .optional()
+          .describe(
+            "Replace all tags with these (e.g. ['react', 'css']). Pass empty array to remove all tags.",
+          ),
       },
     },
-    async ({ id, title, description }) => {
+    async ({ id, title, description, tags }) => {
+      const { count } = await supabase
+        .from("tils")
+        .select("id", { count: "exact", head: true })
+        .eq("id", id)
+        .eq("user_id", userId);
+
+      if (!count) return mcpError("Link not found");
+
       const update: Record<string, string> = {};
       if (title !== undefined) update.title = title;
       if (description !== undefined) update.description = description;
 
-      if (Object.keys(update).length === 0) return mcpText("Nothing to update");
+      const hasTags = tags !== undefined;
+      if (Object.keys(update).length === 0 && !hasTags)
+        return mcpText("Nothing to update");
+
+      if (Object.keys(update).length > 0) {
+        const { error } = await supabase
+          .from("tils")
+          .update(update)
+          .eq("id", id)
+          .eq("user_id", userId);
+
+        if (error) return mcpError(error.message);
+      }
+
+      if (hasTags) {
+        await supabase.from("til_tags").delete().eq("til_id", id);
+        if (tags.length) {
+          await upsertTags(supabase, userId, id, tags);
+        }
+      }
 
       const { data, error } = await supabase
         .from("tils")
-        .update(update)
+        .select("*, tags:til_tags(...tags(*))")
         .eq("id", id)
         .eq("user_id", userId)
-        .select()
         .single();
 
       if (error) return mcpError(error.message);

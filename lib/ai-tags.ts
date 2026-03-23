@@ -3,6 +3,7 @@ import { openrouter } from "@openrouter/ai-sdk-provider";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Til } from "@/lib/types";
+import { upsertTags } from "@/lib/tag-utils";
 
 const tagSchema = z.object({
   tags: z
@@ -55,26 +56,7 @@ Output format: ["tag"] or ["tag1", "tag2"]`,
 
     if (!output?.tags?.length) return;
 
-    for (const tagName of output.tags.slice(0, 2)) {
-      const name = tagName.toLowerCase().trim();
-      if (!name) continue;
-
-      const { data: tag } = await supabase
-        .from("tags")
-        .upsert({ user_id: userId, name }, { onConflict: "user_id,name" })
-        .select("id")
-        .single();
-
-      if (!tag) continue;
-
-      await supabase
-        .from("til_tags")
-        .upsert(
-          { til_id: tilId, tag_id: tag.id },
-          { onConflict: "til_id,tag_id" },
-        )
-        .select();
-    }
+    await upsertTags(supabase, userId, tilId, output.tags);
   } catch (error) {
     console.error("[ai-tags] Failed:", error);
   }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ImportLink } from "@/lib/ai-import";
+import { upsertTags } from "@/lib/tag-utils";
 
 export async function confirmImport(links: ImportLink[]) {
   const supabase = await createClient();
@@ -55,26 +56,7 @@ export async function confirmImport(links: ImportLink[]) {
           const til = tils.find((t) => t.url === link.url);
           if (!til || !link.tags) continue;
 
-          for (const tagName of link.tags) {
-            const name = tagName.toLowerCase().trim();
-            if (!name) continue;
-
-            const { data: tag } = await admin
-              .from("tags")
-              .upsert({ user_id: userId, name }, { onConflict: "user_id,name" })
-              .select("id")
-              .single();
-
-            if (!tag) continue;
-
-            await admin
-              .from("til_tags")
-              .upsert(
-                { til_id: til.id, tag_id: tag.id },
-                { onConflict: "til_id,tag_id" },
-              )
-              .select();
-          }
+          await upsertTags(admin, userId, til.id, link.tags);
         }
       } catch (err) {
         console.error("[import] Tag import failed:", err);
