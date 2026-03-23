@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Globe, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ import { clickSoftSound } from "@/sounds/click-soft";
 
 function getFaviconUrl(url: string): string {
   try {
-    return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`;
+    return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(url)}&size=64`;
   } catch {
     return "";
   }
@@ -51,6 +51,7 @@ export function TilItem({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [play] = useSound(clickSoftSound);
+  const [faviconError, setFaviconError] = useState(false);
   const faviconUrl = getFaviconUrl(til.url);
 
   const handleRefresh = () => {
@@ -85,7 +86,7 @@ export function TilItem({
             aria-label="Refresh metadata"
             className="relative size-4 shrink-0 group/favicon cursor-pointer hit-area-4"
           >
-            {faviconUrl ? (
+            {faviconUrl && !faviconError ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={faviconUrl}
@@ -96,9 +97,7 @@ export function TilItem({
                   "size-4 rounded-sm transition-[opacity,filter,scale] duration-300 ease-[cubic-bezier(0.2,0,0,1)] group-hover/favicon:scale-[0.25] group-hover/favicon:opacity-0 ",
                   { "scale-[0.25] opacity-0": isPending },
                 )}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
+                onError={() => setFaviconError(true)}
               />
             ) : (
               <Globe
