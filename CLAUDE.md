@@ -4,6 +4,14 @@
 
 **til.bar** — a "Today I Learned" application. Capture all your links in one place.
 
+## Project Stack
+
+- This is a TypeScript/Next.js project ecosystem. Always prefer TypeScript over JavaScript. Use modern Next.js patterns (App Router, Server Components) unless told otherwise.
+
+## Important Rules
+
+- Before answering architecture questions about this project (especially MCP, auth, or API patterns), READ the project's CLAUDE.md and relevant docs first. Do not assume local STDIO or standard patterns without checking.
+
 ## Core Principles
 
 - **Read project docs first**: Before answering ANY question about til.bar — even conceptual ones — read `PRODUCT.md` and `TECH.md`. Never assume architecture, auth model, or deployment from generic patterns. til.bar is a remote HTTP MCP server with per-user API key auth, not a local STDIO server.
@@ -53,6 +61,15 @@
 - Point at logs, errors, failing tests - then resolve them
 - Zero context switching required from the user
 - Go fix failing CI tests without being told how
+
+## Workflow Rules
+
+- When a CSS/UI fix doesn't work after 2 attempts, stop and ask the user for more context or a reference example rather than cycling through approaches.
+- Do not fetch external URLs or go off-task when the user asks for a code change. Make the edit directly unless explicitly asked to research first.
+
+## Debugging
+
+- When debugging API/auth issues, verify the actual root cause with a test request before suggesting fixes. Don't keep suggesting the same hypothesis after it's been ruled out.
 
 ## Task Management
 
