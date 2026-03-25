@@ -46,16 +46,18 @@ function matchMeta(html: string, attr: string, value: string): string | null {
   return null;
 }
 
-export async function fetchMetadata(
-  url: string,
-): Promise<{ title: string | null; description: string | null }> {
+export async function fetchMetadata(url: string): Promise<{
+  title: string | null;
+  description: string | null;
+  image: string | null;
+}> {
   try {
     const response = await fetch(url, {
       headers: { "User-Agent": "til.bar Bot" },
       signal: AbortSignal.timeout(5000),
     });
 
-    if (!response.ok) return { title: null, description: null };
+    if (!response.ok) return { title: null, description: null, image: null };
 
     const html = await response.text();
 
@@ -68,11 +70,14 @@ export async function fetchMetadata(
       matchMeta(html, "property", "og:description") ??
       matchMeta(html, "name", "description");
 
+    const image = matchMeta(html, "property", "og:image");
+
     return {
       title: title ? decodeEntities(title) : null,
       description,
+      image,
     };
   } catch {
-    return { title: null, description: null };
+    return { title: null, description: null, image: null };
   }
 }

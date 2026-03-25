@@ -10,6 +10,7 @@ import { TilActions } from "@/components/til-actions";
 import { refreshMetadata } from "@/app/actions/tils";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "./ui/hover-card";
 import { motion } from "motion/react";
 import { useSound } from "@/hooks/use-sound";
 import { clickSoftSound } from "@/sounds/click-soft";
@@ -118,24 +119,7 @@ export function TilItem({
           </TooltipTrigger>
           <TooltipContent>Refresh metadata</TooltipContent>
         </Tooltip>
-        <Link
-          href={til.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="transition-colors w-full flex gap-1 text-sm items-center group font-medium group-hover/row:text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
-        >
-          <span className="truncate">{til.title ?? til.url}</span>
-          <motion.span
-            className="shrink-0 text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity duration-150"
-            variants={{
-              idle: { scale: 1 },
-              hover: { scale: 1.1 },
-            }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-          >
-            <ArrowUpRight className="size-3.5" aria-hidden="true" />
-          </motion.span>
-        </Link>
+        <LinkWithPreview til={til} />
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <span
@@ -154,5 +138,75 @@ export function TilItem({
         />
       </div>
     </motion.li>
+  );
+}
+
+function LinkWithPreview({ til }: { til: TilWithTags }) {
+  const [ogImage, setOgImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
+
+  const handleOpenChange = (open: boolean) => {
+    if (open && !fetched) {
+      setFetched(true);
+      setLoading(true);
+      fetch(`/api/og-image?url=${encodeURIComponent(til.url)}`)
+        .then((res) => res.json())
+        .then((data) => setOgImage(data.image))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }
+  };
+
+  const linkContent = (
+    <Link
+      href={til.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="transition-colors w-full flex gap-1 text-sm items-center group font-medium group-hover/row:text-foreground min-w-0 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
+    >
+      <span className="truncate">{til.title ?? til.url}</span>
+      <motion.span
+        className="shrink-0 text-muted-foreground opacity-0 group-hover/row:opacity-100 transition-opacity duration-150"
+        variants={{
+          idle: { scale: 1 },
+          hover: { scale: 1.1 },
+        }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
+      >
+        <ArrowUpRight className="size-3.5" aria-hidden="true" />
+      </motion.span>
+    </Link>
+  );
+
+  // Desktop only — hidden on touch devices
+  return (
+    <>
+      <div className="hidden md:contents">
+        <HoverCard onOpenChange={handleOpenChange}>
+          <HoverCardTrigger render={<span className="w-full min-w-0" />}>
+            {linkContent}
+          </HoverCardTrigger>
+          <HoverCardContent side="top" align="start">
+            {loading && <div className="w-full h-40 bg-muted animate-pulse" />}
+            {ogImage && !loading && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={ogImage} alt="" className="w-full h-40 object-cover" />
+            )}
+            <div className="p-3 space-y-1">
+              <p className="text-sm font-medium leading-snug line-clamp-2">
+                {til.title ?? til.url}
+              </p>
+              {til.description && (
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {til.description}
+                </p>
+              )}
+            </div>
+          </HoverCardContent>
+        </HoverCard>
+      </div>
+      <div className="contents md:hidden">{linkContent}</div>
+    </>
   );
 }
