@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
@@ -196,45 +197,56 @@ function createMcpServer(userId: string) {
       },
     },
     async ({ url }) => {
-      let { title, description } = await fetchMetadata(url);
-
       const { data, error } = await supabase
         .from("tils")
-        .insert({ user_id: userId, url, title, description })
+        .insert({ user_id: userId, url })
         .select()
         .single();
 
       if (error) return mcpError(error.message);
 
-      try {
-        const aiMeta = await generateMetadata(url, title, description);
-        if (aiMeta) {
-          title = aiMeta.title;
-          description = aiMeta.description;
-          await supabase
-            .from("tils")
-            .update({ title, description })
-            .eq("id", data.id);
+      // Defer metadata fetch, AI enhancement, and tag generation to background
+      after(async () => {
+        let title: string | null = null;
+        let description: string | null = null;
+
+        try {
+          const meta = await fetchMetadata(url);
+          title = meta.title;
+          description = meta.description;
+
+          if (title || description) {
+            await supabase
+              .from("tils")
+              .update({ title, description })
+              .eq("id", data.id);
+          }
+        } catch (err) {
+          console.error("[mcp:save_link] Metadata fetch failed:", err);
         }
-      } catch {
-        // AI metadata enhancement is best-effort
-      }
 
-      try {
-        await generateTags({ ...data, title, description });
-      } catch {
-        // Tag generation is best-effort
-      }
+        try {
+          const aiMeta = await generateMetadata(url, title, description);
+          if (aiMeta) {
+            title = aiMeta.title;
+            description = aiMeta.description;
+            await supabase
+              .from("tils")
+              .update({ title, description })
+              .eq("id", data.id);
+          }
+        } catch (err) {
+          console.error("[mcp:save_link] AI metadata failed:", err);
+        }
 
-      const { data: saved } = await supabase
-        .from("tils")
-        .select("*, tags:til_tags(...tags(*))")
-        .eq("id", data.id)
-        .single();
+        try {
+          await generateTags({ ...data, title, description });
+        } catch (err) {
+          console.error("[mcp:save_link] Tag generation failed:", err);
+        }
+      });
 
-      return mcpText(
-        `Saved: ${title ?? url}\n${JSON.stringify(saved ?? data, null, 2)}`,
-      );
+      return mcpText(`Saved: ${url}\n${JSON.stringify(data, null, 2)}`);
     },
   );
 
@@ -256,14 +268,6 @@ function createMcpServer(userId: string) {
       },
     },
     async ({ id, title, description, tags }) => {
-      const { count } = await supabase
-        .from("tils")
-        .select("id", { count: "exact", head: true })
-        .eq("id", id)
-        .eq("user_id", userId);
-
-      if (!count) return mcpError("Link not found");
-
       const update: Record<string, string> = {};
       if (title !== undefined) update.title = title;
       if (description !== undefined) update.description = description;
@@ -272,22 +276,30 @@ function createMcpServer(userId: string) {
       if (Object.keys(update).length === 0 && !hasTags)
         return mcpText("Nothing to update");
 
-      if (Object.keys(update).length > 0) {
-        const { error } = await supabase
-          .from("tils")
-          .update(update)
-          .eq("id", id)
-          .eq("user_id", userId);
+      // Run field update and tag replacement in parallel
+      const results = await Promise.all([
+        Object.keys(update).length > 0
+          ? supabase
+              .from("tils")
+              .update(update)
+              .eq("id", id)
+              .eq("user_id", userId)
+          : null,
+        hasTags
+          ? supabase
+              .from("til_tags")
+              .delete()
+              .eq("til_id", id)
+              .then(() =>
+                tags.length
+                  ? upsertTags(supabase, userId, id, tags)
+                  : undefined,
+              )
+          : null,
+      ]);
 
-        if (error) return mcpError(error.message);
-      }
-
-      if (hasTags) {
-        await supabase.from("til_tags").delete().eq("til_id", id);
-        if (tags.length) {
-          await upsertTags(supabase, userId, id, tags);
-        }
-      }
+      const updateResult = results[0];
+      if (updateResult?.error) return mcpError(updateResult.error.message);
 
       const { data, error } = await supabase
         .from("tils")
@@ -297,6 +309,7 @@ function createMcpServer(userId: string) {
         .single();
 
       if (error) return mcpError(error.message);
+      if (!data) return mcpError("Link not found");
       return mcpText(`Updated:\n${JSON.stringify(data, null, 2)}`);
     },
   );
