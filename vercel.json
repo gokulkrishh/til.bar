@@ -1,9 +1,0 @@
-{
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "destination": "https://til.bar/$1",
-      "statusCode": 301
-    }
-  ]
-}
