@@ -8,7 +8,8 @@ import {
   deleteApiKey,
 } from "@/app/actions/account";
 import { toast } from "sonner";
-import { Check, Chrome, Copy, Plus, Trash2 } from "lucide-react";
+import { Check, Copy, Plus, Trash2 } from "lucide-react";
+import { ChromeIcon } from "@/components/icons/chrome";
 import { Spinner } from "@/components/ui/spinner";
 import { MCP_TOOLS } from "@/lib/mcp-tools";
 import { clickSoftSound } from "@/sounds/click-soft";
@@ -296,7 +297,7 @@ export function IntegrationsTab() {
           rel="noopener noreferrer"
         >
           <Button variant="secondary">
-            <Chrome />
+            <ChromeIcon />
             Get extension
           </Button>
         </a>

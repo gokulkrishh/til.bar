@@ -12,7 +12,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Github, LogOut, Settings } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
+import { GithubIcon } from "@/components/icons/github";
 import { SettingsDialog } from "@/components/settings-dialog";
 
 export function Profile({ user }: { user: User }) {
@@ -56,7 +57,7 @@ export function Profile({ user }: { user: User }) {
               />
             }
           >
-            <Github aria-hidden="true" />
+            <GithubIcon aria-hidden="true" />
             GitHub
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
