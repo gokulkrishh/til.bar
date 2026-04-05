@@ -11,7 +11,7 @@ import { refreshMetadata } from "@/app/actions/tils";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { motion } from "motion/react";
-import { useSound } from "@/hooks/use-sound";
+import { useAppSound } from "@/hooks/use-app-sound";
 import { clickSoftSound } from "@/sounds/click-soft";
 
 function getFaviconUrl(url: string): string {
@@ -50,7 +50,7 @@ export function TilItem({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [play] = useSound(clickSoftSound);
+  const [play] = useAppSound(clickSoftSound);
   const [faviconError, setFaviconError] = useState(false);
   const faviconUrl = getFaviconUrl(til.url);
 

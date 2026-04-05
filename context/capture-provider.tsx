@@ -13,7 +13,7 @@ import { createTil, deleteTil } from "@/app/actions/tils";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppSound } from "@/hooks/use-app-sound";
-import { drop003Sound } from "@/sounds/drop-003";
+import { clickSoftSound } from "@/sounds/click-soft";
 import { useAppHaptics } from "@/context/haptics-provider";
 
 type PendingTil = {
@@ -48,7 +48,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const [, startTransition] = useTransition();
   const [pendingTils, setPendingTils] = useState<PendingTil[]>([]);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
-  const [playDrop] = useAppSound(drop003Sound);
+  const [playDrop] = useAppSound(clickSoftSound);
   const trigger = useAppHaptics();
 
   const removeDeletedId = useCallback((id: string) => {
