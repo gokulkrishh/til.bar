@@ -48,7 +48,7 @@ export function ChatMessage({
         </Avatar>
       )}
       <div
-        className={cn("rounded-2xl bg-muted py-2 px-3 w-full", {
+        className={cn("rounded-2xl py-2 px-3 w-full", {
           "bg-primary text-primary-foreground": isUser,
         })}
       >
