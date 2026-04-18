@@ -6,9 +6,11 @@ import type { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import { ImportPreview } from "./import-preview";
 import { cn, getInitials } from "@/lib/utils";
 import { exportTils, deleteAccount } from "@/app/actions/account";
+import { setEmailDigestEnabled } from "@/app/actions/preferences";
 import { parseImportJson, IMPORT_PROMPT } from "@/lib/ai-import";
 import type { ImportLink } from "@/lib/ai-import";
 import { toast } from "sonner";
@@ -23,9 +25,11 @@ import {
 
 export function AccountTab({
   user,
+  emailDigestEnabled,
   onOpenChange,
 }: {
   user: User;
+  emailDigestEnabled: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
@@ -35,11 +39,29 @@ export function AccountTab({
 
   const [isExporting, startExportTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isTogglingDigest, startDigestTransition] = useTransition();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [previewLinks, setPreviewLinks] = useState<ImportLink[] | null>(null);
   const [importExpanded, setImportExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [digestEnabled, setDigestEnabled] = useState(emailDigestEnabled);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDigestToggle = (next: boolean) => {
+    const prev = digestEnabled;
+    setDigestEnabled(next);
+    startDigestTransition(async () => {
+      const result = await setEmailDigestEnabled(next);
+      if (result.error) {
+        setDigestEnabled(prev);
+        toast.error(result.error);
+        return;
+      }
+      toast.success(
+        next ? "Weekly digest turned on" : "Weekly digest turned off",
+      );
+    });
+  };
 
   const handleCopyPrompt = async () => {
     await navigator.clipboard.writeText(IMPORT_PROMPT);
@@ -120,7 +142,7 @@ export function AccountTab({
   }
 
   return (
-    <div className="flex flex-col gap-4 py-4 px-1">
+    <div className="flex flex-col gap-6 py-4 px-1">
       <div className="flex items-center gap-3">
         <Avatar className="size-10">
           <AvatarImage src={avatarUrl} alt={fullName} />
@@ -132,101 +154,128 @@ export function AccountTab({
         </div>
       </div>
 
-      <hr className="border-border" />
-
-      <div>
-        <button
-          type="button"
-          className="flex w-full items-center justify-between cursor-pointer"
-          onClick={() => setImportExpanded((v) => !v)}
-        >
-          <div className="text-left">
-            <h3 className="text-sm font-semibold">Import links</h3>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Notifications
+        </h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">Weekly digest</h3>
             <p className="text-xs text-muted-foreground">
-              Copy prompt, paste with your data into any AI, upload the result.
+              Email me a summary of last week&apos;s links every Monday
             </p>
           </div>
-          <ChevronDown
-            className={cn(
-              "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
-              { "-rotate-180": importExpanded },
-            )}
+          <Switch
+            checked={digestEnabled}
+            disabled={isTogglingDigest}
+            onCheckedChange={handleDigestToggle}
           />
-        </button>
+        </div>
+      </section>
 
-        {importExpanded && (
-          <div className="mt-3 flex flex-col gap-2">
-            <div className="relative">
-              <pre className="text-xs leading-relaxed bg-muted rounded-md p-3 pr-10 overflow-x-auto max-h-32 whitespace-pre-wrap text-muted-foreground select-all">
-                {IMPORT_PROMPT.trim()}
-              </pre>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Copy prompt"
-                className="absolute top-1.5 right-1.5 size-7"
-                onClick={handleCopyPrompt}
-              >
-                {copied ? (
-                  <Check className="size-3.5" />
-                ) : (
-                  <Copy className="size-3.5" />
-                )}
-              </Button>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Data
+        </h2>
+        <div>
+          <button
+            type="button"
+            className="flex w-full items-center justify-between cursor-pointer"
+            onClick={() => setImportExpanded((v) => !v)}
+          >
+            <div className="text-left">
+              <h3 className="text-sm font-semibold">Import links</h3>
+              <p className="text-xs text-muted-foreground">
+                Copy prompt, paste with your data into any AI, upload the
+                result.
+              </p>
             </div>
-            <div className="flex justify-end">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              <Button
-                variant="secondary"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload />
-                Upload JSON
-              </Button>
+            <ChevronDown
+              className={cn(
+                "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                { "-rotate-180": importExpanded },
+              )}
+            />
+          </button>
+
+          {importExpanded && (
+            <div className="mt-3 flex flex-col gap-2">
+              <div className="relative">
+                <pre className="text-xs leading-relaxed bg-muted rounded-md p-3 pr-10 overflow-x-auto max-h-32 whitespace-pre-wrap text-muted-foreground select-all">
+                  {IMPORT_PROMPT.trim()}
+                </pre>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Copy prompt"
+                  className="absolute top-1.5 right-1.5 size-7"
+                  onClick={handleCopyPrompt}
+                >
+                  {copied ? (
+                    <Check className="size-3.5" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
+                </Button>
+              </div>
+              <div className="flex justify-end">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Button
+                  variant="secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload />
+                  Upload JSON
+                </Button>
+              </div>
             </div>
+          )}
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">Export links</h3>
+            <p className="text-xs text-muted-foreground">
+              Download all your links as JSON
+            </p>
           </div>
-        )}
-      </div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-semibold">Export links</h3>
-          <p className="text-xs text-muted-foreground">
-            Download all your links as JSON
-          </p>
+          <Button
+            variant="secondary"
+            onClick={handleExport}
+            disabled={isExporting}
+          >
+            {isExporting ? <Spinner /> : <Download />}
+            Export
+          </Button>
         </div>
-        <Button
-          variant="secondary"
-          onClick={handleExport}
-          disabled={isExporting}
-        >
-          {isExporting ? <Spinner /> : <Download />}
-          Export
-        </Button>
-      </div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-destructive">
-            Delete account
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            Permanently deletes all your links and account data
-          </p>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-destructive">
+          Danger zone
+        </h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">Delete account</h3>
+            <p className="text-xs text-muted-foreground">
+              Permanently deletes all your links and account data
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
+          >
+            <Trash2 />
+            {confirmDelete ? "Delete account? This can't be undone" : "Delete"}
+          </Button>
         </div>
-        <Button
-          variant="destructive"
-          onClick={handleDeleteAccount}
-          disabled={isDeleting}
-        >
-          <Trash2 />
-          {confirmDelete ? "Delete account? This can't be undone" : "Delete"}
-        </Button>
-      </div>
+      </section>
     </div>
   );
 }

@@ -16,7 +16,13 @@ import { LogOut, Settings } from "lucide-react";
 import { GithubIcon } from "@/components/icons/github";
 import { SettingsDialog } from "@/components/settings-dialog";
 
-export function Profile({ user }: { user: User }) {
+export function Profile({
+  user,
+  emailDigestEnabled,
+}: {
+  user: User;
+  emailDigestEnabled: boolean;
+}) {
   const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -72,6 +78,7 @@ export function Profile({ user }: { user: User }) {
       </DropdownMenu>
       <SettingsDialog
         user={user}
+        emailDigestEnabled={emailDigestEnabled}
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
       />

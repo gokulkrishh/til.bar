@@ -11,6 +11,19 @@ export async function Header() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let emailDigestEnabled = false;
+  if (user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("settings")
+      .eq("id", user.id)
+      .single();
+    const settings = (data?.settings ?? {}) as {
+      email_digest_enabled?: boolean;
+    };
+    emailDigestEnabled = settings.email_digest_enabled === true;
+  }
+
   return (
     <header className="flex items-center justify-between py-5">
       <Link className="active:scale-98 inline-flex items-center" href="/">
@@ -18,7 +31,11 @@ export async function Header() {
       </Link>
       <div className="flex items-center gap-2">
         {user && <SearchButton />}
-        {user ? <Profile user={user} /> : <SignIn />}
+        {user ? (
+          <Profile user={user} emailDigestEnabled={emailDigestEnabled} />
+        ) : (
+          <SignIn />
+        )}
       </div>
     </header>
   );
