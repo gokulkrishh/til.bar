@@ -137,7 +137,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     created_at: yesterday(9, 0),
     tags: [tags.haptics, tags.javascript],
   },
-  // Earlier
+  // Older
   {
     id: "5b94c581-6833-490e-a329-d188240bb864",
     user_id: USER_ID,

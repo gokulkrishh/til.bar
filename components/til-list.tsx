@@ -34,7 +34,7 @@ function groupByRelativeDay(tils: TilWithTags[]) {
     } else if (date.getTime() === yesterday.getTime()) {
       label = "Yesterday";
     } else {
-      label = "Earlier";
+      label = "Older";
     }
 
     const existing = map.get(label);
@@ -45,7 +45,7 @@ function groupByRelativeDay(tils: TilWithTags[]) {
     }
   }
 
-  for (const label of ["Today", "Yesterday", "Earlier"]) {
+  for (const label of ["Today", "Yesterday", "Older"]) {
     const tils = map.get(label);
     if (tils) {
       groups.push({ label, tils });
@@ -98,8 +98,8 @@ function TilGroup({
               >
                 <TilItem
                   til={til}
-                  showDate={label === "Earlier"}
-                  showYear={label === "Earlier"}
+                  showDate={label === "Older"}
+                  showYear={label === "Older"}
                 />
               </motion.div>
             ))}
@@ -169,14 +169,14 @@ export function TilList({
   const groups = groupByRelativeDay(displayTils);
   const hiddenCount = totalCount - initialTils.length;
 
-  // Compute real total for "Earlier" when not filtering
+  // Compute real total for "Older" when not filtering
   const groupTotals: Record<string, number | undefined> = {};
   if (!hasAnyFilter && hiddenCount > 0) {
     const todayCount =
       groups.find((g) => g.label === "Today")?.tils.length ?? 0;
     const yesterdayCount =
       groups.find((g) => g.label === "Yesterday")?.tils.length ?? 0;
-    groupTotals["Earlier"] = totalCount - todayCount - yesterdayCount;
+    groupTotals["Older"] = totalCount - todayCount - yesterdayCount;
   }
 
   if (hasPending && !hasAnyFilter && !groups.some((g) => g.label === "Today")) {
