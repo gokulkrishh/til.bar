@@ -13,10 +13,12 @@ import { AppearanceTab } from "@/components/settings/appearance-tab";
 import { IntegrationsTab } from "@/components/settings/integrations-tab";
 export function SettingsDialog({
   user,
+  emailDigestEnabled,
   open,
   onOpenChange,
 }: {
   user: User;
+  emailDigestEnabled: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -35,7 +37,11 @@ export function SettingsDialog({
             </TabsList>
           </div>
           <TabsContent value="account" className="max-h-120 overflow-y-auto">
-            <AccountTab user={user} onOpenChange={onOpenChange} />
+            <AccountTab
+              user={user}
+              emailDigestEnabled={emailDigestEnabled}
+              onOpenChange={onOpenChange}
+            />
           </TabsContent>
           <TabsContent value="appearance">
             <AppearanceTab />

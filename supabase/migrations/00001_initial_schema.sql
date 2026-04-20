@@ -25,7 +25,7 @@ create table public.profiles (
 );
 
 comment on column public.profiles.settings is
-  'User preferences. Shape: { "export_format"?: "json" | "markdown" }';
+  'User preferences. Shape: { "export_format"?: "json" | "markdown", "email_digest_enabled"?: boolean }';
 
 create index idx_profiles_email on public.profiles(email);
 
