@@ -52,7 +52,8 @@ export function TilActions({
         }}
         className={cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "rounded-full hit-area-2",
+          "rounded-full hit-area-2 transition-opacity duration-150",
+          "md:opacity-0 group-hover/row:opacity-100 data-[state=open]:opacity-100 focus-visible:opacity-100",
         )}
       >
         <MoreVertical aria-hidden="true" />
