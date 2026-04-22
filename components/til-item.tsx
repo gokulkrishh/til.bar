@@ -50,7 +50,7 @@ export function TilItem({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [play] = useAppSound(clickSoftSound);
+  const play = useAppSound(clickSoftSound);
   const [faviconError, setFaviconError] = useState(false);
   const faviconUrl = getFaviconUrl(til.url);
 

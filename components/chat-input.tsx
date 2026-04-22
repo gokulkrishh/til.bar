@@ -35,7 +35,7 @@ export function ChatInput({ user }: { user: User }) {
   const { capture } = useCaptureContext();
   const { attachedTils, removeTil, clearAttachment } = useChatContext();
   const trigger = useAppHaptics();
-  const [playSound] = useAppSound(clickSoftSound);
+  const playSound = useAppSound(clickSoftSound);
 
   const {
     messages,

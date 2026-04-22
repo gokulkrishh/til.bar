@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { SoundProvider as AudioSoundProvider } from "@web-kits/audio/react";
 
 type SoundContextType = {
   soundEnabled: boolean;
@@ -41,5 +42,9 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     [soundEnabled, handleSetSoundEnabled],
   );
 
-  return <SoundContext value={value}>{children}</SoundContext>;
+  return (
+    <SoundContext value={value}>
+      <AudioSoundProvider enabled={soundEnabled}>{children}</AudioSoundProvider>
+    </SoundContext>
+  );
 }

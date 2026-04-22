@@ -1,10 +1,8 @@
 "use client";
 
-import { useSound } from "@/hooks/use-sound";
-import { useSoundSettings } from "@/context/sound-provider";
-import type { SoundAsset } from "@/lib/sound-types";
+import { useSound } from "@web-kits/audio/react";
+import type { SoundDefinition } from "@web-kits/audio";
 
-export function useAppSound(sound: SoundAsset) {
-  const { soundEnabled } = useSoundSettings();
-  return useSound(sound, { soundEnabled, interrupt: true });
+export function useAppSound(sound: SoundDefinition) {
+  return useSound(sound);
 }

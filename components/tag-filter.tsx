@@ -26,7 +26,7 @@ export function TagFilter({
   onClear: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [click] = useAppSound(clickSoftSound);
+  const click = useAppSound(clickSoftSound);
   const trigger = useAppHaptics();
 
   if (tags.length === 0) return null;

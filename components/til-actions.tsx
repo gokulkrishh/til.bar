@@ -26,7 +26,7 @@ export function TilActions({
   title: string | null;
 }) {
   const [open, setOpen] = useState(false);
-  const [playClick] = useAppSound(clickSoftSound);
+  const playClick = useAppSound(clickSoftSound);
   const { optimisticDelete } = useCaptureContext();
   const { attachTil } = useChatContext();
   const trigger = useAppHaptics();

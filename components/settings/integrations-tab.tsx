@@ -43,7 +43,7 @@ export function IntegrationsTab() {
   const [label, setLabel] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [revokingId, setRevokingId] = useState<string | null>(null);
-  const [playClick] = useAppSound(clickSoftSound);
+  const playClick = useAppSound(clickSoftSound);
   const trigger = useAppHaptics();
 
   useEffect(() => {

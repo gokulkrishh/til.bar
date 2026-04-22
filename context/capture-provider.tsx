@@ -48,7 +48,7 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const [, startTransition] = useTransition();
   const [pendingTils, setPendingTils] = useState<PendingTil[]>([]);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
-  const [playDrop] = useAppSound(clickSoftSound);
+  const playDrop = useAppSound(clickSoftSound);
   const trigger = useAppHaptics();
 
   const removeDeletedId = useCallback((id: string) => {
