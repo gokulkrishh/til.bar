@@ -3,8 +3,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWeeklyDigest } from "@/lib/email/resend";
 import type { DigestTil } from "@/emails/weekly-digest";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const CHUNK_SIZE = 10;

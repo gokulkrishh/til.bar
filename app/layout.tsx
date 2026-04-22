@@ -9,7 +9,7 @@ import "./globals.css";
 import { CaptureProvider } from "@/context/capture-provider";
 import { SoundProvider } from "@/context/sound-provider";
 import { HapticsProvider } from "@/context/haptics-provider";
-import { Header } from "@/components/header";
+import { FallbackHeader, Header } from "@/components/header";
 import { ShareTargetHandler } from "@/components/share-target-handler";
 import { ChatProvider } from "@/context/chat-provider";
 import { SearchProvider } from "@/context/search-provider";
@@ -142,7 +142,9 @@ export default function RootLayout({
                   <CaptureProvider>
                     <ChatProvider>
                       <div className="mx-auto flex h-screen max-w-2xl flex-col px-4">
-                        <Header />
+                        <Suspense fallback={<FallbackHeader />}>
+                          <Header />
+                        </Suspense>
                         {children}
                       </div>
                       <Suspense>
