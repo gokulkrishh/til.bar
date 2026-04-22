@@ -10,7 +10,6 @@ import {
 import { Link2, MessageCircle, MoreVertical, Trash2 } from "lucide-react";
 import { buttonVariants } from "./ui/button";
 import { useAppSound } from "@/hooks/use-app-sound";
-import { clickSoftSound } from "@/sounds/click-soft";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
@@ -26,7 +25,7 @@ export function TilActions({
   title: string | null;
 }) {
   const [open, setOpen] = useState(false);
-  const playClick = useAppSound(clickSoftSound);
+  const playClick = useAppSound();
   const { optimisticDelete } = useCaptureContext();
   const { attachTil } = useChatContext();
   const trigger = useAppHaptics();

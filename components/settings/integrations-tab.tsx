@@ -12,7 +12,6 @@ import { Check, Copy, Plus, Trash2 } from "lucide-react";
 import { ChromeIcon } from "@/components/icons/chrome";
 import { Spinner } from "@/components/ui/spinner";
 import { MCP_TOOLS } from "@/lib/mcp-tools";
-import { clickSoftSound } from "@/sounds/click-soft";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { useAppHaptics } from "@/context/haptics-provider";
 import { ShortcutIcon } from "../icons/shortcut";
@@ -43,7 +42,7 @@ export function IntegrationsTab() {
   const [label, setLabel] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [revokingId, setRevokingId] = useState<string | null>(null);
-  const playClick = useAppSound(clickSoftSound);
+  const playClick = useAppSound();
   const trigger = useAppHaptics();
 
   useEffect(() => {

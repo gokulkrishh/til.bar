@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAppHaptics } from "@/context/haptics-provider";
 import { useAppSound } from "@/hooks/use-app-sound";
-import { clickSoftSound } from "@/sounds/click-soft";
 import { AnimateNumber } from "motion-plus/react";
 
 const DEFAULT_VISIBLE_TAGS = 10;
@@ -26,7 +25,7 @@ export function TagFilter({
   onClear: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const click = useAppSound(clickSoftSound);
+  const click = useAppSound();
   const trigger = useAppHaptics();
 
   if (tags.length === 0) return null;
