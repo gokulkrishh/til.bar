@@ -142,15 +142,17 @@ export function AccountTab({
   }
 
   return (
-    <div className="flex flex-col gap-6 py-4 px-1">
-      <div className="flex items-center gap-3">
-        <Avatar className="size-10">
+    <div className="flex flex-col gap-6 py-4 px-1 overflow-x-hidden">
+      <div className="flex items-center gap-3 min-w-0">
+        <Avatar className="size-10 shrink-0">
           <AvatarImage src={avatarUrl} alt={fullName} />
           <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
         </Avatar>
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold">{fullName}</span>
-          <span className="text-xs text-muted-foreground">{email}</span>
+        <div className="flex flex-col min-w-0">
+          <span className="text-sm font-semibold truncate">{fullName}</span>
+          <span className="text-xs text-muted-foreground truncate">
+            {email}
+          </span>
         </div>
       </div>
 
