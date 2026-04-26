@@ -2,7 +2,11 @@ import "server-only";
 
 import { Resend } from "resend";
 import { render } from "@react-email/render";
-import { WeeklyDigestEmail, type DigestTil } from "@/emails/weekly-digest";
+import {
+  WeeklyDigestEmail,
+  type DigestSynthesisInput,
+  type DigestTil,
+} from "@/emails/weekly-digest";
 
 let client: Resend | null = null;
 
@@ -23,34 +27,27 @@ function getAppUrl() {
 
 export async function sendWeeklyDigest({
   to,
-  fullName,
-  tils,
-  weekStart,
-  weekEnd,
+  synthesis,
+  archiveTil = null,
 }: {
   to: string;
-  fullName: string | null;
-  tils: DigestTil[];
-  weekStart: Date;
-  weekEnd: Date;
+  synthesis: DigestSynthesisInput;
+  archiveTil?: DigestTil | null;
 }) {
   const from = process.env.EMAIL_FROM;
   if (!from) throw new Error("EMAIL_FROM is not set");
 
   const appUrl = getAppUrl();
-  const html = await render(
-    WeeklyDigestEmail({ fullName, tils, weekStart, weekEnd, appUrl }),
-  );
+  const props = { appUrl, synthesis, archiveTil };
+  const html = await render(WeeklyDigestEmail(props));
+  const text = await render(WeeklyDigestEmail(props), { plainText: true });
 
-  const text = await render(
-    WeeklyDigestEmail({ fullName, tils, weekStart, weekEnd, appUrl }),
-    { plainText: true },
-  );
+  const subject = `Your TIL week — ${synthesis.themes[0].title}`;
 
   return getClient().emails.send({
     from,
     to,
-    subject: `Your TIL week — ${tils.length} link${tils.length === 1 ? "" : "s"}`,
+    subject,
     html,
     text,
   });

@@ -20,62 +20,34 @@ export type DigestTil = {
   tags: { name: string }[];
 };
 
-type Props = {
-  fullName: string | null;
-  tils: DigestTil[];
-  weekStart: Date;
-  weekEnd: Date;
-  appUrl: string;
+export type DigestThemeItem = {
+  url: string;
+  title: string | null;
+  note: string;
 };
 
-const dayFormatter = new Intl.DateTimeFormat("en-US", {
-  weekday: "long",
-  month: "short",
-  day: "numeric",
-  timeZone: "UTC",
-});
+export type DigestSynthesisInput = {
+  themes: {
+    title: string;
+    items: DigestThemeItem[];
+  }[];
+  memoryLaneNote: string | null;
+};
 
-const rangeFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  timeZone: "UTC",
-});
+type Props = {
+  appUrl: string;
+  synthesis: DigestSynthesisInput;
+  archiveTil?: DigestTil | null;
+};
 
-const dayKeyFormatter = new Intl.DateTimeFormat("en-US", {
+const archiveDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
   year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
   timeZone: "UTC",
 });
 
-function groupByDay(tils: DigestTil[]) {
-  const groups = new Map<string, { date: Date; items: DigestTil[] }>();
-  for (const til of tils) {
-    const date = new Date(til.created_at);
-    const key = dayKeyFormatter.format(date);
-    const bucket = groups.get(key);
-    if (bucket) {
-      bucket.items.push(til);
-    } else {
-      groups.set(key, { date, items: [til] });
-    }
-  }
-  return Array.from(groups.values()).sort(
-    (a, b) => b.date.getTime() - a.date.getTime(),
-  );
-}
-
-export function WeeklyDigestEmail({
-  fullName,
-  tils,
-  weekStart,
-  weekEnd,
-  appUrl,
-}: Props) {
-  const groups = groupByDay(tils);
-  const greetingName = fullName?.split(" ")[0] ?? "there";
-  const range = `${rangeFormatter.format(weekStart)} – ${rangeFormatter.format(weekEnd)}`;
-  const preview = `${tils.length} link${tils.length === 1 ? "" : "s"} from ${range}`;
+export function WeeklyDigestEmail({ appUrl, synthesis, archiveTil }: Props) {
+  const preview = synthesis.themes[0]?.title ?? "Your TIL week";
 
   return (
     <Html>
@@ -86,40 +58,43 @@ export function WeeklyDigestEmail({
           <Heading as="h1" style={h1}>
             Your TIL week
           </Heading>
-          <Text style={subtitle}>
-            Hi {greetingName}, here&apos;s what you saved between {range}.
-          </Text>
 
-          {groups.map(({ date, items }) => (
-            <Section key={date.toISOString()} style={daySection}>
-              <Heading as="h2" style={h2}>
-                {dayFormatter.format(date)}
-              </Heading>
-              {items.map((til) => (
-                <Section key={til.id} style={itemSection}>
-                  <Link href={til.url} style={itemLink}>
-                    {til.title?.trim() || til.url}
+          {synthesis.themes.map((theme) => (
+            <Section key={theme.title} style={themeBlock}>
+              <Text style={sectionLabel}>{theme.title}</Text>
+              {theme.items.map((item) => (
+                <Section key={item.url} style={itemBlock}>
+                  <Link href={item.url} style={itemLink}>
+                    {item.title?.trim() || item.url}
                   </Link>
-                  {til.description && (
-                    <Text style={itemDescription}>{til.description}</Text>
-                  )}
-                  {til.tags.length > 0 && (
-                    <Text style={tagRow}>
-                      {til.tags.map((tag) => `#${tag.name}`).join("  ")}
-                    </Text>
-                  )}
+                  <Text style={itemNote}>{item.note}</Text>
                 </Section>
               ))}
             </Section>
           ))}
 
+          {archiveTil && synthesis.memoryLaneNote && (
+            <>
+              <Text style={sectionLabel}>From your archive</Text>
+              <Section style={memoryLaneSection}>
+                <Text style={memoryLaneNote}>{synthesis.memoryLaneNote}</Text>
+                <Text style={memoryLaneMeta}>
+                  ↳{" "}
+                  <Link href={archiveTil.url} style={memoryLaneLink}>
+                    {archiveTil.title?.trim() || archiveTil.url}
+                  </Link>{" "}
+                  ·{" "}
+                  {archiveDateFormatter.format(new Date(archiveTil.created_at))}
+                </Text>
+              </Section>
+            </>
+          )}
+
           <Hr style={hr} />
           <Text style={footer}>
-            Times are shown in UTC.{" "}
-            <Link href={`${appUrl}/?settings=account`} style={footerLink}>
-              Manage notifications
+            <Link href={appUrl} style={footerLink}>
+              Open til.bar
             </Link>
-            .
           </Text>
         </Container>
       </Body>
@@ -143,33 +118,27 @@ const container = {
 };
 
 const h1 = {
-  fontSize: "24px",
+  fontSize: "20px",
   fontWeight: 600,
-  margin: "0 0 8px",
+  color: "#111827",
+  margin: "0 0 16px",
 };
 
-const subtitle = {
-  fontSize: "14px",
-  color: "#6b7280",
-  margin: "0 0 24px",
-};
-
-const daySection = {
-  margin: "0 0 24px",
-};
-
-const h2 = {
-  fontSize: "13px",
+const sectionLabel = {
+  fontSize: "11px",
   fontWeight: 600,
   textTransform: "uppercase" as const,
-  letterSpacing: "0.04em",
-  color: "#6b7280",
+  letterSpacing: "0.06em",
+  color: "#9ca3af",
   margin: "0 0 12px",
 };
 
-const itemSection = {
-  padding: "12px 0",
-  borderTop: "1px solid #e5e7eb",
+const themeBlock = {
+  margin: "0 0 28px",
+};
+
+const itemBlock = {
+  margin: "0 0 16px",
 };
 
 const itemLink = {
@@ -177,24 +146,43 @@ const itemLink = {
   fontWeight: 500,
   color: "#111827",
   textDecoration: "underline",
+  lineHeight: "1.4",
 };
 
-const itemDescription = {
-  fontSize: "13px",
+const itemNote = {
+  fontSize: "14px",
   color: "#4b5563",
-  margin: "6px 0 0",
+  margin: "4px 0 0",
+  lineHeight: "1.55",
+};
+
+const memoryLaneSection = {
+  margin: "8px 0 0",
+  padding: "12px 16px",
+  borderLeft: "3px solid #d1d5db",
+};
+
+const memoryLaneNote = {
+  fontSize: "14px",
+  color: "#374151",
+  margin: 0,
   lineHeight: "1.5",
 };
 
-const tagRow = {
+const memoryLaneMeta = {
   fontSize: "12px",
   color: "#6b7280",
-  margin: "8px 0 0",
+  margin: "6px 0 0",
+};
+
+const memoryLaneLink = {
+  color: "#374151",
+  textDecoration: "underline",
 };
 
 const hr = {
   borderColor: "#e5e7eb",
-  margin: "24px 0",
+  margin: "24px 0 12px",
 };
 
 const footer = {

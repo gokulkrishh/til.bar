@@ -160,9 +160,9 @@ export function AccountTab({
         </h2>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold">Weekly digest</h3>
+            <h3 className="text-sm font-semibold">Weekly reflection</h3>
             <p className="text-xs text-muted-foreground">
-              Email me a summary of last week&apos;s links every Monday
+              AI summary of your weekly saves. Sent on Mondays.
             </p>
           </div>
           <Switch
