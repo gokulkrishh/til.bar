@@ -8,7 +8,7 @@
 - **Formatting**: Prettier (pre-commit via Husky)
 - **Linting**: ESLint with eslint-config-next
 - **Package manager**: bun
-- **AI**: AI SDK + `@ai-sdk/react` (useChat) + OpenRouter (Gemini 2.5 Flash Lite) for tag generation and chat
+- **AI**: AI SDK + `@ai-sdk/react` (useChat) + OpenRouter (Gemini Flash Lite) for tag generation, metadata cleanup, chat, and weekly digest synthesis
 - **Markdown**: streamdown (streaming markdown renderer for AI chat responses), `@tailwindcss/typography` for prose styling
 - **Validation**: Zod
 - **Toasts**: Sonner
@@ -18,6 +18,7 @@
 - **Chrome Extension**: `extension/` directory — saves current tab URL via `/api/save` endpoint, uses Supabase access token auth with `/api/auth/refresh` for token renewal
 - **iOS Shortcut**: Save links via `/api/save` endpoint with API key auth
 - **Import/Export**: Settings > Data tab — export all links as JSON, import via JSON file with AI prompt for format conversion. Import preserves tags and dates.
+- **Email digest**: Weekly AI reflection email (Mondays via Vercel Cron, `/api/cron/weekly-digest`). Resend transport + React Email templates. AI generates topic sections with per-link notes and an optional archive callback. `WEEKLY_DIGEST_AI_MAX_USERS` caps per-run AI cost.
 - **Animation**: Motion (framer-motion) for spring physics and fluid interactions
 - **Sound**: soundcn (Web Audio API, inline base64 sounds via shadcn registry)
 - **Path alias**: `@/*` maps to project root
