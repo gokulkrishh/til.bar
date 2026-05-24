@@ -1,9 +1,11 @@
 import { ChatInput } from "@/components/chat-input";
 import { TilList } from "@/components/til-list";
+import { ResurfacedStrip } from "@/components/resurfaced-strip";
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 import PageLoading from "@/components/page-loading";
 import { DemoState } from "@/components/demo-state";
+import { getResurfacedWindows } from "@/lib/resurfaced";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -22,12 +24,21 @@ export default async function Home() {
   const yesterdayStart = new Date(todayStart);
   yesterdayStart.setDate(todayStart.getDate() - 1);
 
+  const resurfacedWindows = getResurfacedWindows(now);
+  const resurfacedOrFilter = resurfacedWindows
+    .map(
+      (w) =>
+        `and(created_at.gte.${w.start.toISOString()},created_at.lte.${w.end.toISOString()})`,
+    )
+    .join(",");
+
   const [
     { data: todayTils },
     { data: yesterdayTils },
     { data: earlierTils },
     { count: totalCount },
     { data: tagRows },
+    { data: resurfacedTils },
   ] = await Promise.all([
     supabase
       .from("tils")
@@ -54,6 +65,12 @@ export default async function Home() {
       .select("id, name, til_tags(count)")
       .eq("user_id", user.id)
       .order("name"),
+    supabase
+      .from("tils")
+      .select("*, tags:til_tags(...tags(*))")
+      .or(resurfacedOrFilter)
+      .order("created_at", { ascending: true })
+      .limit(3),
   ]);
 
   const tils = [
@@ -73,6 +90,7 @@ export default async function Home() {
 
   return (
     <Suspense fallback={<PageLoading />}>
+      <ResurfacedStrip tils={resurfacedTils ?? []} />
       <TilList tils={tils} totalCount={totalCount ?? 0} allTags={allTags} />
       <ChatInput user={user} />
     </Suspense>
