@@ -57,6 +57,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "Anthropic has announced that their latest model, Claude Opus 4.6, is now generally available with a context window of up to 1 million tokens, enabling it to process and understand much larger inputs than before.",
     created_at: today(14, 12),
+    updated_at: today(14, 12),
     tags: [tags.ai],
   },
   {
@@ -66,6 +67,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     title: "AI Exposure of the US Job Market",
     description: null,
     created_at: today(11, 23),
+    updated_at: today(11, 23),
     tags: [tags.analysis, tags.ai],
   },
   {
@@ -76,6 +78,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "Convert images and gradients into scalable vector dither patterns. Bayer, halftone, dots, lines, and more. Export as SVG or PNG.",
     created_at: today(9, 54),
+    updated_at: today(9, 54),
     tags: [tags.design],
   },
   {
@@ -86,6 +89,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "A web-based tool for private audio-to-text transcription using WebGPU and WebCodecs that requires no backend or API keys.",
     created_at: today(8, 37),
+    updated_at: today(8, 37),
     tags: [tags.audio, tags.ai],
   },
   // Yesterday
@@ -97,6 +101,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "Utility classes in TailwindCSS to enlarge the clickable area of interactive elements.",
     created_at: yesterday(19, 40),
+    updated_at: yesterday(19, 40),
     tags: [tags.accessibility, tags.css],
   },
   {
@@ -106,6 +111,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     title: "Headless Browser Automation for AI | agent-browser",
     description: "Headless browser automation CLI for AI agents",
     created_at: yesterday(15, 22),
+    updated_at: yesterday(15, 22),
     tags: [tags.automation, tags.ai],
   },
   {
@@ -116,6 +122,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "Analysis of AI exposure in US jobs, scoring occupations on a 0-10 scale using an LLM and visualizing results.",
     created_at: yesterday(12, 50),
+    updated_at: yesterday(12, 50),
     tags: [tags.analysis, tags.ai],
   },
   {
@@ -126,6 +133,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "Beautiful &amp; consistent icon toolkit made by the community.",
     created_at: yesterday(10, 43),
+    updated_at: yesterday(10, 43),
     tags: [tags.design, tags.icons],
   },
   {
@@ -135,6 +143,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     title: "WebHaptics – Haptic feedback for the mobile web.",
     description: "Haptic feedback for the mobile web.",
     created_at: yesterday(9, 0),
+    updated_at: yesterday(9, 0),
     tags: [tags.haptics, tags.javascript],
   },
   // Older
@@ -145,6 +154,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     title: "The Agent Skills Directory",
     description: "Discover and install skills for AI agents.",
     created_at: earlier(3, 14, 27),
+    updated_at: earlier(3, 14, 27),
     tags: [tags.ai],
   },
   {
@@ -155,6 +165,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "gists.sh provides a beautifully designed interface for GitHub Gists, offering a more visually appealing way to view and share code snippets.",
     created_at: earlier(4, 17, 24),
+    updated_at: earlier(4, 17, 24),
     tags: [tags.notes, tags.github],
   },
   {
@@ -165,6 +176,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "700+ curated UI sound effects for modern web apps. Browse, preview, and install sounds with a single command.",
     created_at: earlier(4, 11, 52),
+    updated_at: earlier(4, 11, 52),
     tags: [tags.audio, tags.design],
   },
   {
@@ -175,6 +187,7 @@ export const DEMO_ITEMS: TilWithTags[] = [
     description:
       "There&#x27;s a set of psychological principles behind every interface that feels right. Here are the ones I think about the most.",
     created_at: earlier(5, 11, 39),
+    updated_at: earlier(5, 11, 39),
     tags: [tags.design, tags.ux],
   },
 ];
