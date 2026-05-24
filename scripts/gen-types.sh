@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+if [ -f .env.local ]; then
+  set -o allexport
+  # shellcheck disable=SC1091
+  source .env.local
+  set +o allexport
+fi
+
 if [ -z "$SUPABASE_PROJECT_ID" ]; then
   echo "Error: SUPABASE_PROJECT_ID is not set. Add it to .env.local"
   exit 1

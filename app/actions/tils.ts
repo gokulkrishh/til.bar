@@ -162,6 +162,8 @@ export async function deleteTil(id: string) {
   return { success: true };
 }
 
+const REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
+
 export async function refreshMetadata(id: string, url: string) {
   const supabase = await createClient();
   const {
@@ -170,6 +172,24 @@ export async function refreshMetadata(id: string, url: string) {
 
   if (!user) {
     return { error: "Sign in to refresh metadata" };
+  }
+
+  const { data: existing } = await supabase
+    .from("tils")
+    .select("updated_at")
+    .eq("id", id)
+    .single();
+
+  if (existing?.updated_at) {
+    const elapsed = Date.now() - new Date(existing.updated_at).getTime();
+    if (elapsed < REFRESH_COOLDOWN_MS) {
+      const secondsLeft = Math.ceil((REFRESH_COOLDOWN_MS - elapsed) / 1000);
+      const wait =
+        secondsLeft >= 60
+          ? `${Math.ceil(secondsLeft / 60)} min`
+          : `${secondsLeft}s`;
+      return { error: `Just refreshed. Try again in ${wait}.` };
+    }
   }
 
   let { title, description } = await fetchMetadata(url);

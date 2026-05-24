@@ -19,18 +19,21 @@ export type Database = {
           created_at: string;
           id: string;
           key_hash: string;
+          label: string;
           user_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
           key_hash: string;
+          label?: string;
           user_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
           key_hash?: string;
+          label?: string;
           user_id?: string;
         };
         Relationships: [];
@@ -130,6 +133,7 @@ export type Database = {
           description: string | null;
           id: string;
           title: string | null;
+          updated_at: string;
           url: string;
           user_id: string;
         };
@@ -138,6 +142,7 @@ export type Database = {
           description?: string | null;
           id?: string;
           title?: string | null;
+          updated_at?: string;
           url: string;
           user_id: string;
         };
@@ -146,6 +151,7 @@ export type Database = {
           description?: string | null;
           id?: string;
           title?: string | null;
+          updated_at?: string;
           url?: string;
           user_id?: string;
         };

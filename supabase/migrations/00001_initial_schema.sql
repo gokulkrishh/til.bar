@@ -4,6 +4,7 @@
 drop trigger if exists handle_new_user on auth.users;
 drop trigger if exists on_auth_user_created on auth.users;
 drop trigger if exists set_profiles_updated_at on public.profiles;
+drop trigger if exists set_tils_updated_at on public.tils;
 drop function if exists public.handle_new_user() cascade;
 drop function if exists public.handle_updated_at() cascade;
 drop table if exists public.til_tags cascade;
@@ -53,7 +54,8 @@ create table public.tils (
   url         text not null,
   title       text,
   description text,
-  created_at  timestamptz not null default now()
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
 );
 
 create index idx_tils_user_id on public.tils(user_id);
@@ -84,6 +86,10 @@ $$ language plpgsql;
 
 create trigger set_profiles_updated_at
   before update on public.profiles
+  for each row execute function public.handle_updated_at();
+
+create trigger set_tils_updated_at
+  before update on public.tils
   for each row execute function public.handle_updated_at();
 
 -- =============================================================
