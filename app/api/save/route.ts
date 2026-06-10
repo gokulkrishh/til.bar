@@ -5,6 +5,7 @@ import { fetchMetadata } from "@/lib/metadata";
 import { generateMetadata } from "@/lib/ai-metadata";
 import { generateTags } from "@/lib/ai-tags";
 import { getCorsHeaders } from "@/lib/cors";
+import { checkDuplicateUrl } from "@/lib/duplicate";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,6 +48,15 @@ export async function POST(req: Request) {
     return Response.json(
       { error: "Not authenticated" },
       { status: 401, headers },
+    );
+  }
+
+  const dup = await checkDuplicateUrl(supabase, userId, url);
+
+  if (dup.duplicate) {
+    return Response.json(
+      { error: "Already saved", id: dup.id, saved_at: dup.created_at },
+      { status: 409, headers },
     );
   }
 

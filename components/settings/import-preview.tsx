@@ -33,7 +33,15 @@ export function ImportPreview({
         return;
       }
 
-      toast.success(`Imported ${result.count} links`);
+      if (result.count === 0) {
+        toast.info(`No new links — ${result.skipped} already saved`);
+      } else if (result.skipped) {
+        toast.success(
+          `Imported ${result.count} links, skipped ${result.skipped} duplicates`,
+        );
+      } else {
+        toast.success(`Imported ${result.count} links`);
+      }
       onClose();
     });
   };
