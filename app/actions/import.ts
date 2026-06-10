@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ImportLink } from "@/lib/ai-import";
 import { upsertTags } from "@/lib/tag-utils";
+import { normalizeUrl } from "@/lib/duplicate";
 
 export async function confirmImport(links: ImportLink[]) {
   const supabase = await createClient();
@@ -18,7 +19,29 @@ export async function confirmImport(links: ImportLink[]) {
   }
 
   // Skip URLs too long for the btree index
-  const validLinks = links.filter((link) => link.url.length <= 2048);
+  const fittingLinks = links.filter((link) => link.url.length <= 2048);
+
+  const { data: existingUrls } = await supabase
+    .from("tils")
+    .select("url")
+    .eq("user_id", user.id);
+
+  // Skip already-saved URLs and duplicates within the file itself
+  const seen = new Set(
+    (existingUrls ?? []).map((row) => normalizeUrl(row.url)),
+  );
+  const validLinks: ImportLink[] = [];
+  let skipped = 0;
+
+  for (const link of fittingLinks) {
+    const key = normalizeUrl(link.url);
+    if (seen.has(key)) {
+      skipped++;
+      continue;
+    }
+    seen.add(key);
+    validLinks.push(link);
+  }
 
   const now = new Date().toISOString();
   const rows = validLinks.map((link) => ({
@@ -30,6 +53,9 @@ export async function confirmImport(links: ImportLink[]) {
   }));
 
   if (!rows.length) {
+    if (skipped) {
+      return { count: 0, skipped };
+    }
     return { error: "No valid links to import" };
   }
 
@@ -72,5 +98,5 @@ export async function confirmImport(links: ImportLink[]) {
   }
 
   revalidatePath("/");
-  return { count: tils.length };
+  return { count: tils.length, skipped };
 }

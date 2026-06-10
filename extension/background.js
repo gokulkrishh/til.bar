@@ -37,7 +37,10 @@ async function handleSave(url, tabId) {
     // Save in background
     const result = await saveLink(url, apiKey);
 
-    if (!result.success) {
+    if (result.error === "duplicate") {
+      // Neutral toast, no sound — the link is safe, just not new
+      showToast(tabId, "Already saved", "success");
+    } else if (!result.success) {
       showToast(tabId, "Failed to save", "error");
     } else {
       // Optimistic — show success immediately
@@ -80,6 +83,10 @@ async function saveLink(url, apiKey) {
         "[til.bar] Invalid API key. Check your key in extension options.",
       );
       return { success: false, error: "unauthorized" };
+    }
+
+    if (response.status === 409) {
+      return { success: false, error: "duplicate" };
     }
 
     return { success: false, error: "Failed to save" };

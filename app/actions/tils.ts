@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchMetadata } from "@/lib/metadata";
 import { generateTags } from "@/lib/ai-tags";
 import { generateMetadata } from "@/lib/ai-metadata";
+import { alreadySavedMessage, checkDuplicateUrl } from "@/lib/duplicate";
 
 export async function searchTils({
   query,
@@ -92,6 +93,15 @@ export async function createTil(input: string) {
 
   if (!url) {
     return { error: "Not a valid URL" };
+  }
+
+  const dup = await checkDuplicateUrl(supabase, user.id, url);
+
+  if (dup.duplicate) {
+    return {
+      error: alreadySavedMessage(dup.created_at),
+      duplicate: { id: dup.id, url: dup.url },
+    };
   }
 
   const { data, error } = await supabase

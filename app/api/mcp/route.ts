@@ -8,6 +8,7 @@ import { authenticateToken } from "@/lib/auth";
 import { generateTags } from "@/lib/ai-tags";
 import { generateMetadata } from "@/lib/ai-metadata";
 import { getTilIdsByTag, upsertTags } from "@/lib/tag-utils";
+import { alreadySavedMessage, checkDuplicateUrl } from "@/lib/duplicate";
 
 function mcpText(text: string) {
   return { content: [{ type: "text" as const, text }] };
@@ -197,6 +198,14 @@ function createMcpServer(userId: string) {
       },
     },
     async ({ url }) => {
+      const dup = await checkDuplicateUrl(supabase, userId, url);
+
+      if (dup.duplicate) {
+        return mcpText(
+          `${alreadySavedMessage(dup.created_at)}: ${dup.url} (id: ${dup.id})`,
+        );
+      }
+
       const { data, error } = await supabase
         .from("tils")
         .insert({ user_id: userId, url })
