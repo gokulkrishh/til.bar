@@ -9,25 +9,32 @@ export async function upsertTags(
   tilId: string,
   tags: string[],
 ) {
-  for (const tagName of tags.slice(0, MAX_TAGS_PER_LINK)) {
-    const name = tagName.toLowerCase().trim();
-    if (!name) continue;
+  const names = [
+    ...new Set(
+      tags
+        .slice(0, MAX_TAGS_PER_LINK)
+        .map((tag) => tag.toLowerCase().trim())
+        .filter(Boolean),
+    ),
+  ];
 
-    const { data: tag } = await supabase
-      .from("tags")
-      .upsert({ user_id: userId, name }, { onConflict: "user_id,name" })
-      .select("id")
-      .single();
+  if (!names.length) return;
 
-    if (!tag) continue;
+  // Both tags in one round trip each, rather than two per tag.
+  const { data: tagRows } = await supabase
+    .from("tags")
+    .upsert(
+      names.map((name) => ({ user_id: userId, name })),
+      { onConflict: "user_id,name" },
+    )
+    .select("id");
 
-    await supabase
-      .from("til_tags")
-      .upsert(
-        { til_id: tilId, tag_id: tag.id },
-        { onConflict: "til_id,tag_id" },
-      );
-  }
+  if (!tagRows?.length) return;
+
+  await supabase.from("til_tags").upsert(
+    tagRows.map((tag) => ({ til_id: tilId, tag_id: tag.id })),
+    { onConflict: "til_id,tag_id" },
+  );
 }
 
 export async function getTilIdsByTag(

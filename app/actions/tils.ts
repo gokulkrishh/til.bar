@@ -94,45 +94,53 @@ export async function createTil(input: string) {
     return { error: "Not a valid URL" };
   }
 
-  const { data, error } = await supabase
-    .from("tils")
-    .insert({
-      user_id: user.id,
-      url,
-    })
-    .select()
-    .single();
+  // The row and the page fetch are independent, so pay for them once rather
+  // than back to back. Awaiting the metadata here means the card is populated
+  // as soon as it lands instead of appearing as a bare URL.
+  const [{ data, error }, meta] = await Promise.all([
+    supabase
+      .from("tils")
+      .insert({
+        user_id: user.id,
+        url,
+      })
+      .select()
+      .single(),
+    fetchMetadata(url),
+  ]);
 
   if (error) {
     return { error: "Couldn't save this link. Try again." };
   }
 
-  // Fetch metadata and generate tags in the background after response is sent
+  const { title, description } = meta;
+
+  if (title || description) {
+    await supabase
+      .from("tils")
+      .update({ title, description })
+      .eq("id", data.id);
+  }
+
+  const til = { ...data, title, description };
+
+  // AI cleanup and tagging are independent of each other, so run them
+  // together after the response is sent. generateMetadata screens out pages
+  // whose own metadata is already good, so this is usually just the tags.
   after(async () => {
     try {
       const admin = createAdminClient();
-      let { title, description } = await fetchMetadata(url);
 
-      if (title || description) {
-        await admin
-          .from("tils")
-          .update({ title, description })
-          .eq("id", data.id);
-      }
-
-      // Generate better metadata via AI if needed
-      const aiMeta = await generateMetadata(url, title, description);
-
-      if (aiMeta) {
-        title = aiMeta.title;
-        description = aiMeta.description;
-        await admin
-          .from("tils")
-          .update({ title, description })
-          .eq("id", data.id);
-      }
-
-      await generateTags({ ...data, title, description });
+      await Promise.all([
+        generateMetadata(url, title, description).then(async (aiMeta) => {
+          if (!aiMeta) return;
+          await admin
+            .from("tils")
+            .update({ title: aiMeta.title, description: aiMeta.description })
+            .eq("id", data.id);
+        }),
+        generateTags(til),
+      ]);
     } catch (err) {
       console.error("[after] Background work failed:", err);
     } finally {
@@ -140,7 +148,7 @@ export async function createTil(input: string) {
     }
   });
 
-  return { data };
+  return { data: til };
 }
 
 export async function deleteTil(id: string) {

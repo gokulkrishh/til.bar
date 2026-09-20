@@ -63,8 +63,9 @@ export async function POST(req: Request) {
     );
   }
 
-  // Background: fetch metadata, enhance with AI, generate tags
-  // Each step is independent so one failure doesn't block the rest
+  // Background: fetch metadata, enhance with AI, generate tags.
+  // Callers here are the extension and MCP, which don't render the row, so
+  // the fetch stays in the background rather than delaying the response.
   after(async () => {
     let title: string | null = null;
     let description: string | null = null;
@@ -84,25 +85,27 @@ export async function POST(req: Request) {
       console.error("[api/save] Metadata fetch failed:", err);
     }
 
-    try {
-      const aiMeta = await generateMetadata(url, title, description);
+    // Independent of each other, so don't make one wait on the other. Each
+    // settles on its own to keep one failure from dropping the other.
+    const [aiMeta, tags] = await Promise.allSettled([
+      generateMetadata(url, title, description),
+      generateTags({ ...data, title, description }),
+    ]);
 
-      if (aiMeta) {
-        title = aiMeta.title;
-        description = aiMeta.description;
-        await supabase
-          .from("tils")
-          .update({ title, description })
-          .eq("id", data.id);
-      }
-    } catch (err) {
-      console.error("[api/save] AI metadata failed:", err);
+    if (aiMeta.status === "rejected") {
+      console.error("[api/save] AI metadata failed:", aiMeta.reason);
+    } else if (aiMeta.value) {
+      await supabase
+        .from("tils")
+        .update({
+          title: aiMeta.value.title,
+          description: aiMeta.value.description,
+        })
+        .eq("id", data.id);
     }
 
-    try {
-      await generateTags({ ...data, title, description });
-    } catch (err) {
-      console.error("[api/save] Tag generation failed:", err);
+    if (tags.status === "rejected") {
+      console.error("[api/save] Tag generation failed:", tags.reason);
     }
   });
 

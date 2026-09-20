@@ -46,18 +46,58 @@ function matchMeta(html: string, attr: string, value: string): string | null {
   return null;
 }
 
+const FETCH_TIMEOUT_MS = 5000;
+
+/**
+ * Stop reading once the head is in hand. Pages routinely run to hundreds of
+ * KB while `</head>` closes within the first few — react.dev ships 318KB and
+ * closes its head at byte 5,590 — so reading the whole body is almost all
+ * waste.
+ */
+const MAX_HEAD_CHARS = 64 * 1024;
+
+async function readHead(response: Response): Promise<string> {
+  if (!response.body) return response.text();
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let html = "";
+
+  try {
+    while (html.length < MAX_HEAD_CHARS) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      html += decoder.decode(value, { stream: true });
+      if (/<\/head>/i.test(html)) break;
+    }
+  } finally {
+    // Aborts the rest of the transfer rather than draining it.
+    await reader.cancel().catch(() => {});
+  }
+
+  return html;
+}
+
 export async function fetchMetadata(
   url: string,
 ): Promise<{ title: string | null; description: string | null }> {
   try {
     const response = await fetch(url, {
       headers: { "User-Agent": "til.bar Bot" },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) return { title: null, description: null };
 
-    const html = await response.text();
+    // Without this a saved PDF or video is buffered into a string in full.
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.includes("html")) {
+      await response.body?.cancel().catch(() => {});
+      return { title: null, description: null };
+    }
+
+    const html = await readHead(response);
 
     const title =
       matchMeta(html, "property", "og:title") ??
