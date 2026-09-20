@@ -4,7 +4,7 @@ import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fetchMetadata } from "@/lib/metadata";
+import { fetchMetadata, fetchMetadataWithin } from "@/lib/metadata";
 import { generateTags } from "@/lib/ai-tags";
 import { generateMetadata } from "@/lib/ai-metadata";
 
@@ -80,11 +80,14 @@ function extractUrl(text: string): string | null {
 
 export async function createTil(input: string) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) {
+  // getUser() round trips to the Auth server, which costs more than the
+  // insert itself. getClaims() verifies the JWT against the project's signing
+  // keys locally, which is all a save needs to establish ownership.
+  const { data: claims } = await supabase.auth.getClaims();
+  const userId = claims?.claims.sub;
+
+  if (!userId) {
     return { error: "Sign in to save links" };
   }
 
@@ -94,42 +97,46 @@ export async function createTil(input: string) {
     return { error: "Not a valid URL" };
   }
 
-  // The row and the page fetch are independent, so pay for them once rather
-  // than back to back. Awaiting the metadata here means the card is populated
-  // as soon as it lands instead of appearing as a bare URL.
-  const [{ data, error }, meta] = await Promise.all([
-    supabase
-      .from("tils")
-      .insert({
-        user_id: user.id,
-        url,
-      })
-      .select()
-      .single(),
-    fetchMetadata(url),
-  ]);
+  // Give the page a short window to answer, then insert whatever we have.
+  // Folding the metadata into the insert keeps the save to a single database
+  // round trip; a slow page just misses the window and gets filled in below.
+  const meta = await fetchMetadataWithin(url);
+
+  const { data, error } = await supabase
+    .from("tils")
+    .insert({
+      user_id: userId,
+      url,
+      title: meta?.title ?? null,
+      description: meta?.description ?? null,
+    })
+    .select()
+    .single();
 
   if (error) {
     return { error: "Couldn't save this link. Try again." };
   }
 
-  const { title, description } = meta;
-
-  if (title || description) {
-    await supabase
-      .from("tils")
-      .update({ title, description })
-      .eq("id", data.id);
-  }
-
-  const til = { ...data, title, description };
-
-  // AI cleanup and tagging are independent of each other, so run them
-  // together after the response is sent. generateMetadata screens out pages
-  // whose own metadata is already good, so this is usually just the tags.
+  // Everything past here is off the critical path: re-fetch if the page
+  // missed the window, then AI cleanup and tagging together.
   after(async () => {
     try {
       const admin = createAdminClient();
+
+      let { title, description } = data;
+
+      if (!meta) {
+        const late = await fetchMetadata(url);
+        title = late.title;
+        description = late.description;
+
+        if (title || description) {
+          await admin
+            .from("tils")
+            .update({ title, description })
+            .eq("id", data.id);
+        }
+      }
 
       await Promise.all([
         generateMetadata(url, title, description).then(async (aiMeta) => {
@@ -139,7 +146,7 @@ export async function createTil(input: string) {
             .update({ title: aiMeta.title, description: aiMeta.description })
             .eq("id", data.id);
         }),
-        generateTags(til),
+        generateTags({ ...data, title, description }),
       ]);
     } catch (err) {
       console.error("[after] Background work failed:", err);
@@ -148,7 +155,7 @@ export async function createTil(input: string) {
     }
   });
 
-  return { data: til };
+  return { data };
 }
 
 export async function deleteTil(id: string) {

@@ -79,6 +79,31 @@ async function readHead(response: Response): Promise<string> {
   return html;
 }
 
+/**
+ * Give the page this long to answer before the save proceeds without it.
+ *
+ * A save must not be hostage to how slow someone else's server is. Pages that
+ * answer inside the deadline get folded into the insert; the rest are filled
+ * in by the background pass.
+ */
+export const INLINE_METADATA_DEADLINE_MS = 400;
+
+/**
+ * `fetchMetadata` capped at {@link INLINE_METADATA_DEADLINE_MS}.
+ *
+ * Resolves null when the page is too slow — the fetch itself keeps running so
+ * the background pass can still use it.
+ */
+export function fetchMetadataWithin(
+  url: string,
+  deadlineMs = INLINE_METADATA_DEADLINE_MS,
+): Promise<{ title: string | null; description: string | null } | null> {
+  return Promise.race([
+    fetchMetadata(url),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), deadlineMs)),
+  ]);
+}
+
 export async function fetchMetadata(
   url: string,
 ): Promise<{ title: string | null; description: string | null }> {

@@ -42,6 +42,9 @@ export function usePendingTils() {
   return useContext(CaptureContext).pendingTils;
 }
 
+/** How long to wait before re-checking a row the server is still enriching. */
+const ENRICHMENT_REFRESH_MS = 2500;
+
 export function CaptureProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -101,6 +104,13 @@ export function CaptureProvider({ children }: { children: React.ReactNode }) {
             router.refresh();
             setPendingTils((prev) => prev.filter((t) => t.id !== tempId));
           });
+
+          // A row saved without a title missed the metadata window, so the
+          // server is still filling it in. Nothing pushes that to the client,
+          // so come back for it once. Rows that arrived complete skip this.
+          if (!result.data?.title) {
+            setTimeout(() => router.refresh(), ENRICHMENT_REFRESH_MS);
+          }
         }
       });
     },
