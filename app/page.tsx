@@ -1,4 +1,3 @@
-import { ChatInput } from "@/components/chat-input";
 import { TilList } from "@/components/til-list";
 import { ResurfacedStrip } from "@/components/resurfaced-strip";
 import { createClient } from "@/lib/supabase/server";
@@ -92,7 +91,6 @@ export default async function Home() {
     <Suspense fallback={<PageLoading />}>
       <ResurfacedStrip tils={resurfacedTils ?? []} />
       <TilList tils={tils} totalCount={totalCount ?? 0} allTags={allTags} />
-      <ChatInput user={user} />
     </Suspense>
   );
 }

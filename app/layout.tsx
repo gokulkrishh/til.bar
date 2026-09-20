@@ -11,10 +11,7 @@ import { SoundProvider } from "@/context/sound-provider";
 import { HapticsProvider } from "@/context/haptics-provider";
 import { FallbackHeader, Header } from "@/components/header";
 import { ShareTargetHandler } from "@/components/share-target-handler";
-import { ChatProvider } from "@/context/chat-provider";
 import { SearchProvider } from "@/context/search-provider";
-
-import "streamdown/styles.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -140,17 +137,15 @@ export default function RootLayout({
               <TooltipProvider delay={1000}>
                 <SearchProvider>
                   <CaptureProvider>
-                    <ChatProvider>
-                      <div className="mx-auto flex h-screen max-w-2xl flex-col px-4">
-                        <Suspense fallback={<FallbackHeader />}>
-                          <Header />
-                        </Suspense>
-                        {children}
-                      </div>
-                      <Suspense>
-                        <ShareTargetHandler />
+                    <div className="mx-auto flex h-screen max-w-2xl flex-col px-4">
+                      <Suspense fallback={<FallbackHeader />}>
+                        <Header />
                       </Suspense>
-                    </ChatProvider>
+                      {children}
+                    </div>
+                    <Suspense>
+                      <ShareTargetHandler />
+                    </Suspense>
                   </CaptureProvider>
                 </SearchProvider>
               </TooltipProvider>

@@ -7,11 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link2, MessageCircle, MoreVertical, Trash2 } from "lucide-react";
+import { Link2, MoreVertical, Trash2 } from "lucide-react";
 import { buttonVariants } from "./ui/button";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { useCaptureContext } from "@/context/capture-provider";
-import { useChatContext } from "@/context/chat-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +26,6 @@ export function TilActions({
   const [open, setOpen] = useState(false);
   const playClick = useAppSound();
   const { optimisticDelete } = useCaptureContext();
-  const { attachTil } = useChatContext();
   const trigger = useAppHaptics();
 
   const handleCopyLink = async () => {
@@ -58,16 +56,6 @@ export function TilActions({
         <MoreVertical aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
-        <DropdownMenuItem
-          onClick={() => {
-            playClick();
-            attachTil({ id: tilId, url, title });
-            setOpen(false);
-          }}
-        >
-          <MessageCircle aria-hidden="true" />
-          Ask AI
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
           <Link2 aria-hidden="true" />
           Copy link
