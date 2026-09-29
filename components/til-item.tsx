@@ -42,10 +42,12 @@ export function TilItem({
   til,
   showDate = false,
   showYear = false,
+  onTagSelect,
 }: {
   til: TilWithTags;
   showDate?: boolean;
   showYear?: boolean;
+  onTagSelect?: (name: string) => void;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -150,6 +152,8 @@ export function TilItem({
           tilId={til.id}
           url={til.url}
           title={til.title}
+          tags={til.tags}
+          onTagSelect={onTagSelect}
         />
       </div>
     </motion.li>

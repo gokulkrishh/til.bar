@@ -22,7 +22,7 @@ Pasting anywhere on the page triggers capture in desktop. On mobile, a fixed inp
 
 ## AI Categorisation
 
-After an entry is saved, the AI assigns up to 2 tags asynchronously via OpenRouter (Gemini 2.5 Flash Lite) — capture never waits on this. Prefers reusing existing tags over creating new ones. Tags are lowercase, displayed as pills on each item. Tags are not editable.
+After an entry is saved, the AI assigns up to 2 tags asynchronously via OpenRouter (Gemini 2.5 Flash Lite) — capture never waits on this. Prefers reusing existing tags over creating new ones. Tags are lowercase and not editable. They aren't shown on the row — open an item's menu and hover **Tags** to see them; clicking a tag filters the list by it.
 
 ---
 
@@ -56,7 +56,7 @@ Both views are filterable by tag.
 
 ## TIL Item Context Menu
 
-Each TIL item has a context menu with: **Ask AI**, **Copy link**, and **Delete**.
+Each TIL item has a context menu with: **Copy link**, **Tags** (submenu listing the item's tags; click to filter), and **Delete**.
 
 ---
 

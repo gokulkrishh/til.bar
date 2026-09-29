@@ -5,23 +5,31 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link2, MoreVertical, Trash2 } from "lucide-react";
+import { Link2, MoreVertical, Tag as TagIcon, Trash2 } from "lucide-react";
 import { buttonVariants } from "./ui/button";
 import { useAppSound } from "@/hooks/use-app-sound";
 import { useCaptureContext } from "@/context/capture-provider";
 import { useAppHaptics } from "@/context/haptics-provider";
 import { cn } from "@/lib/utils";
+import type { Tag } from "@/lib/types";
 
 export function TilActions({
   tilId,
   url,
   title,
+  tags,
+  onTagSelect,
 }: {
   tilId: string;
   url: string;
   title: string | null;
+  tags: Tag[];
+  onTagSelect?: (name: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const playClick = useAppSound();
@@ -32,6 +40,11 @@ export function TilActions({
     playClick();
     trigger("light");
     await navigator.clipboard.writeText(url);
+  };
+
+  const handleTagSelect = (name: string) => {
+    playClick();
+    onTagSelect?.(name);
   };
 
   const handleDelete = () => {
@@ -60,6 +73,27 @@ export function TilActions({
           <Link2 aria-hidden="true" />
           Copy link
         </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <TagIcon aria-hidden="true" />
+            Tags
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {tags.length === 0 ? (
+              <DropdownMenuItem disabled>No tags yet</DropdownMenuItem>
+            ) : (
+              tags.map((tag) => (
+                <DropdownMenuItem
+                  key={tag.id}
+                  onClick={() => handleTagSelect(tag.name)}
+                >
+                  <span className="text-muted-foreground">#</span>
+                  {tag.name}
+                </DropdownMenuItem>
+              ))
+            )}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuItem variant="destructive" onClick={handleDelete}>
           <Trash2 aria-hidden="true" />
           Delete

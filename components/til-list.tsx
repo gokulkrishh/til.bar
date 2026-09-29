@@ -62,11 +62,13 @@ function TilGroup({
   tils,
   pendingItems = [],
   totalCount: totalCountOverride,
+  onTagSelect,
 }: {
   label: string;
   tils: TilWithTags[];
   pendingItems?: PendingItem[];
   totalCount?: number;
+  onTagSelect?: (name: string) => void;
 }) {
   const { deletedIds } = useCaptureContext();
   const activeTils = tils.filter((til) => !deletedIds.has(til.id));
@@ -100,6 +102,7 @@ function TilGroup({
                   til={til}
                   showDate={label === "Older"}
                   showYear={label === "Older"}
+                  onTagSelect={onTagSelect}
                 />
               </motion.div>
             ))}
@@ -158,6 +161,11 @@ export function TilList({
     });
   };
 
+  const selectTag = (name: string) => {
+    trigger("light");
+    setActiveTags((prev) => (prev.has(name) ? prev : new Set(prev).add(name)));
+  };
+
   // Show filtered results when filtering, initial data otherwise
   const displayTils = hasAnyFilter ? (filteredTils ?? []) : initialTils;
   const isEmpty = initialTils.length === 0 && !hasPending;
@@ -207,6 +215,7 @@ export function TilList({
               label={group.label}
               tils={group.tils}
               totalCount={groupTotals[group.label]}
+              onTagSelect={selectTag}
               pendingItems={
                 group.label === "Today" && !hasAnyFilter ? pendingTils : []
               }
