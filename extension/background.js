@@ -34,15 +34,15 @@ async function handleSave(url, tabId) {
       return;
     }
 
-    // Save in background
+    // Optimistic: show the toast and play the sound while the save runs
+    const toastShown = showToast(tabId, "Saved", "success");
+    playSound();
     const result = await saveLink(url, apiKey);
 
     if (!result.success) {
+      // Wait for the optimistic toast so the error toast replaces it
+      await toastShown;
       showToast(tabId, "Failed to save", "error");
-    } else {
-      // Optimistic — show success immediately
-      playSound();
-      showToast(tabId, "Saved", "success");
     }
   } catch (err) {
     console.error("[til.bar] Error:", err);
@@ -91,7 +91,7 @@ async function saveLink(url, apiKey) {
 
 function showToast(tabId, message, type) {
   if (!tabId) return;
-  chrome.scripting
+  return chrome.scripting
     .executeScript({
       target: { tabId },
       func: (msg, t) => {
