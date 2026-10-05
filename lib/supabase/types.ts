@@ -165,7 +165,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      save_til_with_key: {
+        Args: { p_key_hash: string; p_url: string };
+        Returns: Database["public"]["Tables"]["tils"]["Row"];
+        SetofOptions: {
+          from: "*";
+          to: "tils";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
     };
     Enums: {
       [_ in never]: never;

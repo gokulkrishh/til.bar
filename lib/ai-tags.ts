@@ -156,23 +156,38 @@ Output format: ["tag"] or ["tag1", "tag2"]`,
   return output?.tags?.length ? output.tags : null;
 }
 
-export async function generateTags(til: Til) {
-  const { id: tilId, user_id: userId } = til;
-  const supabase = createAdminClient();
-
-  // Fetch existing tags for reuse preference
-  const { data: existingTags } = await supabase
+/** The user's tag names, so tagging can prefer reusing one. */
+export async function loadExistingTagNames(
+  supabase: ReturnType<typeof createAdminClient>,
+  userId: string,
+): Promise<string[]> {
+  const { data } = await supabase
     .from("tags")
     .select("name")
     .eq("user_id", userId);
 
-  const existingTagNames = existingTags?.map((t) => t.name) ?? [];
+  return data?.map((t) => t.name) ?? [];
+}
+
+/**
+ * Pass `existingTagNames` when the caller started loading them earlier, so the
+ * query overlaps other work instead of running here.
+ */
+export async function generateTags(
+  til: Til,
+  existingTagNames?: Promise<string[]>,
+) {
+  const { id: tilId, user_id: userId } = til;
+  const supabase = createAdminClient();
+
+  const tagNames = await (existingTagNames ??
+    loadExistingTagNames(supabase, userId));
   const state = buildState(til);
 
   try {
     const tags =
-      (await pickExistingTags(state, existingTagNames)) ??
-      (await generateNewTags(state, existingTagNames));
+      (await pickExistingTags(state, tagNames)) ??
+      (await generateNewTags(state, tagNames));
 
     if (!tags?.length) return;
 

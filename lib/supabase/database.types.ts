@@ -170,7 +170,24 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      save_til_with_key: {
+        Args: { p_key_hash: string; p_url: string };
+        Returns: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          title: string | null;
+          updated_at: string;
+          url: string;
+          user_id: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "tils";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
     };
     Enums: {
       [_ in never]: never;

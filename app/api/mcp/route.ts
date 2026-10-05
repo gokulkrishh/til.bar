@@ -3,10 +3,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
-import { fetchMetadata } from "@/lib/metadata";
 import { authenticateToken } from "@/lib/auth";
-import { generateTags } from "@/lib/ai-tags";
-import { generateMetadata } from "@/lib/ai-metadata";
+import { enrichTil } from "@/lib/enrich";
 import { getTilIdsByTag, upsertTags } from "@/lib/tag-utils";
 
 function mcpText(text: string) {
@@ -20,12 +18,12 @@ function mcpError(message: string) {
   };
 }
 
-function createMcpServer(userId: string) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
+function createMcpServer(userId: string) {
   const server = new McpServer({
     name: "til-bar",
     version: "1.0.0",
@@ -206,45 +204,7 @@ function createMcpServer(userId: string) {
       if (error) return mcpError(error.message);
 
       // Defer metadata fetch, AI enhancement, and tag generation to background
-      after(async () => {
-        let title: string | null = null;
-        let description: string | null = null;
-
-        try {
-          const meta = await fetchMetadata(url);
-          title = meta.title;
-          description = meta.description;
-
-          if (title || description) {
-            await supabase
-              .from("tils")
-              .update({ title, description })
-              .eq("id", data.id);
-          }
-        } catch (err) {
-          console.error("[mcp:save_link] Metadata fetch failed:", err);
-        }
-
-        try {
-          const aiMeta = await generateMetadata(url, title, description);
-          if (aiMeta) {
-            title = aiMeta.title;
-            description = aiMeta.description;
-            await supabase
-              .from("tils")
-              .update({ title, description })
-              .eq("id", data.id);
-          }
-        } catch (err) {
-          console.error("[mcp:save_link] AI metadata failed:", err);
-        }
-
-        try {
-          await generateTags({ ...data, title, description });
-        } catch (err) {
-          console.error("[mcp:save_link] Tag generation failed:", err);
-        }
-      });
+      after(() => enrichTil(data, "mcp:save_link"));
 
       return mcpText(`Saved: ${url}\n${JSON.stringify(data, null, 2)}`);
     },

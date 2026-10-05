@@ -1,15 +1,11 @@
 import { after } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { authenticateToken } from "@/lib/auth";
-import { fetchMetadata } from "@/lib/metadata";
-import { generateMetadata } from "@/lib/ai-metadata";
-import { generateTags } from "@/lib/ai-tags";
+import { authenticateToken, saveTilWithApiKey } from "@/lib/auth";
+import { enrichTil } from "@/lib/enrich";
 import { getCorsHeaders } from "@/lib/cors";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { Til } from "@/lib/types";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+const supabase = createAdminClient();
 
 export async function OPTIONS(req: Request) {
   return new Response(null, {
@@ -20,13 +16,28 @@ export async function OPTIONS(req: Request) {
   });
 }
 
-async function getAuthenticatedUserId(req: Request): Promise<string | null> {
+function getBearerToken(req: Request): string | null {
   const authHeader = req.headers.get("authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  return authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+}
 
-  if (!token) return null;
+/** API keys save in one round trip; JWT bearers verify locally, then insert. */
+async function saveTil(
+  token: string,
+  url: string,
+): Promise<{ til: Til } | { error: "unauthorized" | "failed" }> {
+  if (token.startsWith("mcp_sk_")) return saveTilWithApiKey(token, url);
 
-  return authenticateToken(token);
+  const userId = await authenticateToken(token);
+  if (!userId) return { error: "unauthorized" };
+
+  const { data, error } = await supabase
+    .from("tils")
+    .insert({ user_id: userId, url })
+    .select()
+    .single();
+
+  return error ? { error: "failed" } : { til: data };
 }
 
 export async function POST(req: Request) {
@@ -41,73 +52,28 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid URL" }, { status: 400, headers });
   }
 
-  const userId = await getAuthenticatedUserId(req);
+  const token = getBearerToken(req);
+  const result = token ? await saveTil(token, url) : null;
 
-  if (!userId) {
+  if (!result || ("error" in result && result.error === "unauthorized")) {
     return Response.json(
       { error: "Not authenticated" },
       { status: 401, headers },
     );
   }
 
-  const { data, error } = await supabase
-    .from("tils")
-    .insert({ user_id: userId, url })
-    .select()
-    .single();
-
-  if (error) {
+  if ("error" in result) {
     return Response.json(
       { error: "Failed to save link" },
       { status: 500, headers },
     );
   }
 
-  // Background: fetch metadata, enhance with AI, generate tags.
-  // Callers here are the extension and MCP, which don't render the row, so
-  // the fetch stays in the background rather than delaying the response.
-  after(async () => {
-    let title: string | null = null;
-    let description: string | null = null;
+  const { til } = result;
 
-    try {
-      const meta = await fetchMetadata(url);
-      title = meta.title;
-      description = meta.description;
+  // Callers here are the extension and iOS Shortcut, which don't render the
+  // row, so enrichment stays in the background rather than delaying them.
+  after(() => enrichTil(til, "api/save"));
 
-      if (title || description) {
-        await supabase
-          .from("tils")
-          .update({ title, description })
-          .eq("id", data.id);
-      }
-    } catch (err) {
-      console.error("[api/save] Metadata fetch failed:", err);
-    }
-
-    // Independent of each other, so don't make one wait on the other. Each
-    // settles on its own to keep one failure from dropping the other.
-    const [aiMeta, tags] = await Promise.allSettled([
-      generateMetadata(url, title, description),
-      generateTags({ ...data, title, description }),
-    ]);
-
-    if (aiMeta.status === "rejected") {
-      console.error("[api/save] AI metadata failed:", aiMeta.reason);
-    } else if (aiMeta.value) {
-      await supabase
-        .from("tils")
-        .update({
-          title: aiMeta.value.title,
-          description: aiMeta.value.description,
-        })
-        .eq("id", data.id);
-    }
-
-    if (tags.status === "rejected") {
-      console.error("[api/save] Tag generation failed:", tags.reason);
-    }
-  });
-
-  return Response.json({ id: data.id, url: data.url }, { headers });
+  return Response.json({ id: til.id, url: til.url }, { headers });
 }
