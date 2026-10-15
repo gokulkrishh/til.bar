@@ -33,6 +33,14 @@ const title = "til.bar — Your personal TIL log, organized by AI.";
 const description =
   "Your personal TIL log, organized by AI. Save links from your browser, phone, or ask any AI.";
 
+const ogImage = {
+  url: "/og.png",
+  type: "image/png",
+  width: 1200,
+  height: 630,
+  alt: "til.bar",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://til.bar"),
   alternates: { canonical: "/" },
@@ -44,15 +52,7 @@ export const metadata: Metadata = {
     site: "@gokul_i",
     description,
     creator: "@gokul_i",
-    images: [
-      {
-        type: "image/svg+xml",
-        url: "/og.svg",
-        width: 1920,
-        height: 1080,
-        alt: "til.bar",
-      },
-    ],
+    images: [ogImage],
   },
   openGraph: {
     type: "website",
@@ -60,15 +60,7 @@ export const metadata: Metadata = {
     title,
     description,
     url: "https://til.bar",
-    images: [
-      {
-        type: "image/svg+xml",
-        url: "/og.svg",
-        width: 1200,
-        height: 630,
-        alt: "til.bar",
-      },
-    ],
+    images: [ogImage],
   },
   icons: [
     {
