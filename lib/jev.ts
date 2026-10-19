@@ -10,7 +10,7 @@ import { z } from "zod";
  * @see https://openrouter.ai/docs/guides/community/typesafe-sdk
  */
 const JEV_ENDPOINT = "https://openrouter.ai/api/v1/systemone";
-const JEV_MODEL = "typesafe/jev-1.13";
+const JEV_MODEL = "typesafe/jev-1.14";
 const JEV_TIMEOUT_MS = 5_000;
 
 /** Jev accepts at most 255 options for a single `choice` question. */
